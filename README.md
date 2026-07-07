@@ -10,30 +10,31 @@ Norn was built as a selectee of Built with Claude: Life Sciences, 1 of 500 chose
 
 ## Tech stack
 
+<p align="center"><b>Frameworks &amp; Runtime</b></p>
 <p align="center">
   <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white">
   <img src="https://img.shields.io/badge/React-20232a?style=for-the-badge&logo=react&logoColor=61DAFB">
   <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white">
   <img src="https://img.shields.io/badge/Node.js-5FA04E?style=for-the-badge&logo=nodedotjs&logoColor=white">
 </p>
-<p align="center"><sub><b>Framework and runtime.</b> Next.js 14 App Router and React 18 in TypeScript, on the Node serverless runtime.</sub></p>
 
+<p align="center"><b>Styling &amp; Visuals</b></p>
 <p align="center">
   <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white">
   <img src="https://img.shields.io/badge/PostCSS-DD3A0A?style=for-the-badge&logo=postcss&logoColor=white">
   <img src="https://img.shields.io/badge/Autoprefixer-DD3735?style=for-the-badge&logo=autoprefixer&logoColor=white">
   <img src="https://img.shields.io/badge/SVG-FFB13B?style=for-the-badge&logo=svg&logoColor=black">
 </p>
-<p align="center"><sub><b>Styling and visuals.</b> Tailwind CSS with PostCSS and Autoprefixer; hand-rolled SVG for the architecture and scoring diagrams and the protein lollipop.</sub></p>
 
+<p align="center"><b>AI Reasoning</b></p>
 <p align="center">
   <img src="https://img.shields.io/badge/Anthropic_Claude-D97757?style=for-the-badge&logo=anthropic&logoColor=white">
   <img src="https://img.shields.io/badge/Anthropic_SDK-191919?style=for-the-badge&logo=anthropic&logoColor=white">
   <img src="https://img.shields.io/badge/Zod-3E67B1?style=for-the-badge&logo=zod&logoColor=white">
   <img src="https://img.shields.io/badge/JSON-000000?style=for-the-badge&logo=json&logoColor=white">
 </p>
-<p align="center"><sub><b>AI reasoning.</b> Two server-side Claude passes through the Anthropic TypeScript SDK, returning strict JSON validated with Zod.</sub></p>
 
+<p align="center"><b>Genomics Data</b></p>
 <p align="center">
   <img src="https://img.shields.io/badge/Ensembl_VEP-0b3d91?style=for-the-badge">
   <img src="https://img.shields.io/badge/Ensembl_variant__recoder-0b3d91?style=for-the-badge">
@@ -42,21 +43,20 @@ Norn was built as a selectee of Built with Claude: Life Sciences, 1 of 500 chose
   <img src="https://img.shields.io/badge/ClinVar-2a9d8f?style=for-the-badge">
   <img src="https://img.shields.io/badge/NCBI_E--utilities-20558a?style=for-the-badge">
 </p>
-<p align="center"><sub><b>Genomics data.</b> Ensembl VEP and variant_recoder over REST, gnomAD v4 over GraphQL, and ClinVar through NCBI E-utilities.</sub></p>
 
+<p align="center"><b>Deploy &amp; Tooling</b></p>
 <p align="center">
   <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white">
   <img src="https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white">
   <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white">
   <img src="https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white">
 </p>
-<p align="center"><sub><b>Deploy and tooling.</b> Ships on Vercel with no database; built and versioned with Git, GitHub, and npm.</sub></p>
 
+<p align="center"><b>Built with Claude</b></p>
 <p align="center">
   <img src="https://img.shields.io/badge/Claude_Code-D97757?style=for-the-badge&logo=anthropic&logoColor=white">
   <img src="https://img.shields.io/badge/Claude_Science-D97757?style=for-the-badge&logo=anthropic&logoColor=white">
 </p>
-<p align="center"><sub><b>Built with Claude.</b> Written with Claude Code, following the reviewer-agent pattern from Claude Science.</sub></p>
 
 ## Who it is for
 
