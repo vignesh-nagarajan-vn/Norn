@@ -1,0 +1,28 @@
+{
+  "description": "Well-established variants with their generally accepted ClinVar germline classification. Used to measure Norn agreement. A variant's own ClinVar classification is never fed into adjudication; it is only the comparison label here.",
+  "clinvarAccessedNote": "Accessions and expected labels reflect widely cited ClinVar records and may be refined over time. Norn compares its computed classification to the expected label.",
+  "variants": [
+    { "input": "BRCA1:c.68_69delAG", "gene": "BRCA1", "expected": "Pathogenic", "accession": "VCV000017661", "category": "pathogenic", "note": "185delAG founder frameshift" },
+    { "input": "BRCA1:c.5266dupC", "gene": "BRCA1", "expected": "Pathogenic", "accession": "VCV000017677", "category": "pathogenic", "note": "5382insC founder frameshift" },
+    { "input": "BRCA2:c.5946delT", "gene": "BRCA2", "expected": "Pathogenic", "accession": "VCV000038266", "category": "pathogenic", "note": "6174delT founder frameshift" },
+    { "input": "CFTR:c.1521_1523delCTT", "gene": "CFTR", "expected": "Pathogenic", "accession": "VCV000007105", "category": "pathogenic", "note": "F508del, most common CF allele" },
+    { "input": "HBB:c.20A>T", "gene": "HBB", "expected": "Pathogenic", "accession": "VCV000015333", "category": "pathogenic", "note": "Sickle cell, p.Glu7Val (rs334)" },
+    { "input": "TP53:c.743G>A", "gene": "TP53", "expected": "Pathogenic", "accession": "VCV000012347", "category": "pathogenic", "note": "p.Arg248Gln hotspot" },
+    { "input": "MLH1:c.1942C>T", "gene": "MLH1", "expected": "Pathogenic", "accession": "VCV000090232", "category": "pathogenic", "note": "p.Arg648Ter nonsense (Lynch)" },
+    { "input": "HFE:c.845G>A", "gene": "HFE", "expected": "Pathogenic", "accession": "VCV000000009", "category": "pathogenic", "note": "p.Cys282Tyr hemochromatosis (rs1800562)" },
+
+    { "input": "CFTR:c.1408A>G", "gene": "CFTR", "expected": "Benign", "accession": "VCV000053380", "category": "benign", "note": "p.Met470Val common polymorphism (rs213950)" },
+    { "input": "BRCA2:c.1114A>C", "gene": "BRCA2", "expected": "Benign", "accession": "VCV000051063", "category": "benign", "note": "p.Asn372His common (rs144848)" },
+    { "input": "BRCA1:c.4837A>G", "gene": "BRCA1", "expected": "Benign", "accession": "VCV000125660", "category": "benign", "note": "p.Ser1613Gly common (rs16941)" },
+    { "input": "TP53:c.215C>G", "gene": "TP53", "expected": "Benign", "accession": "VCV000127384", "category": "benign", "note": "p.Pro72Arg common polymorphism (rs1042522)" },
+    { "input": "CFTR:c.2562T>G", "gene": "CFTR", "expected": "Benign", "accession": "VCV000053452", "category": "benign", "note": "p.Thr854= synonymous common (rs1042077)" },
+    { "input": "BRCA2:c.9976A>T", "gene": "BRCA2", "expected": "Benign", "accession": "VCV000051411", "category": "benign", "note": "p.Lys3326Ter, common truncation with no clear risk (rs11571833)" },
+    { "input": "MLH1:c.655A>G", "gene": "MLH1", "expected": "Benign", "accession": "VCV000041176", "category": "benign", "note": "p.Ile219Val common polymorphism (rs1799977)" },
+
+    { "input": "BRCA1:c.5096G>A", "gene": "BRCA1", "expected": "Uncertain significance", "accession": "VCV000037653", "category": "vus", "note": "p.Arg1699Gln reduced-penetrance VUS (rs41293463)" },
+    { "input": "BRCA2:c.7958T>C", "gene": "BRCA2", "expected": "Uncertain significance", "accession": "VCV000052846", "category": "vus", "note": "p.Leu2653Pro uncertain" },
+    { "input": "MSH6:c.3226C>T", "gene": "MSH6", "expected": "Uncertain significance", "accession": "VCV000089674", "category": "vus", "note": "p.Arg1076Cys uncertain" },
+    { "input": "APC:c.3920T>A", "gene": "APC", "expected": "Uncertain significance", "accession": "VCV000001432", "category": "vus", "note": "p.Ile1307Lys low-penetrance, genuinely contested (rs1801155)" },
+    { "input": "MLH1:c.2146G>A", "gene": "MLH1", "expected": "Uncertain significance", "accession": "VCV000090266", "category": "vus", "note": "p.Val716Met uncertain (rs63750217)" }
+  ]
+}
