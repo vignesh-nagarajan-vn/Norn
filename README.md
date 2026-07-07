@@ -1,6 +1,8 @@
 # Norn
 
-Norn is a variant-interpretation copilot that drafts ACMG/AMP evidence for a human curator to confirm. Paste one human genetic variant (HGVS like `BRCA1:c.5266dupC`, an rsID like `rs80357906`, or a locus like `17-43057062-A-AG`) and Norn gathers evidence from public genomics databases, uses Claude to adjudicate each ACMG/AMP criterion one at a time, applies the ClinGen points framework in code to reach a classification from Pathogenic to Benign, and runs a second Claude pass that critiques the draft. The name is Norn, after the Norse fates who read and decree destiny from evidence; a variant classifier does the same, reading the evidence and rendering a verdict. Built by Vignesh Nagarajan with Next.js 14, TypeScript, Tailwind CSS, and the Anthropic Claude SDK, and deployable on Vercel with a single API key. Norn was built as a selectee of Anthropic's Built with Claude: Life Sciences hackathon (1 of 500 chosen from more than 6,000 applicants across 47 countries), hosted by Anthropic and Cerebral Valley in partnership with Gladstone Institutes.
+Norn is a variant-interpretation copilot that drafts ACMG/AMP evidence for a human curator to confirm. Paste one genetic variant (HGVS, rsID, or locus) and Norn gathers evidence from public genomics databases, adjudicates each ACMG/AMP criterion with Claude, applies the ClinGen points framework in code, and returns a scored classification with per-criterion sources and a reviewer checklist. The name is Norn, after the Norse fates who read and decree destiny from evidence; a variant classifier does the same, reading the evidence and rendering a verdict.
+
+Norn was built as a selectee of Built with Claude: Life Sciences, 1 of 500 chosen (about half of them PhDs, postdocs, or physicians) from more than 6,000 applicants across 47 countries, for a global hackathon hosted by Anthropic and Cerebral Valley in partnership with Gladstone Institutes. Selectees received Claude Max and $200 in API credits to build with Claude Science and Claude Code.
 
 > **Not for clinical use.** Norn is a research and demonstration tool. It drafts evidence for a human to confirm and is not a diagnostic device. Do not use it to make patient-care decisions.
 
@@ -9,27 +11,56 @@ Norn is a variant-interpretation copilot that drafts ACMG/AMP evidence for a hum
 ## Tech stack
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Next.js-black?style=for-the-badge&logo=next.js&logoColor=white">
+  <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white">
   <img src="https://img.shields.io/badge/React-20232a?style=for-the-badge&logo=react&logoColor=61DAFB">
   <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white">
-  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white">
-  <img src="https://img.shields.io/badge/Anthropic_Claude-D97757?style=for-the-badge&logo=anthropic&logoColor=white">
-  <img src="https://img.shields.io/badge/Zod-3E67B1?style=for-the-badge&logo=zod&logoColor=white">
-  <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white">
+  <img src="https://img.shields.io/badge/Node.js-5FA04E?style=for-the-badge&logo=nodedotjs&logoColor=white">
 </p>
+<p align="center"><sub><b>Framework and runtime.</b> Next.js 14 App Router and React 18 in TypeScript, on the Node serverless runtime.</sub></p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white">
+  <img src="https://img.shields.io/badge/PostCSS-DD3A0A?style=for-the-badge&logo=postcss&logoColor=white">
+  <img src="https://img.shields.io/badge/Autoprefixer-DD3735?style=for-the-badge&logo=autoprefixer&logoColor=white">
+  <img src="https://img.shields.io/badge/SVG-FFB13B?style=for-the-badge&logo=svg&logoColor=black">
+</p>
+<p align="center"><sub><b>Styling and visuals.</b> Tailwind CSS with PostCSS and Autoprefixer; hand-rolled SVG for the architecture and scoring diagrams and the protein lollipop.</sub></p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Anthropic_Claude-D97757?style=for-the-badge&logo=anthropic&logoColor=white">
+  <img src="https://img.shields.io/badge/Anthropic_SDK-191919?style=for-the-badge&logo=anthropic&logoColor=white">
+  <img src="https://img.shields.io/badge/Zod-3E67B1?style=for-the-badge&logo=zod&logoColor=white">
+  <img src="https://img.shields.io/badge/JSON-000000?style=for-the-badge&logo=json&logoColor=white">
+</p>
+<p align="center"><sub><b>AI reasoning.</b> Two server-side Claude passes through the Anthropic TypeScript SDK, returning strict JSON validated with Zod.</sub></p>
+
 <p align="center">
   <img src="https://img.shields.io/badge/Ensembl_VEP-0b3d91?style=for-the-badge">
+  <img src="https://img.shields.io/badge/Ensembl_variant__recoder-0b3d91?style=for-the-badge">
   <img src="https://img.shields.io/badge/gnomAD_v4-1f6feb?style=for-the-badge">
+  <img src="https://img.shields.io/badge/GraphQL-E10098?style=for-the-badge&logo=graphql&logoColor=white">
   <img src="https://img.shields.io/badge/ClinVar-2a9d8f?style=for-the-badge">
+  <img src="https://img.shields.io/badge/NCBI_E--utilities-20558a?style=for-the-badge">
 </p>
+<p align="center"><sub><b>Genomics data.</b> Ensembl VEP and variant_recoder over REST, gnomAD v4 over GraphQL, and ClinVar through NCBI E-utilities.</sub></p>
 
-## Built with Claude: Life Sciences
+<p align="center">
+  <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white">
+  <img src="https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white">
+  <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white">
+  <img src="https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white">
+</p>
+<p align="center"><sub><b>Deploy and tooling.</b> Ships on Vercel with no database; built and versioned with Git, GitHub, and npm.</sub></p>
 
-Norn was built as a selectee of the Built with Claude: Life Sciences hackathon, a global event hosted by Anthropic and Cerebral Valley in partnership with Gladstone Institutes. 500 builders were chosen from more than 6,000 applicants across 47 countries, roughly half of them PhDs, postdocs, or physicians. Selectees received Claude Max and $200 in API credits to build with Claude Science and Claude Code.
+<p align="center">
+  <img src="https://img.shields.io/badge/Claude_Code-D97757?style=for-the-badge&logo=anthropic&logoColor=white">
+  <img src="https://img.shields.io/badge/Claude_Science-D97757?style=for-the-badge&logo=anthropic&logoColor=white">
+</p>
+<p align="center"><sub><b>Built with Claude.</b> Written with Claude Code, following the reviewer-agent pattern from Claude Science.</sub></p>
 
 ## Who it is for
 
-The named user is a clinical molecular geneticist or genetic counselor doing variant curation. They paste a variant, and Norn produces a first-pass evidence draft in about a minute so the curator spends their time confirming and judging rather than gathering. Norn never replaces that person. It drafts; they decide.
+The user is a molecular geneticist or genetic counselor doing variant curation. Concretely, picture a curator in a genomic-medicine group at Gladstone, for example the Conklin Lab at the Gladstone Institute of Data Science and Biotechnology, which builds iPSC disease models of inherited heart conditions. Before committing bench time to a candidate variant in a cardiomyopathy gene like MYH7 or TNNT2, they need a fast, sourced first pass on how the evidence lines up. Norn produces that draft in about a minute so the curator spends their time confirming and judging rather than gathering. Norn never replaces that person. It drafts; they decide.
 
 ## What it does, end to end
 
@@ -45,10 +76,6 @@ The named user is a clinical molecular geneticist or genetic counselor doing var
 The model justifies criteria. The engine combines them. The final label is always computed in code, never taken from the model.
 
 ![Norn architecture](docs/architecture.svg)
-
-## How the scoring works
-
-![Norn scoring model](docs/scoring-model.svg)
 
 ## Example variants
 
@@ -106,6 +133,10 @@ The point total maps to a five-tier classification (Tavtigian et al. 2020; ClinG
 | -7 or less | Benign |
 
 BA1 (allele frequency above 5%) is a stand-alone override to Benign regardless of the point total. Confidence (High, Moderate, Low) is derived from how far the total sits from the nearest category boundary and how many criteria were left unknown. The exact logic is in [`lib/acmg.ts`](lib/acmg.ts).
+
+## How the scoring works
+
+![Norn scoring model](docs/scoring-model.svg)
 
 ## The Claude reasoning layer
 
