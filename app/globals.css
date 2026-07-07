@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --canvas: #f5f6f8;
+  --surface: #ffffff;
+  --ink: #0f1729;
+  --muted: #545d6d;
+  --faint: #8a93a3;
+  --line: #e4e7ee;
+  --brand: #3a49d6;
+  --brand-soft: #edeffd;
+  --accent: #0d8f7f;
+
+  /* Classification and verdict semantics */
+  --path: #bd2f26;
+  --lpath: #c9740c;
+  --vus: #64707f;
+  --lben: #0e8a70;
+  --ben: #167c3a;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background-color: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+@layer components {
+  .card {
+    @apply rounded-xl border border-line bg-surface shadow-card;
+  }
+  .mono {
+    font-family: var(--font-mono);
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1 text-sm text-ink transition-colors hover:border-brand hover:bg-brand-soft;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50;
+  }
+  .link {
+    @apply text-brand underline-offset-2 hover:underline;
+  }
+  .label-tiny {
+    @apply text-[11px] font-medium uppercase tracking-wide text-faint;
+  }
+}
+
+/* Subtle pulse used while a pipeline stage is running. */
+@keyframes norn-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+.animate-norn-pulse {
+  animation: norn-pulse 1.1s ease-in-out infinite;
+}
