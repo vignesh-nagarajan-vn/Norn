@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 560" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+  <defs>
+    <style>
+      .title { fill:#0f1729; font-weight:700; }
+      .h { fill:#0f1729; font-size:14px; font-weight:600; }
+      .sub { fill:#545d6d; font-size:12px; }
+      .name { fill:#0f1729; font-size:13px; }
+      .tiny { fill:#8a93a3; font-size:11px; }
+      .tag { font-size:11px; font-weight:700; letter-spacing:0.05em; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="920" height="560" fill="#f5f6f8"/>
+  <text x="32" y="42" class="title" font-size="22">How Norn scores a variant</text>
+  <text x="32" y="64" class="sub">Claude adjudicates each criterion. The engine sums ClinGen Bayesian points and assigns the label in code. BA1 overrides to Benign.</text>
+
+  <!-- Left: criteria and points -->
+  <rect x="32" y="86" width="404" height="452" rx="12" fill="#ffffff" stroke="#e4e7ee" stroke-width="1.5"/>
+  <text x="50" y="114" class="h">Eight criteria and their points</text>
+
+  <text x="50" y="140" class="tag" fill="#bd2f26">PATHOGENIC EVIDENCE</text>
+  <!-- pathogenic rows -->
+  <g>
+    <!-- row template repeated -->
+    <g>
+      <rect x="50" y="150" width="58" height="22" rx="6" fill="#f9eceb" stroke="#e7c3bf"/>
+      <text x="79" y="165" text-anchor="middle" class="mono" font-size="12" font-weight="700" fill="#bd2f26">PVS1</text>
+      <text x="120" y="165" class="name">Predicted loss of function</text>
+      <rect x="360" y="150" width="60" height="22" rx="11" fill="#bd2f26"/>
+      <text x="390" y="165" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="700">+8</text>
+    </g>
+    <g>
+      <rect x="50" y="184" width="58" height="22" rx="6" fill="#f9eceb" stroke="#e7c3bf"/>
+      <text x="79" y="199" text-anchor="middle" class="mono" font-size="12" font-weight="700" fill="#bd2f26">PS1</text>
+      <text x="120" y="199" class="name">Same amino acid as a pathogenic variant</text>
+      <rect x="360" y="184" width="60" height="22" rx="11" fill="#bd2f26"/>
+      <text x="390" y="199" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="700">+4</text>
+    </g>
+    <g>
+      <rect x="50" y="218" width="58" height="22" rx="6" fill="#f9eceb" stroke="#e7c3bf"/>
+      <text x="79" y="233" text-anchor="middle" class="mono" font-size="12" font-weight="700" fill="#bd2f26">PM5</text>
+      <text x="120" y="233" class="name">New change at a known pathogenic residue</text>
+      <rect x="360" y="218" width="60" height="22" rx="11" fill="#bd2f26"/>
+      <text x="390" y="233" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="700">+2</text>
+    </g>
+    <g>
+      <rect x="50" y="252" width="58" height="22" rx="6" fill="#f9eceb" stroke="#e7c3bf"/>
+      <text x="79" y="267" text-anchor="middle" class="mono" font-size="12" font-weight="700" fill="#bd2f26">PM2</text>
+      <text x="120" y="267" class="name">Absent or very rare in gnomAD</text>
+      <rect x="360" y="252" width="60" height="22" rx="11" fill="#bd2f26"/>
+      <text x="390" y="267" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="700">+1</text>
+    </g>
+    <g>
+      <rect x="50" y="286" width="58" height="22" rx="6" fill="#f9eceb" stroke="#e7c3bf"/>
+      <text x="79" y="301" text-anchor="middle" class="mono" font-size="12" font-weight="700" fill="#bd2f26">PP3</text>
+      <text x="120" y="301" class="name">Computational evidence of damage</text>
+      <rect x="360" y="286" width="60" height="22" rx="11" fill="#bd2f26"/>
+      <text x="390" y="301" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="700">+1</text>
+    </g>
+  </g>
+
+  <text x="50" y="336" class="tag" fill="#167c3a">BENIGN EVIDENCE</text>
+  <g>
+    <g>
+      <rect x="50" y="346" width="58" height="22" rx="6" fill="#e9f4ec" stroke="#bfe0cb"/>
+      <text x="79" y="361" text-anchor="middle" class="mono" font-size="12" font-weight="700" fill="#167c3a">BA1</text>
+      <text x="120" y="361" class="name">Allele frequency above 5 percent</text>
+      <rect x="352" y="346" width="68" height="22" rx="11" fill="#167c3a"/>
+      <text x="386" y="361" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="700">override</text>
+    </g>
+    <g>
+      <rect x="50" y="380" width="58" height="22" rx="6" fill="#e9f4ec" stroke="#bfe0cb"/>
+      <text x="79" y="395" text-anchor="middle" class="mono" font-size="12" font-weight="700" fill="#167c3a">BS1</text>
+      <text x="120" y="395" class="name">Above the disorder frequency threshold</text>
+      <rect x="360" y="380" width="60" height="22" rx="11" fill="#167c3a"/>
+      <text x="390" y="395" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="700">-4</text>
+    </g>
+    <g>
+      <rect x="50" y="414" width="58" height="22" rx="6" fill="#e9f4ec" stroke="#bfe0cb"/>
+      <text x="79" y="429" text-anchor="middle" class="mono" font-size="12" font-weight="700" fill="#167c3a">BP4</text>
+      <text x="120" y="429" class="name">Computational evidence of tolerance</text>
+      <rect x="360" y="414" width="60" height="22" rx="11" fill="#167c3a"/>
+      <text x="390" y="429" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="700">-1</text>
+    </g>
+  </g>
+  <text x="50" y="470" class="tiny">PM2 is applied at Supporting strength (+1) per current ClinGen SVI guidance.</text>
+  <text x="50" y="488" class="tiny">PVS1 is flagged provisional: Norn does not verify the gene disease mechanism.</text>
+
+  <!-- Right: scale and examples -->
+  <rect x="460" y="86" width="428" height="452" rx="12" fill="#ffffff" stroke="#e4e7ee" stroke-width="1.5"/>
+  <text x="478" y="114" class="h">Points to classification</text>
+
+  <!-- meter -->
+  <g>
+    <rect x="478" y="130" width="82.9" height="26" fill="#d6e6dc"/>
+    <rect x="560.9" y="130" width="90.5" height="26" fill="#d4ece2"/>
+    <rect x="651.4" y="130" width="90.5" height="26" fill="#e0e3e7"/>
+    <rect x="741.9" y="130" width="60.3" height="26" fill="#f5e2cd"/>
+    <rect x="802.2" y="130" width="67.8" height="26" fill="#f2d3d0"/>
+    <rect x="478" y="130" width="392" height="26" fill="none" stroke="#e4e7ee"/>
+
+    <text x="519" y="176" text-anchor="middle" class="tiny" fill="#167c3a" font-weight="700">Benign</text>
+    <text x="519" y="190" text-anchor="middle" class="tiny">-7 or less</text>
+    <text x="606" y="176" text-anchor="middle" class="tiny" fill="#0e8a70" font-weight="700">Likely Benign</text>
+    <text x="606" y="190" text-anchor="middle" class="tiny">-6 to -1</text>
+    <text x="696" y="176" text-anchor="middle" class="tiny" fill="#64707f" font-weight="700">VUS</text>
+    <text x="696" y="190" text-anchor="middle" class="tiny">0 to 5</text>
+    <text x="772" y="176" text-anchor="middle" class="tiny" fill="#c9740c" font-weight="700">Likely Path.</text>
+    <text x="772" y="190" text-anchor="middle" class="tiny">6 to 9</text>
+    <text x="836" y="176" text-anchor="middle" class="tiny" fill="#bd2f26" font-weight="700">Pathogenic</text>
+    <text x="836" y="190" text-anchor="middle" class="tiny">10 or more</text>
+  </g>
+
+  <text x="478" y="222" class="h" font-size="13">Worked examples (the demo chips)</text>
+
+  <!-- example 1 -->
+  <rect x="470" y="234" width="408" height="52" rx="8" fill="#fafbfc" stroke="#eef1f5"/>
+  <text x="484" y="255" class="mono" font-size="12" font-weight="700" fill="#0f1729">BRCA1:c.5266dupC</text>
+  <text x="484" y="274" class="tiny">PVS1 +8, PM2 +1  =  +9</text>
+  <rect x="736" y="248" width="130" height="24" rx="12" fill="#f6e6d4"/>
+  <text x="801" y="264" text-anchor="middle" font-size="11" font-weight="700" fill="#c9740c">Likely Pathogenic</text>
+
+  <!-- example 2 -->
+  <rect x="470" y="296" width="408" height="52" rx="8" fill="#fafbfc" stroke="#eef1f5"/>
+  <text x="484" y="317" class="mono" font-size="12" font-weight="700" fill="#0f1729">CFTR:c.1408A&gt;G</text>
+  <text x="484" y="336" class="tiny">BA1 stand-alone override (AF about 55 percent)</text>
+  <rect x="786" y="310" width="80" height="24" rx="12" fill="#dcefe2"/>
+  <text x="826" y="326" text-anchor="middle" font-size="11" font-weight="700" fill="#167c3a">Benign</text>
+
+  <!-- example 3 -->
+  <rect x="470" y="358" width="408" height="52" rx="8" fill="#fafbfc" stroke="#eef1f5"/>
+  <text x="484" y="379" class="mono" font-size="12" font-weight="700" fill="#0f1729">BRCA1:c.5096G&gt;A</text>
+  <text x="484" y="398" class="tiny">PM2 +1, PM5 +2, PP3 +1  =  +4</text>
+  <rect x="746" y="372" width="120" height="24" rx="12" fill="#e6e9ed"/>
+  <text x="806" y="388" text-anchor="middle" font-size="11" font-weight="700" fill="#64707f">Uncertain (VUS)</text>
+
+  <text x="478" y="440" class="sub">The model reads messy evidence and returns a clean per-criterion verdict.</text>
+  <text x="478" y="458" class="sub">The engine owns the arithmetic, so the same verdicts always give the same label.</text>
+  <text x="478" y="486" class="tiny">A second Claude pass reviews the draft and writes the curator checklist.</text>
+  <text x="478" y="504" class="tiny">A variant's own ClinVar classification is never used as adjudication evidence.</text>
+</svg>
