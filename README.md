@@ -7,8 +7,6 @@ Vignesh Nagarajan was selected as 1 of 500 builders (about half of them PhDs, po
 - **Live demo:** [norn-five.vercel.app](https://norn-five.vercel.app/)
 - **Hackathon:** [Built with Claude: Life Sciences](https://cerebralvalley.ai/e/built-with-claude-life-sciences)
 
-<p align="center"><em>Built by Vignesh Nagarajan.</em></p>
-
 <p align="center">
   <img src="docs/ui-home.png" width="49%" alt="Norn home: automated variant curation" />
   &nbsp;
