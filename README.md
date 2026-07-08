@@ -2,9 +2,10 @@
 
 Norn is a variant-interpretation copilot that drafts ACMG/AMP evidence for a human curator to confirm. Paste one genetic variant (HGVS, rsID, or locus) and Norn gathers evidence from public genomics databases, adjudicates each ACMG/AMP criterion with Claude, applies the ClinGen points framework in code, and returns a scored classification with per-criterion sources and a reviewer checklist. The name is Norn, after the Norse fates who read and decree destiny from evidence; a variant classifier does the same, reading the evidence and rendering a verdict.
 
-Norn was built as a selectee of Built with Claude: Life Sciences, 1 of 500 chosen (about half of them PhDs, postdocs, or physicians) from more than 6,000 applicants across 47 countries, for a global hackathon hosted by Anthropic and Cerebral Valley in partnership with Gladstone Institutes. Selectees received Claude Max and $200 in API credits to build with Claude Science and Claude Code.
+Vignesh Nagarajan was selected as 1 of 500 builders (about half of them PhDs, postdocs, or physicians) from more than 6,000 applicants across 47 countries for **Built with Claude: Life Sciences**, a global hackathon hosted by Anthropic and Cerebral Valley in partnership with Gladstone Institutes, and built Norn after being selected. Selectees received Claude Max and $200 in API credits to build with Claude Science and Claude Code.
 
-> **Not for clinical use.** Norn is a research and demonstration tool. It drafts evidence for a human to confirm and is not a diagnostic device. Do not use it to make patient-care decisions.
+- **Live demo:** [norn-five.vercel.app](https://norn-five.vercel.app/)
+- **Hackathon:** [Built with Claude: Life Sciences](https://cerebralvalley.ai/e/built-with-claude-life-sciences)
 
 <p align="center"><em>Built by Vignesh Nagarajan.</em></p>
 
@@ -294,3 +295,5 @@ Ideas to round Norn out into a fuller curation suite:
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+> **Not for clinical use.** Norn is a research and demonstration tool. It drafts evidence for a human to confirm and is not a diagnostic device. Do not use it to make patient-care decisions.
