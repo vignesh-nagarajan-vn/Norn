@@ -42,6 +42,14 @@ export function useInterpret() {
   const [error, setError] = useState<string | null>(null);
   const running = useRef(false);
 
+  const reset = useCallback(() => {
+    if (running.current) return;
+    setStatus("idle");
+    setStages(initialStages());
+    setReport(null);
+    setError(null);
+  }, []);
+
   const run = useCallback(async (variant: string) => {
     const v = variant.trim();
     if (!v || running.current) return;
@@ -113,5 +121,5 @@ export function useInterpret() {
     }
   }, []);
 
-  return { status, stages, report, error, run };
+  return { status, stages, report, error, run, reset };
 }

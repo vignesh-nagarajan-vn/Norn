@@ -2,28 +2,80 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+  "Scientific Precision" design tokens from the Stitch mockup.
+  Classification colors: pathogenic = teal, VUS = amber, benign = indigo.
+
+  Two forms of each token:
+   - hex vars (e.g. --secondary) for inline style / color-mix usage
+   - channel vars (e.g. --secondary-rgb) for Tailwind, so `/opacity` works
+*/
 :root {
-  --canvas: #f5f6f8;
+  --background: #f9fafb;
   --surface: #ffffff;
-  --ink: #0f1729;
-  --muted: #545d6d;
-  --faint: #8a93a3;
-  --line: #e4e7ee;
-  --brand: #3a49d6;
-  --brand-soft: #edeffd;
-  --accent: #0d8f7f;
+  --surface-low: #f4f6fb;
+  --surface-container: #eef2fb;
+  --surface-high: #e6ebf6;
+  --surface-bright: #fbfcfe;
+  --surface-variant: #eef1f7;
+  --on-surface: #151c27;
+  --on-surface-variant: #4a5261;
+  --outline: #75777d;
+  --outline-variant: #e2e8f0;
+  --primary: #0f172a;
+  --on-primary: #ffffff;
+  --primary-container: #1e293b;
+  --secondary: #2563eb;
+  --on-secondary: #ffffff;
+  --secondary-container: #2563eb;
+  --pathogenic: #10b981;
+  --vus: #f59e0b;
+  --benign: #6366f1;
+  --risk-high: #ef4444;
+  --error: #ba1a1a;
+  --acmg-vs: #1e293b;
+  --acmg-s: #334155;
+  --acmg-m: #64748b;
+  --acmg-sup: #94a3b8;
+  /* five-tier classification scale */
+  --ben: #6366f1;
+  --lben: #818cf8;
+  --lpath: #10b981;
+  --path: #059669;
 
-  /* Classification and verdict semantics */
-  --path: #bd2f26;
-  --lpath: #c9740c;
-  --vus: #64707f;
-  --lben: #0e8a70;
-  --ben: #167c3a;
+  --background-rgb: 249 250 251;
+  --surface-rgb: 255 255 255;
+  --surface-low-rgb: 244 246 251;
+  --surface-container-rgb: 238 242 251;
+  --surface-high-rgb: 230 235 246;
+  --surface-bright-rgb: 251 252 254;
+  --surface-variant-rgb: 238 241 247;
+  --on-surface-rgb: 21 28 39;
+  --on-surface-variant-rgb: 74 82 97;
+  --outline-rgb: 117 119 125;
+  --outline-variant-rgb: 226 232 240;
+  --primary-rgb: 15 23 42;
+  --on-primary-rgb: 255 255 255;
+  --primary-container-rgb: 30 41 59;
+  --secondary-rgb: 37 99 235;
+  --on-secondary-rgb: 255 255 255;
+  --secondary-container-rgb: 37 99 235;
+  --pathogenic-rgb: 16 185 129;
+  --vus-rgb: 245 158 11;
+  --benign-rgb: 99 102 241;
+  --risk-high-rgb: 239 68 68;
+  --error-rgb: 186 26 26;
+  --acmg-vs-rgb: 30 41 59;
+  --acmg-s-rgb: 51 65 85;
+  --acmg-m-rgb: 100 116 139;
+  --acmg-sup-rgb: 148 163 184;
+  --ben-rgb: 99 102 241;
+  --lben-rgb: 129 140 248;
+  --lpath-rgb: 16 185 129;
+  --path-rgb: 5 150 105;
 
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
-    "Liberation Mono", monospace;
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 html,
@@ -33,35 +85,52 @@ body {
 }
 
 body {
-  background-color: var(--canvas);
-  color: var(--ink);
+  background-color: var(--background);
+  color: var(--on-surface);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: "opsz" 24;
+}
+.ms-fill {
+  font-variation-settings: "FILL" 1;
+}
+
 @layer components {
   .card {
-    @apply rounded-xl border border-line bg-surface shadow-card;
+    @apply rounded-lg border border-outline-variant bg-surface shadow-card;
   }
   .mono {
     font-family: var(--font-mono);
   }
-  .chip {
-    @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1 text-sm text-ink transition-colors hover:border-brand hover:bg-brand-soft;
+  .label-caps {
+    @apply text-[11px] font-bold uppercase tracking-caps text-on-surface-variant;
   }
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-on-primary transition-opacity hover:opacity-90 disabled:opacity-50;
+  }
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-secondary px-4 py-2 text-sm font-semibold text-secondary transition-colors hover:bg-secondary/5;
   }
   .link {
-    @apply text-brand underline-offset-2 hover:underline;
-  }
-  .label-tiny {
-    @apply text-[11px] font-medium uppercase tracking-wide text-faint;
+    @apply text-secondary underline-offset-2 hover:underline;
   }
 }
 
-/* Subtle pulse used while a pipeline stage is running. */
 @keyframes norn-pulse {
   0%,
   100% {

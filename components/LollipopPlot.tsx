@@ -5,10 +5,10 @@ import type { ClinVarNeighbor } from "@/lib/types";
 function classColor(classification: string): string {
   const c = classification.toLowerCase();
   if (c.includes("pathogenic") && !c.includes("benign") && !c.includes("conflict")) {
-    return c.includes("likely") ? "var(--lpath)" : "var(--path)";
+    return "var(--pathogenic)";
   }
   if (c.includes("benign") && !c.includes("conflict")) {
-    return c.includes("likely") ? "var(--lben)" : "var(--ben)";
+    return "var(--benign)";
   }
   return "var(--vus)";
 }
@@ -36,9 +36,9 @@ export default function LollipopPlot({
 
   if (positions.length === 0) {
     return (
-      <div className="card p-5">
-        <h2 className="mb-1 text-sm font-semibold text-ink">Protein context</h2>
-        <p className="text-sm text-muted">
+      <div>
+        <h3 className="mb-1 text-[15px] font-semibold text-on-surface">Protein context</h3>
+        <p className="text-sm text-on-surface-variant">
           No positioned ClinVar variants were available for {gene}, so the lollipop plot is not shown.
         </p>
       </div>
@@ -58,35 +58,32 @@ export default function LollipopPlot({
   const needle = (stars: number | null | undefined) => 34 + (stars ?? 0) * 12;
 
   return (
-    <div className="card p-5">
+    <div>
       <div className="mb-2 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-ink">Protein context ({gene})</h2>
-        <div className="flex flex-wrap gap-3 text-[11px] text-muted">
-          <Legend color="var(--path)" label="Pathogenic" />
+        <h3 className="text-[15px] font-semibold text-on-surface">Protein context ({gene})</h3>
+        <div className="flex flex-wrap gap-3 text-[11px] text-on-surface-variant">
+          <Legend color="var(--pathogenic)" label="Pathogenic" />
           <Legend color="var(--vus)" label="Uncertain" />
-          <Legend color="var(--ben)" label="Benign" />
-          <Legend color="var(--brand)" label="Query" ring />
+          <Legend color="var(--benign)" label="Benign" />
+          <Legend color="var(--secondary)" label="Query" ring />
         </div>
       </div>
 
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label={`ClinVar variants in ${gene} by protein position`}>
-        {/* protein track */}
-        <line x1={M.left} y1={baseline} x2={W - M.right} y2={baseline} stroke="var(--line)" strokeWidth={6} strokeLinecap="round" />
+        <line x1={M.left} y1={baseline} x2={W - M.right} y2={baseline} stroke="var(--outline-variant)" strokeWidth={6} strokeLinecap="round" />
 
-        {/* axis ticks */}
         {[dMin, Math.round((dMin + dMax) / 2), dMax].map((t) => (
           <g key={t}>
-            <line x1={x(t)} y1={baseline} x2={x(t)} y2={baseline + 6} stroke="var(--faint)" strokeWidth={1} />
-            <text x={x(t)} y={baseline + 20} textAnchor="middle" fontSize={11} fill="var(--faint)">
+            <line x1={x(t)} y1={baseline} x2={x(t)} y2={baseline + 6} stroke="var(--outline)" strokeWidth={1} />
+            <text x={x(t)} y={baseline + 20} textAnchor="middle" fontSize={11} fill="var(--outline)">
               {t}
             </text>
           </g>
         ))}
-        <text x={W - M.right} y={H - 4} textAnchor="end" fontSize={10} fill="var(--faint)">
+        <text x={W - M.right} y={H - 4} textAnchor="end" fontSize={10} fill="var(--outline)">
           amino acid position
         </text>
 
-        {/* known ClinVar variants */}
         {positioned.map((v, i) => {
           const px = x(v.proteinPosition as number);
           const top = baseline - needle(v.stars);
@@ -101,14 +98,13 @@ export default function LollipopPlot({
           );
         })}
 
-        {/* query variant */}
         {queryPosition != null && (
           <g>
-            <line x1={x(queryPosition)} y1={baseline} x2={x(queryPosition)} y2={M.top} stroke="var(--brand)" strokeWidth={2} />
-            <circle cx={x(queryPosition)} cy={M.top} r={7} fill="var(--brand)" stroke="white" strokeWidth={2}>
+            <line x1={x(queryPosition)} y1={baseline} x2={x(queryPosition)} y2={M.top} stroke="var(--secondary)" strokeWidth={2} />
+            <circle cx={x(queryPosition)} cy={M.top} r={7} fill="var(--secondary)" stroke="white" strokeWidth={2}>
               <title>{queryLabel}</title>
             </circle>
-            <text x={x(queryPosition)} y={M.top - 12} textAnchor="middle" fontSize={11} fontWeight={600} fill="var(--brand)">
+            <text x={x(queryPosition)} y={M.top - 12} textAnchor="middle" fontSize={11} fontWeight={600} fill="var(--secondary)">
               {queryLabel}
             </text>
           </g>
@@ -123,7 +119,7 @@ function Legend({ color, label, ring }: { color: string; label: string; ring?: b
     <span className="inline-flex items-center gap-1">
       <span
         className="inline-block h-2.5 w-2.5 rounded-full"
-        style={{ background: color, boxShadow: ring ? "0 0 0 2px white, 0 0 0 3px var(--brand)" : undefined }}
+        style={{ background: color, boxShadow: ring ? "0 0 0 2px white, 0 0 0 3px var(--secondary)" : undefined }}
       />
       {label}
     </span>

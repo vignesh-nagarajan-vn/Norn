@@ -6,15 +6,15 @@ import { STAGES, type StageState } from "./useInterpret";
 function dotColor(status: StageState["status"]): string {
   switch (status) {
     case "done":
-      return "var(--accent)";
+      return "var(--pathogenic)";
     case "start":
-      return "var(--brand)";
+      return "var(--secondary)";
     case "error":
-      return "var(--path)";
+      return "var(--risk-high)";
     case "skipped":
-      return "var(--lpath)";
+      return "var(--vus)";
     default:
-      return "var(--line)";
+      return "var(--outline-variant)";
   }
 }
 
@@ -41,8 +41,8 @@ function StageNode({ state }: { state: StageState & { label: string; sub: string
           <span className="h-2 w-2 rounded-full" style={{ background: color }} />
         )}
       </div>
-      <div className="mt-2 text-sm font-medium text-ink">{state.label}</div>
-      <div className="text-[11px] text-faint">{state.detail ?? state.sub}</div>
+      <div className="mt-2 text-sm font-medium text-on-surface">{state.label}</div>
+      <div className="text-[11px] text-outline">{state.detail ?? state.sub}</div>
     </div>
   );
 }
@@ -55,15 +55,15 @@ export default function PipelineView({
   return (
     <div className="card p-5">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-ink">Evidence pipeline</h2>
-        <span className="label-tiny">6 stages</span>
+        <h2 className="text-sm font-semibold text-on-surface">Evidence pipeline</h2>
+        <span className="label-caps">6 stages</span>
       </div>
       <div className="flex items-start gap-2">
         {STAGES.map((s, i) => (
           <div key={s.key} className="flex flex-1 items-start">
             <StageNode state={{ ...stages[s.key], label: s.label, sub: s.sub }} />
             {i < STAGES.length - 1 && (
-              <div className="mt-4 h-0.5 w-full flex-1 self-start" style={{ background: "var(--line)" }} />
+              <div className="mt-4 h-0.5 w-full flex-1 self-start" style={{ background: "var(--outline-variant)" }} />
             )}
           </div>
         ))}

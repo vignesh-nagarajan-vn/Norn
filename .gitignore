@@ -34,3 +34,6 @@ next-env.d.ts
 # editor
 .idea
 .vscode
+
+# local preview config (machine-specific paths)
+.claude
