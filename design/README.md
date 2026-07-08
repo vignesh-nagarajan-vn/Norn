@@ -49,6 +49,17 @@ A woven "thread of fate": the pipeline is beads on a thread, the points meter is
 | [`illustrations/rune-row.svg`](illustrations/rune-row.svg) | decorative divider (not a literal transcription) |
 | [`illustrations/well-and-tree.svg`](illustrations/well-and-tree.svg) | emblem: the well of Urðr and the world tree |
 
+## Dark mode
+
+A dark theme reverses the chrome (a warm near-black canvas, light text, a lighter bronze mark), toggled from the top bar or Settings. It changes chrome only; classification colors and the engine are unchanged. Tokens are in [`../app/globals.css`](../app/globals.css) under `:root[data-theme="dark"]`.
+
+## Print and slides
+
+The identity carries onto paper and slides:
+
+- **One-page interpretation printout.** The PDF export ([`../lib/pdf.ts`](../lib/pdf.ts)) is a branded, clinical-standard report with the mark, a header and footer on every page, a classification chip, and vector graphs. Its chrome is fixed light so it prints the same in either theme.
+- **Deck template.** [`slides/deck.html`](slides/deck.html) is a self-contained slide deck (title, what Norn is, the three fates, a sample result, closing). Open it in a browser, navigate with the arrow keys, or print to a landscape PDF. Duplicate a `.slide` to add slides. A rendered copy is served at `/deck.html` and embedded as a PDF slideshow (`public/norn-deck.pdf`) in the app's Docs tab.
+
 ## Social and icons
 
 The Open Graph and Twitter cards, the apple-touch icon, and the maskable PWA icons are generated from these tokens and committed under [`app/`](../app) and [`public/icons/`](../public/icons). Regenerate them (and the README screenshots) whenever the identity changes; see the note in [`CLAUDE.md`](../CLAUDE.md).

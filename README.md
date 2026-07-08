@@ -18,7 +18,7 @@ Vignesh Nagarajan was selected as 1 of 500 builders (about half of them PhDs, po
   <img src="docs/ui-docs.png" width="49%" alt="Norn in-app documentation" />
 </p>
 
-<p align="center"><sub>The screenshots from the earlier iteration are kept in <a href="docs/archive/">docs/archive/</a>.</sub></p>
+<p align="center"><sub>The earlier iteration's screenshots and diagrams are kept in <a href="docs/archive/">docs/archive/</a>.</sub></p>
 
 ## Tech stack
 
@@ -161,7 +161,7 @@ BA1 (allele frequency above 5%) is a stand-alone override to Benign regardless o
 Every interpretation is interactive, not a static report:
 
 - **Landing and Dashboard.** A dynamic landing page (`/`) explains what Norn does, frames the pipeline as the three Norse fates (gather, weigh, decree), and links straight into the Dashboard (`/interpret`), the working surface where every feature below lives.
-- **Guided tour.** A first-run walkthrough (also on the "Watch the 30-second demo" button, and embedded as a looping video on the landing) auto-plays one interpretation and annotates each fate step, so a new visitor understands the pipeline without typing a variant.
+- **Guided tour.** A first-run walkthrough (also on the "Watch the 30-second demo" button) auto-plays one interpretation and annotates each fate step (gather, weigh, decree), so a new visitor understands the pipeline without typing a variant. A screen recording of a real interpretation is embedded on the landing.
 - **Live pipeline view.** Each stage (recode, VEP, gnomAD, ClinVar, adjudicate, review) lights up as it completes, streamed over newline-delimited JSON.
 - **ACMG scorecard and points meter.** A row per criterion with its strength, verdict, evidence, and source, plus a meter showing where the total lands on the Pathogenic-to-Benign scale.
 - **Curator-supplied evidence.** Toggle the criteria that need functional, segregation, de novo, or phase evidence; the classification and points recompute live.
@@ -169,11 +169,17 @@ Every interpretation is interactive, not a static report:
 - **Ask the copilot.** A chat panel where the curator can question the interpretation. Claude answers using only that report as its knowledge base, so it explains the call without inventing new evidence or a different label.
 - **Literature.** Search PubMed for the gene and protein change to surface functional and case evidence Norn does not read itself.
 - **Batch mode.** Paste a list or upload a plain list, CSV, or VCF and interpret many variants into a sortable worklist (`/batch`).
-- **Export.** Download a formatted PDF (with the points meter and lollipop drawn as vector graphics), the full JSON, or a draft ClinVar submission row.
+- **Export.** Download a branded, one-to-two-page PDF report (the Norn mark, a header and footer on every page, the classification chip, and the points meter and lollipop drawn as vector graphics), the full JSON, or a draft ClinVar submission row. The PDF is formatted to a clinical standard and stays legible whether the app is in light or dark mode. A matching deck and print kit lives in [`design/`](design) and the deck is embedded (as a PDF slideshow) in the Docs tab.
 - **History.** Recent interpretations are kept in the browser and listed in the sidebar.
-- **Settings.** Switch the classification palette (clinical convention by default, plus colorblind-safe and high-contrast options) and toggle the per-criterion model reasoning. Preferences persist in the browser.
+- **Appearance.** A light or a dark theme (the dark theme reverses the chrome and the mark), switchable from the top bar or Settings.
+- **Settings.** Switch the classification palette (clinical convention by default, plus colorblind-safe and high-contrast options), switch the theme, and toggle the per-criterion model reasoning. Preferences persist in the browser.
 - **Sign-off.** A curator can mark a draft as reviewed. Norn records the intent; it never signs off on its own.
 - **Docs.** An in-app documentation page (`/docs`) covers the workflow, exports, and the MCP server.
+
+<p align="center">
+  <img src="docs/ui-dashboard-dark.png" width="70%" alt="Norn dashboard in dark mode" />
+</p>
+<p align="center"><sub>The dark theme reverses the chrome and the mark. Classification colors follow the chosen palette.</sub></p>
 
 ## The Claude reasoning layer
 
@@ -307,8 +313,9 @@ Still ahead for the product:
 
 Presentation and craft (how Norn is built and shown, not the product itself):
 
-- **A living style guide with visual-regression snapshots.** A `/style` page documenting the design tokens, the loom motif, and the criterion and verdict components, backed by the Playwright screenshot pass in CI so a future redesign cannot silently regress the four views in this README.
-- **A print and slide template.** Reuse the brand kit in [`design/`](design) for a one-page interpretation printout and a deck template, so the identity carries into what a lab actually hands around.
+- **A living style guide with visual-regression snapshots.** A `/style` page documenting the design tokens, the loom motif, and the criterion and verdict components, backed by the Playwright screenshot pass in CI so a future redesign cannot silently regress the views in this README.
+
+The branded PDF report and the deck template in [`design/`](design) (delivered) already carry the identity into what a lab hands around.
 
 ## References
 

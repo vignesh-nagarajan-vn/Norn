@@ -1,96 +1,97 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 620" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 664" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
   <defs>
-    <marker id="arrow" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L7,3 L0,6 Z" fill="#545d6d"/>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="6.5" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L6.5,3 L0,6 Z" fill="#8a5a2b"/>
     </marker>
     <style>
-      .box { fill:#ffffff; stroke:#e4e7ee; stroke-width:1.5; rx:10; }
-      .title { fill:#0f1729; font-size:15px; font-weight:600; }
-      .sub { fill:#545d6d; font-size:12px; }
-      .tag { fill:#8a93a3; font-size:11px; font-weight:600; letter-spacing:0.04em; }
-      .flow { stroke:#545d6d; stroke-width:1.6; fill:none; marker-end:url(#arrow); }
-      .brandbox { fill:#edeffd; stroke:#3a49d6; stroke-width:1.5; }
-      .accentbox { fill:#e7f6f2; stroke:#0d8f7f; stroke-width:1.5; }
-      .lbl { fill:#3a49d6; font-size:11px; font-weight:600; }
+      .disp { fill:#221d15; font-family:"Fraunces", Georgia, serif; }
+      .h { fill:#221d15; font-size:14px; font-weight:600; }
+      .sub { fill:#665d4c; font-size:12px; }
+      .tag { fill:#8a5a2b; font-size:11px; font-weight:700; letter-spacing:0.08em; }
+      .flow { stroke:#8a5a2b; stroke-width:1.6; fill:none; marker-end:url(#arrow); }
+      .lbl { fill:#8a5a2b; font-size:11px; font-weight:600; }
     </style>
   </defs>
 
-  <rect x="0" y="0" width="920" height="620" fill="#f5f6f8"/>
-  <text x="32" y="40" fill="#0f1729" font-size="22" font-weight="700">Norn architecture</text>
-  <text x="32" y="60" class="sub">Variant interpretation copilot. No database. Deploys on Vercel with only ANTHROPIC_API_KEY set.</text>
+  <rect x="0" y="0" width="960" height="664" fill="#f2ede2"/>
+
+  <g stroke="#8a5a2b" stroke-width="1.8" fill="none" transform="translate(892 22)">
+    <circle cx="16" cy="11.4" r="6.6"/><circle cx="10.8" cy="20.2" r="6.6"/><circle cx="21.2" cy="20.2" r="6.6"/>
+  </g>
+
+  <text x="36" y="42" class="disp" font-size="24" font-weight="600">Norn architecture</text>
+  <text x="36" y="63" class="sub">A variant-interpretation copilot. No database. Deploys on Vercel with only ANTHROPIC_API_KEY set.</text>
 
   <!-- Client -->
-  <rect x="32" y="86" width="856" height="86" rx="12" class="box"/>
-  <text x="52" y="112" class="tag">CLIENT (BROWSER)</text>
-  <text x="52" y="134" class="title">Single-page app</text>
-  <text x="52" y="154" class="sub">Input and example chips, live pipeline view, ACMG scorecard, points meter, protein lollipop, reviewer checklist, eval page.</text>
+  <rect x="36" y="84" width="888" height="84" rx="12" fill="#fbf8f1" stroke="#ddd3bf" stroke-width="1.5"/>
+  <text x="56" y="110" class="tag">CLIENT (BROWSER)</text>
+  <text x="56" y="131" class="h">Landing and Dashboard</text>
+  <text x="56" y="151" class="sub">Landing (/) explains Norn and hosts the guided tour. The Dashboard (/interpret) runs one variant end to end: live pipeline, scorecard, points meter, lollipop, Ask, exports.</text>
 
-  <path class="flow" d="M460,172 L460,206"/>
-  <text x="470" y="192" class="lbl">POST /api/interpret, reads streamed NDJSON</text>
+  <path class="flow" d="M480,168 L480,200"/>
+  <text x="492" y="188" class="lbl">POST /api/interpret, reads streamed NDJSON</text>
 
-  <!-- Server pipeline -->
-  <rect x="32" y="206" width="856" height="290" rx="12" fill="#ffffff" stroke="#e4e7ee" stroke-width="1.5"/>
-  <text x="52" y="232" class="tag">SERVER (VERCEL SERVERLESS, NODE RUNTIME, maxDuration 60)</text>
+  <!-- Server -->
+  <rect x="36" y="200" width="888" height="300" rx="12" fill="#f5f0e4" stroke="#ddd3bf" stroke-width="1.5"/>
+  <text x="56" y="226" class="tag">SERVER (VERCEL SERVERLESS, NODE RUNTIME, maxDuration 60)</text>
 
-  <!-- Stage: normalize -->
-  <rect x="52" y="248" width="180" height="66" rx="10" class="box"/>
-  <text x="66" y="272" class="title" font-size="13">1. Normalize</text>
-  <text x="66" y="291" class="sub" font-size="11">variant_recoder:</text>
-  <text x="66" y="305" class="sub" font-size="11">rsID / HGVS / locus</text>
+  <rect x="56" y="242" width="196" height="66" rx="10" fill="#fbf8f1" stroke="#ddd3bf" stroke-width="1.5"/>
+  <text x="70" y="266" class="h" font-size="13">1. Normalize</text>
+  <text x="70" y="285" class="sub" font-size="11">variant_recoder:</text>
+  <text x="70" y="299" class="sub" font-size="11">rsID / HGVS / locus</text>
 
-  <!-- Stage: annotate -->
-  <rect x="252" y="248" width="180" height="66" rx="10" class="box"/>
-  <text x="266" y="272" class="title" font-size="13">2. Annotate</text>
-  <text x="266" y="291" class="sub" font-size="11">VEP: consequence,</text>
-  <text x="266" y="305" class="sub" font-size="11">protein pos, SIFT, PolyPhen</text>
+  <rect x="268" y="242" width="196" height="66" rx="10" fill="#fbf8f1" stroke="#ddd3bf" stroke-width="1.5"/>
+  <text x="282" y="266" class="h" font-size="13">2. Annotate</text>
+  <text x="282" y="285" class="sub" font-size="11">Ensembl VEP: consequence,</text>
+  <text x="282" y="299" class="sub" font-size="11">protein position, SIFT, PolyPhen</text>
 
-  <!-- Stage: evidence -->
-  <rect x="452" y="248" width="200" height="66" rx="10" class="box"/>
-  <text x="466" y="272" class="title" font-size="13">3. Evidence (parallel)</text>
-  <text x="466" y="291" class="sub" font-size="11">gnomAD frequency,</text>
-  <text x="466" y="305" class="sub" font-size="11">ClinVar residue neighbors</text>
+  <rect x="480" y="242" width="204" height="66" rx="10" fill="#fbf8f1" stroke="#ddd3bf" stroke-width="1.5"/>
+  <text x="494" y="266" class="h" font-size="13">3. Evidence (parallel)</text>
+  <text x="494" y="285" class="sub" font-size="11">gnomAD frequency + constraint,</text>
+  <text x="494" y="299" class="sub" font-size="11">ClinVar residue neighbors</text>
 
-  <!-- Stage: signals -->
-  <rect x="672" y="248" width="196" height="66" rx="10" class="box"/>
-  <text x="686" y="272" class="title" font-size="13">4. Compute signals</text>
-  <text x="686" y="291" class="sub" font-size="11">Objective booleans and</text>
-  <text x="686" y="305" class="sub" font-size="11">thresholds, in code</text>
+  <rect x="700" y="242" width="204" height="66" rx="10" fill="#fbf8f1" stroke="#ddd3bf" stroke-width="1.5"/>
+  <text x="714" y="266" class="h" font-size="13">4. Compute signals</text>
+  <text x="714" y="285" class="sub" font-size="11">Objective booleans and</text>
+  <text x="714" y="299" class="sub" font-size="11">gene thresholds, in code</text>
 
-  <path class="flow" d="M232,281 L250,281"/>
-  <path class="flow" d="M432,281 L450,281"/>
-  <path class="flow" d="M652,281 L670,281"/>
+  <path class="flow" d="M252,275 L266,275"/>
+  <path class="flow" d="M464,275 L478,275"/>
+  <path class="flow" d="M684,275 L698,275"/>
 
-  <!-- Adjudicator -->
-  <rect x="52" y="346" width="250" height="70" rx="10" class="brandbox"/>
-  <text x="66" y="370" class="title" font-size="13">5. Claude adjudicator</text>
-  <text x="66" y="389" class="sub" font-size="11">Per-criterion verdict (met /</text>
-  <text x="66" y="403" class="sub" font-size="11">not_met / unknown) with reasoning</text>
+  <!-- reasoning + engine -->
+  <path class="flow" d="M480,308 L187,346"/>
+  <rect x="56" y="348" width="262" height="76" rx="10" fill="#f1e6d6" stroke="#8a5a2b" stroke-width="1.5"/>
+  <text x="70" y="372" class="h" font-size="13">5. Claude adjudicator</text>
+  <text x="70" y="391" class="sub" font-size="11">Per-criterion verdict (met / not_met /</text>
+  <text x="70" y="405" class="sub" font-size="11">unknown) with reasoning, 10 criteria</text>
 
-  <!-- Engine -->
-  <rect x="330" y="346" width="250" height="70" rx="10" class="accentbox"/>
-  <text x="344" y="370" class="title" font-size="13">6. ACMG points engine</text>
-  <text x="344" y="389" class="sub" font-size="11">Deterministic combine, ClinGen</text>
-  <text x="344" y="403" class="sub" font-size="11">Bayesian points, BA1 override</text>
+  <rect x="348" y="348" width="262" height="76" rx="10" fill="#ece3d2" stroke="#221d15" stroke-width="1.8"/>
+  <text x="362" y="372" class="h" font-size="13">6. ACMG points engine</text>
+  <text x="362" y="391" class="sub" font-size="11">Deterministic combine, ClinGen</text>
+  <text x="362" y="405" class="sub" font-size="11">Bayesian points, BA1 override, the label</text>
 
-  <!-- Reviewer -->
-  <rect x="608" y="346" width="260" height="70" rx="10" class="brandbox"/>
-  <text x="622" y="370" class="title" font-size="13">7. Claude reviewer</text>
-  <text x="622" y="389" class="sub" font-size="11">Critiques the draft, flags conflicts,</text>
-  <text x="622" y="403" class="sub" font-size="11">builds the curator checklist</text>
+  <rect x="640" y="348" width="264" height="76" rx="10" fill="#f1e6d6" stroke="#8a5a2b" stroke-width="1.5"/>
+  <text x="654" y="372" class="h" font-size="13">7. Claude reviewer</text>
+  <text x="654" y="391" class="sub" font-size="11">Critiques the draft, flags conflicts,</text>
+  <text x="654" y="405" class="sub" font-size="11">builds the curator checklist</text>
 
-  <path class="flow" d="M456,314 L177,344"/>
-  <path class="flow" d="M302,381 L328,381"/>
-  <path class="flow" d="M580,381 L606,381"/>
+  <path class="flow" d="M318,386 L346,386"/>
+  <path class="flow" d="M610,386 L638,386"/>
 
-  <!-- Report out -->
-  <rect x="330" y="440" width="250" height="42" rx="10" class="box"/>
-  <text x="344" y="466" class="title" font-size="13">Report (streamed to client)</text>
-  <path class="flow" d="M455,416 L455,438"/>
+  <!-- report -->
+  <path class="flow" d="M479,424 L479,442"/>
+  <rect x="352" y="444" width="256" height="34" rx="9" fill="#fbf8f1" stroke="#ddd3bf" stroke-width="1.5"/>
+  <text x="480" y="466" text-anchor="middle" class="h" font-size="12.5">Report (streamed NDJSON to the client)</text>
 
-  <!-- External sources -->
-  <path class="flow" d="M455,496 L455,520"/>
-  <rect x="32" y="520" width="856" height="72" rx="12" class="box"/>
-  <text x="52" y="546" class="tag">EXTERNAL SOURCES (PUBLIC, NO AUTH EXCEPT ANTHROPIC)</text>
-  <text x="52" y="570" class="sub">Ensembl REST (recoder, VEP)   .   gnomAD GraphQL v4   .   ClinVar NCBI E-utilities   .   Anthropic API (Claude)</text>
-  <text x="52" y="586" class="sub" font-size="11">Every fetch has a timeout, one retry, and graceful degradation. Example chips fall back to bundled fixtures if a source is down.</text>
+  <!-- principle -->
+  <text x="480" y="520" text-anchor="middle" class="disp" font-size="15" font-weight="600">The model justifies the criteria. The engine decides the label.</text>
+
+  <!-- external -->
+  <path class="flow" d="M110,500 L110,556"/>
+  <text x="122" y="532" class="lbl">requests: timeout, retry, fixtures</text>
+  <rect x="36" y="556" width="888" height="88" rx="12" fill="#fbf8f1" stroke="#ddd3bf" stroke-width="1.5"/>
+  <text x="56" y="582" class="tag">EXTERNAL SOURCES (PUBLIC, NO AUTH EXCEPT ANTHROPIC)</text>
+  <text x="56" y="605" class="sub">Ensembl REST (recoder, VEP)  ·  gnomAD GraphQL v4  ·  ClinVar and PubMed (NCBI E-utilities)  ·  Anthropic API (Claude)</text>
+  <text x="56" y="624" class="sub" font-size="11">A variant's own ClinVar classification is never fed to adjudication; ClinVar supplies only neighboring-residue evidence (PS1, PM5).</text>
 </svg>

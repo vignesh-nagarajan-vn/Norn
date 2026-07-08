@@ -34,6 +34,7 @@ const TOC = [
   ["literature", "Literature"],
   ["batch", "Batch mode"],
   ["export", "Exports"],
+  ["templates", "Deck and templates"],
   ["mcp", "MCP server"],
   ["settings", "Settings"],
   ["deploy", "Deployment"],
@@ -129,10 +130,37 @@ function DocsInner() {
 
         <Section id="export" title="Exports">
           <ul className="list-disc space-y-1 pl-5">
-            <li><strong className="text-on-surface">Report PDF</strong>: a formatted report including the points meter and protein lollipop drawn as vector graphics.</li>
+            <li><strong className="text-on-surface">Report PDF</strong>: a branded, one-to-two-page report with the Norn mark, a header and footer on every page, the classification chip, and the points meter and protein lollipop drawn as vector graphics. Formatted to a clinical standard and legible in either theme.</li>
             <li><strong className="text-on-surface">Report JSON</strong>: the full structured report.</li>
             <li><strong className="text-on-surface">ClinVar submission (CSV)</strong>: a draft germline submission row. A starting point, not a validated submission; it requires human sign-off.</li>
           </ul>
+        </Section>
+
+        <Section id="templates" title="Deck and templates">
+          <p>
+            The loom-of-fate identity carries onto slides and paper, so a lab can hand Norn around. Below is the brand
+            deck as a PDF slideshow. It, the interpretation PDF export, and the source assets all reuse the tokens in
+            the <Code>design/</Code> brand kit.
+          </p>
+          <div className="overflow-hidden rounded-lg border border-outline-variant bg-surface-low">
+            <iframe
+              src="/norn-deck.pdf"
+              title="Norn brand deck (PDF slideshow)"
+              className="h-[460px] w-full"
+            />
+          </div>
+          <div className="flex flex-wrap gap-4">
+            <a href="/norn-deck.pdf" download className="link inline-flex items-center gap-1">
+              <Icon name="download" size={16} /> Download the deck (PDF)
+            </a>
+            <a href="/deck.html" target="_blank" rel="noreferrer" className="link inline-flex items-center gap-1">
+              <Icon name="slideshow" size={16} /> Open the interactive deck
+            </a>
+          </div>
+          <p className="text-[13px] text-outline">
+            The interactive deck (<Code>design/slides/deck.html</Code>) navigates with the arrow keys and prints to a
+            landscape PDF. The one-page interpretation printout is the branded PDF you export from any report.
+          </p>
         </Section>
 
         <Section id="mcp" title="MCP server">
@@ -158,11 +186,12 @@ function DocsInner() {
 }`}</Block>
         </Section>
 
-        <Section id="settings" title="Settings">
+        <Section id="settings" title="Settings and appearance">
           <p>
-            Settings (in the sidebar) switch the classification colors between the design palette (pathogenic teal)
-            and the clinical convention (pathogenic red), and toggle the per-criterion model reasoning. Preferences
-            persist in your browser.
+            A light or dark theme toggles from the top bar or in Settings; the dark theme reverses the chrome and the
+            mark. Settings also switch the classification palette (clinical convention by default, plus a
+            colorblind-safe scheme and a high-contrast scheme) and toggle the per-criterion model reasoning.
+            Preferences persist in your browser.
           </p>
         </Section>
 

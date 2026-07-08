@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import GuidedDemo from "@/components/GuidedDemo";
+import { PrefsProvider, ThemeToggle } from "@/components/Prefs";
 import { Icon, NornMark, StatusBadge } from "@/components/ui";
 
 /* A woven backdrop: threads drawn left to right, drifting slowly. */
@@ -154,7 +155,15 @@ function SampleReport() {
   );
 }
 
-export default function Landing() {
+export default function LandingPage() {
+  return (
+    <PrefsProvider>
+      <Landing />
+    </PrefsProvider>
+  );
+}
+
+function Landing() {
   const router = useRouter();
   const [q, setQ] = useState("");
   const [demoOpen, setDemoOpen] = useState(false);
@@ -212,6 +221,7 @@ export default function Landing() {
             <span className="hidden items-center gap-1.5 rounded-full border border-error/30 bg-error/5 px-2.5 py-1 text-[11px] font-bold uppercase tracking-caps text-error lg:inline-flex">
               <Icon name="warning" size={14} /> Not for clinical use
             </span>
+            <ThemeToggle />
             <Link href="/interpret" className="btn-primary">
               Open the Dashboard <Icon name="arrow_forward" size={18} />
             </Link>

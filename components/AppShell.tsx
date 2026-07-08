@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getHistory, HISTORY_EVENT, type HistoryItem } from "@/lib/history";
-import { usePrefs } from "./Prefs";
+import { ThemeToggle, usePrefs } from "./Prefs";
 import { classColorVar, Icon, NornMark } from "./ui";
 import type { Classification } from "@/lib/types";
 
@@ -116,6 +116,7 @@ export default function AppShell({
               />
             </form>
           )}
+          <ThemeToggle />
           <span className="hidden items-center gap-1.5 rounded-full border border-error/30 bg-error/5 px-2.5 py-1 text-[11px] font-bold uppercase tracking-caps text-error md:inline-flex">
             <Icon name="warning" size={14} /> Not for clinical use
           </span>

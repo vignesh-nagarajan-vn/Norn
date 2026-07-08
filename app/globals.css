@@ -199,6 +199,82 @@ body {
   }
 }
 
+/*
+  Dark mode ("night vellum"): reverses the chrome only. The mark and accents
+  use a lighter bronze so the reverse lockup reads on the dark canvas. The ACMG
+  strength ramp is inverted to a light sepia so the criteria stay legible.
+  Classification tokens are shared, so schemes and the PDF still work.
+*/
+:root[data-theme="dark"] {
+  --background: #17130e;
+  --surface: #211b14;
+  --surface-low: #1b1610;
+  --surface-container: #29221a;
+  --surface-high: #332b21;
+  --surface-bright: #251f17;
+  --surface-variant: #29221a;
+  --on-surface: #f1e9da;
+  --on-surface-variant: #bcb09b;
+  --outline: #7a6f5d;
+  --outline-variant: #3c3327;
+  --primary: #f1e9da;
+  --on-primary: #17130e;
+  --primary-container: #e6dcc8;
+  --secondary: #d49b60;
+  --on-secondary: #17130e;
+  --secondary-container: #d49b60;
+  --error: #f47171;
+  --risk-high: #f47171;
+  --acmg-vs: #ece0c8;
+  --acmg-s: #cbb693;
+  --acmg-m: #a08b6b;
+  --acmg-sup: #7c6c52;
+
+  --background-rgb: 23 19 14;
+  --surface-rgb: 33 27 20;
+  --surface-low-rgb: 27 22 16;
+  --surface-container-rgb: 41 34 26;
+  --surface-high-rgb: 51 43 33;
+  --surface-bright-rgb: 37 31 23;
+  --surface-variant-rgb: 41 34 26;
+  --on-surface-rgb: 241 233 218;
+  --on-surface-variant-rgb: 188 176 155;
+  --outline-rgb: 122 111 93;
+  --outline-variant-rgb: 60 51 39;
+  --primary-rgb: 241 233 218;
+  --on-primary-rgb: 23 19 14;
+  --primary-container-rgb: 230 220 200;
+  --secondary-rgb: 212 155 96;
+  --on-secondary-rgb: 23 19 14;
+  --secondary-container-rgb: 212 155 96;
+  --error-rgb: 244 113 113;
+  --risk-high-rgb: 244 113 113;
+  --acmg-vs-rgb: 236 224 200;
+  --acmg-s-rgb: 203 182 147;
+  --acmg-m-rgb: 160 139 107;
+  --acmg-sup-rgb: 124 108 82;
+}
+
+/* Lift the deepest classification tiers so they stay legible on the dark canvas. */
+:root[data-theme="dark"] {
+  --path: #ef4444;
+  --ben: #22c55e;
+  --path-rgb: 239 68 68;
+  --ben-rgb: 34 197 94;
+}
+:root[data-theme="dark"][data-scheme="cvd"] {
+  --path: #e8873b;
+  --ben: #4aa3d8;
+  --path-rgb: 232 135 59;
+  --ben-rgb: 74 163 216;
+}
+:root[data-theme="dark"][data-scheme="contrast"] {
+  --path: #ff5a5a;
+  --ben: #3ad46a;
+  --path-rgb: 255 90 90;
+  --ben-rgb: 58 212 106;
+}
+
 /* Loom motif animations */
 @keyframes norn-pulse {
   0%,
@@ -253,6 +329,23 @@ body {
 }
 .fate-rise {
   animation: fate-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/*
+  Print: the branded one-page printout is the PDF export (lib/pdf.ts). This just
+  makes a browser print of the report legible by dropping the app chrome.
+*/
+@media print {
+  header,
+  aside {
+    display: none !important;
+  }
+  main {
+    overflow: visible !important;
+  }
+  body {
+    background: #ffffff;
+  }
 }
 
 /* Guided-demo per-phase progress bar. */

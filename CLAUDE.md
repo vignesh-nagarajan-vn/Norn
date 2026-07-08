@@ -25,7 +25,8 @@ The final classification is always computed in code from the adjudicated verdict
 - Deploys on Vercel with only `ANTHROPIC_API_KEY` set. Node runtime, `maxDuration = 60` on the heavy route.
 - Fonts (Inter, JetBrains Mono, and Fraunces for display headings) and Material Symbols load via `<link>` in `app/layout.tsx` (no `next/font`, to avoid build-time font fetches).
 - Design identity is the "loom of fate": warm vellum canvas, deep ink text, Fraunces serif display, a bronze `--secondary` thread accent, and the `NornMark` (three interlocked rings). Classification colors are engine-contract tokens read at runtime, so retuning the chrome never touched `lib/acmg.ts`, the PDF, or the eval. The default classification palette is the clinical convention, with colorblind-safe (`cvd`) and high-contrast (`contrast`) alternates in Settings. The previous "Scientific Precision" UI is archived in `docs/archive/`.
-- Brand source assets (logo, illustrations, tokens, guide) live in `design/`. The favicon (`app/icon.svg`), OG/Twitter cards (`app/opengraph-image.png`, `app/twitter-image.png`), apple icon (`app/apple-icon.png`), PWA icons (`public/icons/`), and the guided-tour video (`public/norn-demo.webm` + poster) are generated with Playwright and committed. Regenerate them when the identity changes.
+- Light and dark themes: `data-theme` (light | dark), set by `PrefsProvider`, toggled from the top bars (`ThemeToggle`) or Settings. Dark mode (`:root[data-theme="dark"]`) reverses the chrome only (dark canvas, light text, lighter bronze, inverted primary button, light sepia ACMG ramp); it also lifts the two deepest classification tiers for legibility. Persisted with the scheme in `norn-prefs`.
+- Brand source assets (logo, illustrations, tokens, guide, `design/slides/deck.html`) live in `design/`. The favicon (`app/icon.svg`), OG/Twitter cards (`app/opengraph-image.png`, `app/twitter-image.png`), apple icon (`app/apple-icon.png`), PWA icons (`public/icons/`), and the demo video (`public/norn-demo.webm` + poster) are generated with Playwright and committed. Regenerate them when the identity changes.
 
 ## Directory map
 
@@ -55,7 +56,7 @@ components/
   LollipopPlot.tsx      hand-rolled SVG protein lollipop
   PipelineView.tsx      the 6 stage indicators shown while running
   GuidedDemo.tsx        auto-playing annotated tour (gather/weigh/decree), canned data, used on the landing
-  Prefs.tsx             PrefsProvider + Settings modal (palette: clinical|cvd|contrast, show-reasoning), localStorage
+  Prefs.tsx             PrefsProvider + ThemeToggle + Settings modal (theme light|dark, palette clinical|cvd|contrast, show-reasoning), localStorage
   ui.tsx                Icon, NornMark, StatusBadge, VerdictChip, classColorVar, acmgStrengthColor, ClaudeChip
   useInterpret.ts       client hook: POSTs to /api/interpret, parses the NDJSON stream, writes history
 lib/
@@ -75,7 +76,8 @@ lib/
   ask.ts                reportToContext() and suggested questions (pure, reused by MCP)
   submission.ts         toClinvarSubmission() + submissionCsv() (export + MCP tool)
   history.ts            localStorage recent-interpretation list (client)
-  pdf.ts                exportReportPdf(): jsPDF, redraws meter + lollipop as vectors, reads CSS-var colors
+  pdf.ts                exportReportPdf(): branded clinical report (mark, header/footer, chip), jsPDF, vector
+                        meter + lollipop. Fixed light chrome; reads only classification colors from CSS vars.
   fixtures.ts           offline demo data for the example chips
   eval.ts               pure comparison helpers for the eval page
   types.ts              all shared types
@@ -85,10 +87,10 @@ data/
   gene-thresholds.json  illustrative gene-specific AF thresholds
 docs/
   architecture.svg, scoring-model.svg, DESIGN.md, MCP.md
-  ui-landing.png, ui-dashboard.png, ui-batch.png, ui-docs.png  README screenshots (regenerate on UI change)
-  archive/              previous "Scientific Precision" UI screenshots + note
-design/                 brand kit: logo/, illustrations/, tokens.css, README (guide)
-public/                 manifest.webmanifest, icons/ (PWA), norn-demo.webm + poster
+  ui-landing.png, ui-dashboard.png, ui-batch.png, ui-docs.png, ui-dashboard-dark.png  README screenshots
+  archive/              previous "Scientific Precision" UI screenshots and diagrams + note
+design/                 brand kit: logo/, illustrations/, slides/deck.html, tokens.css, README (guide)
+public/                 manifest.webmanifest, icons/ (PWA), norn-demo.webm + poster, deck.html + norn-deck.pdf
 mcp/server.ts           stdio MCP server: interpret_variant, list_eval_variants,
                         list_acmg_criteria, to_clinvar_submission
 ```
@@ -134,7 +136,7 @@ A variant's own ClinVar classification is NEVER fed into adjudication. ClinVar i
 
 ## Conventions
 
-- **Color tokens:** `app/globals.css` defines each color twice: a hex var (`--pathogenic`, for inline styles / color-mix) and a channel var (`--pathogenic-rgb`, e.g. `220 38 38`). `tailwind.config.ts` maps tokens to `rgb(var(--x-rgb) / <alpha-value>)` so Tailwind opacity modifiers (`bg-x/10`) work. If you add a color used with `/opacity`, define both forms. The chrome tokens are the loom identity (vellum surfaces, ink text, bronze `--secondary`, `--font-display` Fraunces) and are shared across every scheme. The base `:root` classification colors are the clinical convention (the default); `PrefsProvider` sets `data-scheme` and `:root[data-scheme="cvd"]` / `:root[data-scheme="contrast"]` override only the classification tokens. `ColorScheme` is `clinical | cvd | contrast` (the removed `mockup`/loom palette maps to `clinical` on load). `design/tokens.css` is a reference copy; keep it in sync with `globals.css`.
+- **Color tokens:** `app/globals.css` defines each color twice: a hex var (`--pathogenic`, for inline styles / color-mix) and a channel var (`--pathogenic-rgb`, e.g. `220 38 38`). `tailwind.config.ts` maps tokens to `rgb(var(--x-rgb) / <alpha-value>)` so Tailwind opacity modifiers (`bg-x/10`) work. If you add a color used with `/opacity`, define both forms. The chrome tokens are the loom identity (vellum surfaces, ink text, bronze `--secondary`, `--font-display` Fraunces) and are shared across every scheme. The base `:root` classification colors are the clinical convention (the default); `PrefsProvider` sets `data-scheme` and `:root[data-scheme="cvd"]` / `:root[data-scheme="contrast"]` override only the classification tokens. `ColorScheme` is `clinical | cvd | contrast` (the removed `mockup`/loom palette maps to `clinical` on load). Independently, `:root[data-theme="dark"]` reverses the chrome tokens (and lifts the two deepest tiers, scoped per scheme via `[data-theme="dark"][data-scheme="..."]`). `design/tokens.css` is a reference copy; keep it in sync with `globals.css`.
 - **Writing style (applies to README, UI copy, code comments, commit messages, PR text):** no em dashes or en dashes anywhere; use commas, periods, or parentheses. Avoid AI-tell filler ("delve", "seamless", "robust" as filler, unnecessary hedging). Prefer a number or a source over an adjective.
 - TypeScript strict. `next.config.mjs` sets `eslint.ignoreDuringBuilds` (type errors still fail the build). ESLint is not installed.
 
@@ -158,10 +160,11 @@ How this repo has been verified in past sessions (no formal test suite): `tsc` +
 
 - The interpret route STREAMS NDJSON. Read it with a reader loop, split on `\n`, ignore partial trailing lines. The last useful line is `{"type":"result","report":...}`; errors come as `{"type":"error","message":...}`.
 - `classify` (lib/acmg) is imported client-side in `Dashboard.tsx` for the live curator recompute. Keep it pure (no server-only imports).
-- `lib/pdf.ts` runs in the browser, dynamic-imports `jspdf`, and reads CSS variables via `getComputedStyle` so the PDF matches the current color scheme. It redraws the meter and lollipop as vectors (do not rely on html2canvas).
-- Pages that use `AppShell` must be wrapped in `PrefsProvider` (AppShell calls `usePrefs`). The landing (`app/page.tsx`) does not use `AppShell`; it is its own full-page layout.
+- `lib/pdf.ts` runs in the browser, dynamic-imports `jspdf`, and redraws the meter and lollipop as vectors (do not rely on html2canvas). Its chrome (ink, bronze, greys) is fixed to a light print palette so the report looks professional even in dark mode; only the classification colors are read from CSS vars (via `getComputedStyle`) so they follow the chosen scheme. It draws the Norn mark as vector rings and a header/footer on every page.
+- Pages that use `AppShell` must be wrapped in `PrefsProvider` (AppShell calls `usePrefs`). The landing (`app/page.tsx`) does not use `AppShell`, but it is now wrapped in `PrefsProvider` too (so it applies the saved theme/scheme and hosts the `ThemeToggle`); `LandingPage` is the provider wrapper, `Landing` is the content.
 - `/` is the landing page; the working app is `/interpret`. The landing search, the sidebar "Recent" links, and the batch/eval variant links all navigate to `/interpret?v=<variant>`; `app/interpret/page.tsx` reads `?v=` on mount and auto-runs. If you add a new deep-link into a report, point it at `/interpret?v=`, not `/?v=`.
-- The guided tour (`components/GuidedDemo.tsx`) is fully canned (no network). It auto-opens once per browser (`localStorage norn-tour-seen`, skipped under reduced motion) and on `?demo=1`. The landing video (`public/norn-demo.webm` + poster) is a Playwright recording of `/?demo=1`. The OG/Twitter/apple PNGs are file-based Next metadata: after regenerating them you MUST rebuild so Next re-detects the files (they are wired at build time, not served live). When capturing README screenshots, seed `localStorage norn-tour-seen=1` first so the tour does not cover the landing.
+- The guided tour (`components/GuidedDemo.tsx`) is fully canned (no network). It auto-opens once per browser (`localStorage norn-tour-seen`, skipped under reduced motion) and on `?demo=1`. The embedded landing video (`public/norn-demo.webm` + poster) is a Playwright screen recording of the REAL app: land, click Open the Dashboard, type a variant, scroll the report. It is recorded with a drawn cursor overlay (headless has none: inject a fixed div that follows `mousemove`, then drive `page.mouse.move/down/up`) and with `/api/interpret` mocked via `page.route` (replay a captured NDJSON after a short delay) so there is no live-pipeline loading wait on screen. The OG/Twitter/apple PNGs are file-based Next metadata: after regenerating them you MUST rebuild so Next re-detects the files (they are wired at build time, not served live). When capturing README screenshots, seed `localStorage norn-tour-seen=1` first so the tour does not cover the landing. To render/verify the PDF export headlessly, load its bytes into pdf.js in a page (Chromium downloads a `file://` PDF instead of rendering it).
+- The Docs tab embeds the brand deck as a PDF slideshow (`public/norn-deck.pdf`, generated by printing `public/deck.html` with `page.pdf({landscape, width/height})`; `public/deck.html` is a copy of `design/slides/deck.html`). Regenerate both when the deck changes. Note: `next start` snapshots `public/` at boot, so a public file created AFTER the server starts 404s until you restart it (a fresh Vercel build serves it fine).
 
 ## Git workflow
 

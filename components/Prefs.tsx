@@ -4,14 +4,18 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 import { Icon } from "./ui";
 
 export type ColorScheme = "clinical" | "cvd" | "contrast";
+export type Theme = "light" | "dark";
 
 const SCHEMES: ColorScheme[] = ["clinical", "cvd", "contrast"];
 
 interface PrefsValue {
   colorScheme: ColorScheme;
   showReasoning: boolean;
+  theme: Theme;
   setColorScheme: (s: ColorScheme) => void;
   setShowReasoning: (b: boolean) => void;
+  setTheme: (t: Theme) => void;
+  toggleTheme: () => void;
   openSettings: () => void;
 }
 
@@ -28,6 +32,7 @@ const STORAGE_KEY = "norn-prefs";
 export function PrefsProvider({ children }: { children: React.ReactNode }) {
   const [colorScheme, setColorScheme] = useState<ColorScheme>("clinical");
   const [showReasoning, setShowReasoning] = useState(true);
+  const [theme, setTheme] = useState<Theme>("light");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
@@ -39,6 +44,7 @@ export function PrefsProvider({ children }: { children: React.ReactNode }) {
         // Legacy values ("mockup", the removed loom palette) fall back to the clinical default.
         if (SCHEMES.includes(p.colorScheme)) setColorScheme(p.colorScheme);
         if (typeof p.showReasoning === "boolean") setShowReasoning(p.showReasoning);
+        if (p.theme === "light" || p.theme === "dark") setTheme(p.theme);
       }
     } catch {
       /* ignore */
@@ -51,18 +57,25 @@ export function PrefsProvider({ children }: { children: React.ReactNode }) {
   }, [colorScheme]);
 
   useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
+
+  useEffect(() => {
     if (!loaded) return;
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ colorScheme, showReasoning }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ colorScheme, showReasoning, theme }));
     } catch {
       /* ignore */
     }
-  }, [colorScheme, showReasoning, loaded]);
+  }, [colorScheme, showReasoning, theme, loaded]);
 
   const openSettings = useCallback(() => setSettingsOpen(true), []);
+  const toggleTheme = useCallback(() => setTheme((t) => (t === "dark" ? "light" : "dark")), []);
 
   return (
-    <Ctx.Provider value={{ colorScheme, showReasoning, setColorScheme, setShowReasoning, openSettings }}>
+    <Ctx.Provider
+      value={{ colorScheme, showReasoning, theme, setColorScheme, setShowReasoning, setTheme, toggleTheme, openSettings }}
+    >
       {children}
       {settingsOpen && (
         <SettingsModal
@@ -71,9 +84,28 @@ export function PrefsProvider({ children }: { children: React.ReactNode }) {
           setColorScheme={setColorScheme}
           showReasoning={showReasoning}
           setShowReasoning={setShowReasoning}
+          theme={theme}
+          setTheme={setTheme}
         />
       )}
     </Ctx.Provider>
+  );
+}
+
+/* A small light/dark toggle for the top bars. */
+export function ThemeToggle({ className = "" }: { className?: string }) {
+  const { theme, toggleTheme } = usePrefs();
+  const dark = theme === "dark";
+  return (
+    <button
+      type="button"
+      onClick={toggleTheme}
+      aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
+      title={dark ? "Light mode" : "Dark mode"}
+      className={`inline-flex h-9 w-9 items-center justify-center rounded-md border border-outline-variant text-on-surface-variant transition-colors hover:bg-surface-high hover:text-on-surface ${className}`}
+    >
+      <Icon name={dark ? "light_mode" : "dark_mode"} size={18} />
+    </button>
   );
 }
 
@@ -109,12 +141,16 @@ function SettingsModal({
   setColorScheme,
   showReasoning,
   setShowReasoning,
+  theme,
+  setTheme,
 }: {
   onClose: () => void;
   colorScheme: ColorScheme;
   setColorScheme: (s: ColorScheme) => void;
   showReasoning: boolean;
   setShowReasoning: (b: boolean) => void;
+  theme: Theme;
+  setTheme: (t: Theme) => void;
 }) {
   const options: { key: ColorScheme; label: string; desc: string; colors: string[] }[] = [
     {
@@ -137,9 +173,14 @@ function SettingsModal({
     },
   ];
 
+  const themes: { key: Theme; label: string; icon: string }[] = [
+    { key: "light", label: "Light", icon: "light_mode" },
+    { key: "dark", label: "Dark", icon: "dark_mode" },
+  ];
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="card relative z-10 w-full max-w-md overflow-hidden">
         <div className="flex items-center justify-between border-b border-outline-variant px-5 py-3">
           <div className="flex items-center gap-2">
@@ -153,6 +194,26 @@ function SettingsModal({
 
         <div className="space-y-5 p-5">
           <div>
+            <div className="label-caps mb-2">Appearance</div>
+            <div className="grid grid-cols-2 gap-2">
+              {themes.map((t) => (
+                <button
+                  key={t.key}
+                  type="button"
+                  onClick={() => setTheme(t.key)}
+                  className={`flex items-center justify-center gap-2 rounded-lg border p-3 text-sm font-medium transition-colors ${
+                    theme === t.key
+                      ? "border-secondary bg-secondary/5 text-secondary"
+                      : "border-outline-variant text-on-surface-variant hover:bg-surface-high"
+                  }`}
+                >
+                  <Icon name={t.icon} size={18} /> {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-t border-outline-variant pt-4">
             <div className="label-caps mb-2">Classification colors</div>
             <div className="space-y-2">
               {options.map((o) => (
