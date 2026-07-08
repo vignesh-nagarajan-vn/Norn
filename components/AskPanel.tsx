@@ -5,18 +5,19 @@ import { SUGGESTED_QUESTIONS } from "@/lib/ask";
 import type { NornReport } from "@/lib/types";
 import { Icon } from "./ui";
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Msg = { role: "user" | "assistant"; content: string; notice?: boolean };
 
 export default function AskPanel({ report }: { report: NornReport }) {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [needsSetup, setNeedsSetup] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const ask = async (q: string) => {
     const question = q.trim();
     if (!question || loading) return;
-    const history = messages;
+    const history = messages.filter((m) => !m.notice).map(({ role, content }) => ({ role, content }));
     setMessages((m) => [...m, { role: "user", content: question }]);
     setInput("");
     setLoading(true);
@@ -26,10 +27,15 @@ export default function AskPanel({ report }: { report: NornReport }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ report, question, history }),
       });
-      const data = (await res.json()) as { answer?: string; error?: string };
-      setMessages((m) => [...m, { role: "assistant", content: data.answer ?? data.error ?? "No answer returned." }]);
+      const data = (await res.json()) as { answer?: string; error?: string; live?: boolean };
+      const notice = data.live === false;
+      if (notice) setNeedsSetup(true);
+      setMessages((m) => [...m, { role: "assistant", content: data.answer ?? data.error ?? "No answer returned.", notice }]);
     } catch {
-      setMessages((m) => [...m, { role: "assistant", content: "The request failed. Please try again." }]);
+      setMessages((m) => [
+        ...m,
+        { role: "assistant", content: "The request failed. Please try again.", notice: true },
+      ]);
     } finally {
       setLoading(false);
       requestAnimationFrame(() => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight }));
@@ -45,6 +51,16 @@ export default function AskPanel({ report }: { report: NornReport }) {
           <Icon name="auto_awesome" size={12} /> Claude
         </span>
       </div>
+
+      {needsSetup && (
+        <div className="mb-3 flex items-start gap-2 rounded-md border border-vus/30 bg-vus/5 p-3 text-[13px] text-on-surface-variant">
+          <Icon name="key" size={16} className="mt-0.5 shrink-0 text-vus" />
+          <span>
+            The assistant needs <span className="mono">ANTHROPIC_API_KEY</span> set for this deployment. On Vercel, add it
+            in Project Settings, then redeploy. The report above is fully available either way.
+          </span>
+        </div>
+      )}
 
       {messages.length === 0 ? (
         <div>
@@ -67,17 +83,28 @@ export default function AskPanel({ report }: { report: NornReport }) {
         </div>
       ) : (
         <div ref={scrollRef} className="max-h-80 space-y-3 overflow-y-auto pr-1">
-          {messages.map((m, i) => (
-            <div key={i} className={m.role === "user" ? "flex justify-end" : "flex justify-start"}>
-              <div
-                className={`max-w-[88%] rounded-lg px-3 py-2 text-sm ${
-                  m.role === "user" ? "bg-secondary/10 text-on-surface" : "bg-surface-low text-on-surface-variant"
-                }`}
-              >
-                {m.content}
+          {messages.map((m, i) => {
+            if (m.role === "user") {
+              return (
+                <div key={i} className="flex justify-end">
+                  <div className="max-w-[88%] rounded-lg bg-secondary/10 px-3 py-2 text-sm text-on-surface">{m.content}</div>
+                </div>
+              );
+            }
+            return (
+              <div key={i} className="flex justify-start">
+                <div
+                  className={`max-w-[88%] rounded-lg px-3 py-2 text-sm ${
+                    m.notice
+                      ? "border border-vus/30 bg-vus/5 text-on-surface-variant"
+                      : "bg-surface-low text-on-surface-variant"
+                  }`}
+                >
+                  {m.content}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
           {loading && (
             <div className="flex justify-start">
               <div className="animate-norn-pulse rounded-lg bg-surface-low px-3 py-2 text-sm text-on-surface-variant">

@@ -97,6 +97,14 @@ export default function AppShell({
   const [q, setQ] = useState("");
   const { openSettings } = usePrefs();
 
+  // Evidence and Checklist scroll to their sections in the report. The report
+  // scrolls inside <main>, not the window, so use scrollIntoView directly
+  // rather than a hash link (which the App Router router does not resolve here).
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <div className="flex h-screen flex-col">
       {/* Top app bar */}
@@ -177,8 +185,8 @@ export default function AppShell({
               href="/"
               active={sidebarActive === "interpretation"}
             />
-            <SidebarItem icon="biotech" label="Evidence" href="/#evidence" />
-            <SidebarItem icon="fact_check" label="Checklist" href="/#checklist" />
+            <SidebarItem icon="biotech" label="Evidence" onClick={() => scrollToSection("evidence")} />
+            <SidebarItem icon="fact_check" label="Checklist" onClick={() => scrollToSection("checklist")} />
             <SidebarItem
               icon="analytics"
               label="Metrics"
