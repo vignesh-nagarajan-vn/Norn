@@ -82,7 +82,7 @@ The user is a molecular geneticist or genetic counselor doing variant curation. 
 3. Reads population frequency from gnomAD v4.
 4. Reads neighboring-residue evidence from ClinVar (for PS1 and PM5 only).
 5. Computes objective signals and thresholds in code.
-6. Asks Claude to adjudicate each of eight criteria (met, not met, or unknown) with one sentence of reasoning.
+6. Asks Claude to adjudicate each of ten criteria (met, not met, or unknown) with one sentence of reasoning.
 7. Combines the verdicts deterministically into a classification using the ClinGen points system.
 8. Asks Claude to review the draft, flag conflicts or overcalls, and write the curator checklist.
 
@@ -100,7 +100,7 @@ The home page includes one-click chips, each backed by a bundled fixture so the 
 | `CFTR:c.1408A>G` | p.Met470Val, common | Benign (BA1 stand-alone override) |
 | `BRCA1:c.5096G>A` | p.Arg1699Gln, reduced penetrance | Uncertain Significance |
 
-Norn is deliberately conservative. It applies PM2 at supporting strength and leaves evidence-dependent criteria to the curator, so a classic loss-of-function variant lands at Likely Pathogenic rather than Pathogenic on the automated evidence alone. That is the correct behavior under current ClinGen guidance, and it is stated plainly rather than inflated.
+Norn is deliberately conservative: it applies PM2 at supporting strength and leaves evidence-dependent criteria to the curator, so a classic loss-of-function variant lands at Likely Pathogenic rather than Pathogenic on the automated evidence alone. That is correct under current ClinGen guidance.
 
 ## The ACMG criteria Norn implements
 
@@ -209,7 +209,7 @@ The `/eval` page runs the full Norn pipeline on each variant and reports two num
 - **Exact agreement**: the five-tier classification matches the expected label.
 - **Directional concordance**: the call lands in the same direction (pathogenic-leaning, uncertain, or benign-leaning).
 
-Because Norn applies PM2 at supporting strength and implements only eight criteria, exact agreement is lower than directional concordance, which is the more meaningful measure for a triage copilot. Disagreements are shown, not hidden. The eval never feeds a variant's own ClinVar classification into the engine; the expected label is only the comparison target.
+Because Norn applies PM2 at supporting strength, exact agreement is lower than directional concordance, which is the more meaningful measure for a triage copilot. Disagreements are shown, not hidden.
 
 ## Data sources
 
@@ -268,7 +268,7 @@ The heavy route (`/api/interpret`) sets `maxDuration = 60` and streams progress 
 
 ```
 app/                 Next.js App Router pages and API routes
-  page.tsx           landing page (what Norn does, guided tour, links into the Dashboard)
+  page.tsx           landing page (what Norn does, demo video, links into the Dashboard)
   interpret/         the Dashboard: single-variant pipeline and report
   batch/             batch worklist
   eval/              eval runner page
@@ -277,7 +277,7 @@ app/                 Next.js App Router pages and API routes
   opengraph-image.png, twitter-image.png, apple-icon.png   social + app icons
   api/interpret/     streaming pipeline route (NDJSON)
   api/eval/          serves the static eval dataset
-components/           UI: pipeline view, scorecard, points meter, lollipop, curator panel, GuidedDemo
+components/           UI: pipeline view, scorecard, points meter, lollipop, curator panel
 lib/                  engine and clients
   acmg.ts            criteria specs, points, classification thresholds
   anthropic.ts       the two Claude passes
@@ -289,13 +289,13 @@ lib/                  engine and clients
   fixtures.ts        offline demo data for the example chips
 data/eval-variants.json   the 20-variant evaluation set
 design/              brand kit: logo, illustrations, tokens, guide
-public/              manifest, PWA icons, the guided-tour video and poster
+public/              manifest, PWA icons, the demo video and poster
 docs/                architecture and scoring diagrams, design notes, archived UI
 ```
 
 ## Scope and limitations
 
-- Norn implements 8 of the 28 ACMG/AMP criteria. It does not use segregation, functional studies, de novo status, allelic data, or literature curation.
+- Norn automates 10 of the 28 ACMG/AMP criteria and leaves 8 evidence-dependent ones (functional, segregation, de novo, allelic) to the curator; it does not curate literature itself.
 - PVS1 does not verify that loss of function is a disease mechanism for the gene. It is flagged provisional.
 - Frequency thresholds are generic defaults, not gene- and disease-specific.
 - Computational evidence uses SIFT and PolyPhen concordance, not calibrated meta-predictors.
