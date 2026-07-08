@@ -525,7 +525,7 @@ function Landing() {
           <div className="flex flex-wrap items-center gap-5 text-sm text-on-surface-variant">
             <Link href="/interpret" className="hover:text-on-surface">Dashboard</Link>
             <Link href="/docs" className="hover:text-on-surface">Docs</Link>
-            <a href="https://norn-five.vercel.app" target="_blank" rel="noreferrer" className="hover:text-on-surface">Live demo</a>
+            <a href="https://norn-five.vercel.app" target="_blank" rel="noreferrer" className="hover:text-on-surface">Demo</a>
             <a href="https://github.com/vignesh-nagarajan-vn/Norn" target="_blank" rel="noreferrer" className="hover:text-on-surface">GitHub</a>
           </div>
         </div>

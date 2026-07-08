@@ -168,7 +168,7 @@ Every interpretation is interactive, not a static report:
 - **Protein lollipop.** The query variant plotted against ClinVar variants at nearby residues, colored by classification.
 - **Ask the copilot.** A chat panel where the curator can question the interpretation. Claude answers using only that report as its knowledge base, so it explains the call without inventing new evidence or a different label.
 - **Literature.** Search PubMed for the gene and protein change to surface functional and case evidence Norn does not read itself.
-- **Batch mode.** Paste a list or upload a plain list, CSV, or VCF and interpret many variants into a sortable worklist (`/batch`).
+- **Batch mode.** Paste a list, upload a plain list, CSV, or VCF, or load a sample batch of well-established ClinVar and gnomAD variants, and interpret many at once into a sortable worklist (`/batch`).
 - **Export.** Download a branded, one-to-two-page PDF report (the Norn mark, a header and footer on every page, the classification chip, and the points meter and lollipop drawn as vector graphics), the full JSON, or a draft ClinVar submission row. The PDF is formatted to a clinical standard and stays legible whether the app is in light or dark mode. A matching deck and print kit lives in [`design/`](design) and the deck is embedded (as a PDF slideshow) in the Docs tab.
 - **History.** Recent interpretations are kept in the browser and listed in the sidebar.
 - **Appearance.** Dark by default (the chrome and the mark reverse); a light theme is one toggle away, from the top bar or Settings.

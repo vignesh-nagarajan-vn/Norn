@@ -122,9 +122,10 @@ function DocsInner() {
 
         <Section id="batch" title="Batch mode">
           <p>
-            The Batch page interprets many variants at once. Paste a list (one per line) or upload a plain list, CSV,
-            or VCF. Results fill a sortable worklist that you can export to CSV. Click any variant to open its full
-            report.
+            The Batch page interprets many variants at once. Paste a list (one per line), upload a plain list, CSV, or
+            VCF, or load one of the sample batches of well-established ClinVar and gnomAD variants (hereditary cancer,
+            cystic fibrosis, common polymorphisms, and the founder trio). Results fill a sortable worklist that you can
+            export to CSV. Click any variant to open its full report.
           </p>
         </Section>
 

@@ -74,6 +74,31 @@ function parseVariants(text: string): string[] {
   return Array.from(new Set(out.filter(Boolean)));
 }
 
+// Sample batches drawn from well-established ClinVar / gnomAD variants (the same
+// set the evaluation page uses). Loading one fills the textarea.
+const SAMPLE_BATCHES: { label: string; note: string; variants: string[] }[] = [
+  {
+    label: "Founder trio",
+    note: "the bundled demo variants",
+    variants: ["BRCA1:c.5266dupC", "CFTR:c.1408A>G", "BRCA1:c.5096G>A"],
+  },
+  {
+    label: "Hereditary cancer",
+    note: "BRCA1/2, TP53, Lynch",
+    variants: ["BRCA1:c.68_69delAG", "BRCA2:c.5946delT", "TP53:c.743G>A", "MLH1:c.1942C>T", "MSH6:c.3226C>T"],
+  },
+  {
+    label: "Cystic fibrosis (CFTR)",
+    note: "F508del and common alleles",
+    variants: ["CFTR:c.1521_1523delCTT", "CFTR:c.1408A>G", "CFTR:c.2562T>G"],
+  },
+  {
+    label: "Common polymorphisms",
+    note: "benign controls",
+    variants: ["BRCA2:c.1114A>C", "BRCA1:c.4837A>G", "TP53:c.215C>G", "MLH1:c.655A>G"],
+  },
+];
+
 function BatchInner() {
   const [text, setText] = useState("");
   const [rows, setRows] = useState<Record<string, Row>>({});
@@ -194,6 +219,31 @@ function BatchInner() {
             <Icon name="download" size={18} /> Export CSV
           </button>
         </div>
+      </div>
+
+      <div className="mt-4">
+        <div className="label-caps mb-2">Or load a sample batch (public data)</div>
+        <div className="flex flex-wrap gap-2">
+          {SAMPLE_BATCHES.map((b) => (
+            <button
+              key={b.label}
+              type="button"
+              disabled={running}
+              onClick={() => setText(b.variants.join("\n"))}
+              className="group inline-flex items-center gap-2 rounded-lg border border-outline-variant bg-surface px-3 py-2 text-left transition-colors hover:border-secondary disabled:opacity-50"
+            >
+              <Icon name="dataset" size={16} className="text-secondary" />
+              <span className="text-sm">
+                <span className="font-medium text-on-surface group-hover:text-secondary">{b.label}</span>
+                <span className="ml-2 text-xs text-on-surface-variant">{b.note}</span>
+              </span>
+              <span className="ml-1 rounded-full bg-surface-high px-1.5 py-0.5 text-[11px] text-on-surface-variant">{b.variants.length}</span>
+            </button>
+          ))}
+        </div>
+        <p className="mt-2 text-[11px] text-outline">
+          Well-established variants from ClinVar and gnomAD. Loading one fills the box above; then click Interpret all.
+        </p>
       </div>
 
       {order.length > 0 && (
