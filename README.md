@@ -27,7 +27,9 @@ Vignesh Nagarajan was selected as 1 of 500 builders (about half of them PhDs, po
   <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white">
   <img src="https://img.shields.io/badge/React-20232a?style=for-the-badge&logo=react&logoColor=61DAFB">
   <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white">
+  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black">
   <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white">
+  <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white">
   <img src="https://img.shields.io/badge/jsPDF-EC1C24?style=for-the-badge">
   <img src="https://img.shields.io/badge/Fraunces-1F1F1F?style=for-the-badge">
 </p>
@@ -65,6 +67,7 @@ Vignesh Nagarajan was selected as 1 of 500 builders (about half of them PhDs, po
   <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white">
   <img src="https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white">
   <img src="https://img.shields.io/badge/tsx-3178C6?style=for-the-badge&logo=typescript&logoColor=white">
+  <img src="https://img.shields.io/badge/Playwright-2EAD33?style=for-the-badge&logo=playwright&logoColor=white">
   <img src="https://img.shields.io/badge/Claude_Code-D97757?style=for-the-badge&logo=anthropic&logoColor=white">
 </p>
 
@@ -158,6 +161,7 @@ BA1 (allele frequency above 5%) is a stand-alone override to Benign regardless o
 Every interpretation is interactive, not a static report:
 
 - **Landing and Dashboard.** A dynamic landing page (`/`) explains what Norn does, frames the pipeline as the three Norse fates (gather, weigh, decree), and links straight into the Dashboard (`/interpret`), the working surface where every feature below lives.
+- **Guided tour.** A first-run walkthrough (also on the "Watch the 30-second demo" button, and embedded as a looping video on the landing) auto-plays one interpretation and annotates each fate step, so a new visitor understands the pipeline without typing a variant.
 - **Live pipeline view.** Each stage (recode, VEP, gnomAD, ClinVar, adjudicate, review) lights up as it completes, streamed over newline-delimited JSON.
 - **ACMG scorecard and points meter.** A row per criterion with its strength, verdict, evidence, and source, plus a meter showing where the total lands on the Pathogenic-to-Benign scale.
 - **Curator-supplied evidence.** Toggle the criteria that need functional, segregation, de novo, or phase evidence; the classification and points recompute live.
@@ -167,7 +171,7 @@ Every interpretation is interactive, not a static report:
 - **Batch mode.** Paste a list or upload a plain list, CSV, or VCF and interpret many variants into a sortable worklist (`/batch`).
 - **Export.** Download a formatted PDF (with the points meter and lollipop drawn as vector graphics), the full JSON, or a draft ClinVar submission row.
 - **History.** Recent interpretations are kept in the browser and listed in the sidebar.
-- **Settings.** Switch between the design-system colors (pathogenic teal) and the clinical convention (pathogenic red), and toggle the per-criterion model reasoning. Preferences persist in the browser.
+- **Settings.** Switch the classification palette (clinical convention by default, plus colorblind-safe and high-contrast options) and toggle the per-criterion model reasoning. Preferences persist in the browser.
 - **Sign-off.** A curator can mark a draft as reviewed. Norn records the intent; it never signs off on its own.
 - **Docs.** An in-app documentation page (`/docs`) covers the workflow, exports, and the MCP server.
 
@@ -180,7 +184,7 @@ Two server-side Anthropic calls run per variant. The API key never reaches the c
 
 If no `ANTHROPIC_API_KEY` is set, or a model call fails, Norn falls back to a deterministic heuristic that derives verdicts directly from the computed signals. The fallback is labeled clearly in the UI as an offline heuristic and is never presented as model reasoning. Norn also flags any case where a model verdict disagrees with a hard code-computed signal.
 
-Model selection: read from `ANTHROPIC_MODEL`, default `claude-opus-4-8`. `claude-sonnet-5` is a faster, cheaper alternative for the same pipeline.
+Model selection: read from `ANTHROPIC_MODEL`, default `claude-opus-4-8`. This must be a model the API key can access, or every call returns 404 (interpretations fall back to the heuristic and the Ask panel reports a failed call). `claude-sonnet-4-6` is a faster, cheaper alternative for the same pipeline.
 
 ## Anti-circularity
 
@@ -251,22 +255,23 @@ The heavy route (`/api/interpret`) sets `maxDuration = 60` and streams progress 
 | Name | Required | Purpose |
 | --- | --- | --- |
 | `ANTHROPIC_API_KEY` | Yes, for real model passes | Enables the Claude adjudicator and reviewer. Without it, Norn uses the labeled deterministic fallback. |
-| `ANTHROPIC_MODEL` | No | Model id. Defaults to `claude-opus-4-8`. `claude-sonnet-5` is a faster, cheaper option. |
+| `ANTHROPIC_MODEL` | No | Model id. Defaults to `claude-opus-4-8`. Must be a model your key can access, or every call 404s. `claude-sonnet-4-6` is a faster, cheaper option. |
 | `NCBI_API_KEY` | No | Raises NCBI E-utilities rate limits from 3 to 10 requests per second. |
 
 ## Project layout
 
 ```
 app/                 Next.js App Router pages and API routes
-  page.tsx           landing page (what Norn does, links into the Dashboard)
+  page.tsx           landing page (what Norn does, guided tour, links into the Dashboard)
   interpret/         the Dashboard: single-variant pipeline and report
   batch/             batch worklist
   eval/              eval runner page
   docs/              in-app documentation
   icon.svg           the Norn mark (favicon)
+  opengraph-image.png, twitter-image.png, apple-icon.png   social + app icons
   api/interpret/     streaming pipeline route (NDJSON)
   api/eval/          serves the static eval dataset
-components/           UI: pipeline view, scorecard, points meter, lollipop, curator panel
+components/           UI: pipeline view, scorecard, points meter, lollipop, curator panel, GuidedDemo
 lib/                  engine and clients
   acmg.ts            criteria specs, points, classification thresholds
   anthropic.ts       the two Claude passes
@@ -277,7 +282,9 @@ lib/                  engine and clients
   fallback.ts        deterministic heuristic when no key is set
   fixtures.ts        offline demo data for the example chips
 data/eval-variants.json   the 20-variant evaluation set
-docs/                architecture and scoring diagrams, design notes
+design/              brand kit: logo, illustrations, tokens, guide
+public/              manifest, PWA icons, the guided-tour video and poster
+docs/                architecture and scoring diagrams, design notes, archived UI
 ```
 
 ## Scope and limitations
@@ -292,17 +299,7 @@ docs/                architecture and scoring diagrams, design notes
 
 ## Roadmap
 
-Delivered in the current build:
-
-- **More ACMG criteria.** Ten criteria are adjudicated automatically (adding PM1 hotspot clustering and BP7 synonymous), and PS2, PS3, PS4, PM3, PM6, PP1, BS3, and BS4 are curator-supplied with live recompute.
-- **Firmed PVS1.** gnomAD gene constraint (pLI, LOEUF) clears the provisional flag for loss-of-function-intolerant genes.
-- **Gene-specific thresholds.** A gene-threshold table (illustrative VCEP-style values) replaces the generic defaults where available.
-- **Batch mode.** Paste a list or upload a plain list, CSV, or VCF and interpret many variants into a sortable worklist.
-- **Persistence.** Recent interpretations are kept in the browser and listed in the sidebar.
-- **Write-back.** A draft ClinVar submission row is available as a CSV export and as the `to_clinvar_submission` MCP tool.
-- **Literature mining.** A PubMed search surfaces functional and case evidence for the gene and protein change.
-
-Still ahead:
+Still ahead for the product:
 
 - **Calibrated predictors.** Replace SIFT and PolyPhen concordance for PP3 and BP4 with calibrated meta-predictors (REVEL, AlphaMissense, BayesDel) at published thresholds.
 - **Audit trail.** A server-side store of interpretations and sign-off history so a lab can track who reviewed what and when.
@@ -310,9 +307,8 @@ Still ahead:
 
 Presentation and craft (how Norn is built and shown, not the product itself):
 
-- **A complete identity kit.** Grow the "loom of fate" system past the app chrome: a full favicon and app-icon set (seeded in `app/icon.svg`), an Open Graph social-preview card so shared links unfurl with the Norn mark, and a small set of hand-drawn thread and rune illustrations, so the identity carries into link previews and slides, not only the pages.
-- **A guided demo mode.** A first-run tour that auto-plays one interpretation and annotates each fate step (gather, weigh, decree), so a judge or new visitor understands the pipeline in about thirty seconds without typing a variant.
 - **A living style guide with visual-regression snapshots.** A `/style` page documenting the design tokens, the loom motif, and the criterion and verdict components, backed by the Playwright screenshot pass in CI so a future redesign cannot silently regress the four views in this README.
+- **A print and slide template.** Reuse the brand kit in [`design/`](design) for a one-page interpretation printout and a deck template, so the identity carries into what a lab actually hands around.
 
 ## References
 

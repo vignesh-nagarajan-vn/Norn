@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="90" viewBox="0 0 420 90" fill="none">
+  <title>Rune row (decorative marks, not literal transcription)</title>
+  <g fill="none" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="translate(24 6)" stroke="#8a5a2b"><path d="M20 4 V74 M20 22 L40 10 M20 40 L40 28"/></g>
+    <g transform="translate(104 6)" stroke="#221d15"><path d="M20 74 V24 M20 24 L4 6 M20 24 L36 6"/></g>
+    <g transform="translate(184 6)" stroke="#8a5a2b"><path d="M12 4 V74 M12 22 L36 40 L12 58"/></g>
+    <g transform="translate(264 6)" stroke="#221d15"><path d="M20 4 V74 M6 56 L34 22"/></g>
+    <g transform="translate(340 6)" stroke="#8a5a2b"><path d="M20 6 L38 40 L20 74 L2 40 Z"/></g>
+  </g>
+</svg>

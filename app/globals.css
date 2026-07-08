@@ -38,10 +38,11 @@
   --on-secondary: #fbf8f1;
   --secondary-container: #8a5a2b;
 
-  /* Classification scale (engine contract, unchanged) */
-  --pathogenic: #10b981;
+  /* Classification scale. Default is the clinical convention
+     (pathogenic red, VUS amber, benign green); other schemes override below. */
+  --pathogenic: #dc2626;
   --vus: #f59e0b;
-  --benign: #6366f1;
+  --benign: #16a34a;
   --risk-high: #ef4444;
   --error: #ba1a1a;
   /* ACMG strength ramp, warmed to a carved-sepia gradient */
@@ -50,10 +51,10 @@
   --acmg-m: #7c6a4d;
   --acmg-sup: #a8977a;
   /* five-tier classification scale */
-  --ben: #6366f1;
-  --lben: #818cf8;
-  --lpath: #10b981;
-  --path: #059669;
+  --ben: #15803d;
+  --lben: #22c55e;
+  --lpath: #ea580c;
+  --path: #b91c1c;
 
   --background-rgb: 242 237 226;
   --surface-rgb: 251 248 241;
@@ -72,40 +73,68 @@
   --secondary-rgb: 138 90 43;
   --on-secondary-rgb: 251 248 241;
   --secondary-container-rgb: 138 90 43;
-  --pathogenic-rgb: 16 185 129;
+  --pathogenic-rgb: 220 38 38;
   --vus-rgb: 245 158 11;
-  --benign-rgb: 99 102 241;
+  --benign-rgb: 22 163 74;
   --risk-high-rgb: 239 68 68;
   --error-rgb: 186 26 26;
   --acmg-vs-rgb: 42 33 20;
   --acmg-s-rgb: 77 60 38;
   --acmg-m-rgb: 124 106 77;
   --acmg-sup-rgb: 168 151 122;
-  --ben-rgb: 99 102 241;
-  --lben-rgb: 129 140 248;
-  --lpath-rgb: 16 185 129;
-  --path-rgb: 5 150 105;
+  --ben-rgb: 21 128 61;
+  --lben-rgb: 34 197 94;
+  --lpath-rgb: 234 88 12;
+  --path-rgb: 185 28 28;
 
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --font-display: "Fraunces", "Iowan Old Style", Georgia, "Times New Roman", serif;
 }
 
-/* Optional clinical color convention (pathogenic red, benign green), toggled in Settings. */
-:root[data-scheme="clinical"] {
-  --pathogenic: #dc2626;
-  --benign: #16a34a;
-  --path: #b91c1c;
-  --lpath: #ea580c;
-  --lben: #22c55e;
-  --ben: #15803d;
+/*
+  Alternate classification schemes, toggled in Settings. The base :root above is
+  the clinical convention. These override only the classification tokens; the
+  chrome (vellum, ink, bronze) is shared. The engine, PDF, and eval read these
+  tokens at runtime, so nothing in lib/ changes.
+*/
 
-  --pathogenic-rgb: 220 38 38;
-  --benign-rgb: 22 163 74;
-  --path-rgb: 185 28 28;
-  --lpath-rgb: 234 88 12;
-  --lben-rgb: 34 197 94;
-  --ben-rgb: 21 128 61;
+/* Colorblind-safe (Okabe-Ito): pathogenic vermillion, VUS amber, benign blue. */
+:root[data-scheme="cvd"] {
+  --pathogenic: #d55e00;
+  --vus: #e69f00;
+  --benign: #0072b2;
+  --path: #a34700;
+  --lpath: #e0801f;
+  --lben: #4aa3d8;
+  --ben: #005a8c;
+
+  --pathogenic-rgb: 213 94 0;
+  --vus-rgb: 230 159 0;
+  --benign-rgb: 0 114 178;
+  --path-rgb: 163 71 0;
+  --lpath-rgb: 224 128 31;
+  --lben-rgb: 74 163 216;
+  --ben-rgb: 0 90 140;
+}
+
+/* High contrast: bold, saturated tiers for projectors and print. */
+:root[data-scheme="contrast"] {
+  --pathogenic: #b30000;
+  --vus: #b45309;
+  --benign: #0b7a1e;
+  --path: #7a0000;
+  --lpath: #c2410c;
+  --lben: #15a02f;
+  --ben: #08571a;
+
+  --pathogenic-rgb: 179 0 0;
+  --vus-rgb: 180 83 9;
+  --benign-rgb: 11 122 30;
+  --path-rgb: 122 0 0;
+  --lpath-rgb: 194 65 12;
+  --lben-rgb: 21 160 47;
+  --ben-rgb: 8 87 26;
 }
 
 html,
@@ -224,6 +253,16 @@ body {
 }
 .fate-rise {
   animation: fate-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Guided-demo per-phase progress bar. */
+@keyframes demo-progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

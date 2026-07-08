@@ -1,10 +1,36 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
+const DESCRIPTION =
+  "Norn drafts ACMG/AMP evidence for a human curator: it gathers public genomics data, adjudicates each criterion with Claude, and applies the ClinGen points framework. Research and demonstration only.";
+
+// Next auto-attaches the OG and Twitter images from app/opengraph-image.png and
+// app/twitter-image.png, and the icons from app/icon.svg and app/apple-icon.png.
 export const metadata: Metadata = {
-  title: "Norn: variant interpretation copilot",
-  description:
-    "Norn drafts ACMG/AMP evidence for a human curator: it gathers public genomics data, adjudicates each criterion with Claude, and applies the ClinGen points framework. Research and demonstration only.",
+  metadataBase: new URL("https://norn-five.vercel.app"),
+  title: {
+    default: "Norn: variant interpretation copilot",
+    template: "%s · Norn",
+  },
+  description: DESCRIPTION,
+  applicationName: "Norn",
+  manifest: "/manifest.webmanifest",
+  openGraph: {
+    title: "Norn: variant interpretation copilot",
+    description: DESCRIPTION,
+    url: "/",
+    siteName: "Norn",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Norn: variant interpretation copilot",
+    description: DESCRIPTION,
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#f2ede2",
 };
 
 export default function RootLayout({

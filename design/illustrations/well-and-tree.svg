@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240" fill="none">
+  <title>The well of Urðr and the world tree (emblem)</title>
+  <g fill="none" stroke-linecap="round">
+    <!-- three threads rising and branching from the well -->
+    <path d="M120 196 C 118 150, 96 128, 70 96 C 56 78, 52 60, 58 42" stroke="#8a5a2b" stroke-width="2.2" stroke-opacity="0.85"/>
+    <path d="M120 196 C 121 150, 121 120, 120 84 C 120 62, 120 48, 120 34" stroke="#221d15" stroke-width="2.2" stroke-opacity="0.85"/>
+    <path d="M120 196 C 122 150, 144 128, 170 96 C 184 78, 188 60, 182 42" stroke="#8a5a2b" stroke-width="2.2" stroke-opacity="0.85"/>
+    <!-- fine branch threads -->
+    <path d="M92 118 C 100 108, 108 104, 118 102" stroke="#7c6a4d" stroke-width="1.4" stroke-opacity="0.6"/>
+    <path d="M148 118 C 140 108, 132 104, 122 102" stroke="#7c6a4d" stroke-width="1.4" stroke-opacity="0.6"/>
+    <!-- three-ring crown -->
+    <g stroke="#8a5a2b" stroke-width="2.2">
+      <circle cx="120" cy="30" r="12"/>
+      <circle cx="104" cy="46" r="12"/>
+      <circle cx="136" cy="46" r="12"/>
+    </g>
+    <!-- the well -->
+    <ellipse cx="120" cy="200" rx="46" ry="14" stroke="#221d15" stroke-width="2.2"/>
+    <path d="M78 200 C 82 214, 158 214, 162 200" stroke="#221d15" stroke-width="2.2"/>
+    <path d="M92 205 C 100 210, 140 210, 148 205" stroke="#8a5a2b" stroke-width="1.4" stroke-opacity="0.7"/>
+  </g>
+</svg>

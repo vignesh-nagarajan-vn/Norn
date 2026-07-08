@@ -1,0 +1,14 @@
+{
+  "name": "Norn: variant interpretation copilot",
+  "short_name": "Norn",
+  "description": "Norn drafts ACMG/AMP evidence for a human curator. Research and demonstration only.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f2ede2",
+  "theme_color": "#f2ede2",
+  "icons": [
+    { "src": "/icons/norn-192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "/icons/norn-512.png", "type": "image/png", "sizes": "512x512" },
+    { "src": "/icons/norn-512-maskable.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" }
+  ]
+}

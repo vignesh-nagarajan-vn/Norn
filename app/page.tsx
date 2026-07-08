@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import GuidedDemo from "@/components/GuidedDemo";
 import { Icon, NornMark, StatusBadge } from "@/components/ui";
 
 /* A woven backdrop: threads drawn left to right, drifting slowly. */
@@ -156,6 +157,36 @@ function SampleReport() {
 export default function Landing() {
   const router = useRouter();
   const [q, setQ] = useState("");
+  const [demoOpen, setDemoOpen] = useState(false);
+
+  // Open the guided tour on ?demo=1, or once on a first visit (unless the
+  // visitor prefers reduced motion).
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("demo") === "1") {
+      setDemoOpen(true);
+      return;
+    }
+    let reduced = false;
+    let seen = false;
+    try {
+      reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      seen = Boolean(localStorage.getItem("norn-tour-seen"));
+    } catch {
+      /* ignore */
+    }
+    if (!reduced && !seen) {
+      const id = setTimeout(() => {
+        setDemoOpen(true);
+        try {
+          localStorage.setItem("norn-tour-seen", "1");
+        } catch {
+          /* ignore */
+        }
+      }, 1100);
+      return () => clearTimeout(id);
+    }
+  }, []);
 
   const go = (variant: string) => {
     const v = variant.trim();
@@ -215,8 +246,11 @@ export default function Landing() {
               <Link href="/interpret" className="btn-primary px-5 py-2.5 text-[15px]">
                 Open the Dashboard <Icon name="arrow_forward" size={18} />
               </Link>
-              <Link href="/docs" className="btn-outline px-5 py-2.5 text-[15px]">
-                <Icon name="menu_book" size={18} /> Read the docs
+              <button type="button" onClick={() => setDemoOpen(true)} className="btn-outline px-5 py-2.5 text-[15px]">
+                <Icon name="play_circle" size={18} /> Watch the 30-second demo
+              </button>
+              <Link href="/docs" className="px-2 py-2.5 text-[15px] font-semibold text-on-surface-variant underline-offset-4 hover:text-on-surface hover:underline">
+                Read the docs
               </Link>
             </div>
 
@@ -290,6 +324,45 @@ export default function Landing() {
                 <p className="mt-3 text-sm leading-relaxed text-on-surface-variant">{f.body}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* See it in motion */}
+      <section id="demo" className="border-b border-outline-variant">
+        <div className="mx-auto max-w-6xl px-6 py-20">
+          <div className="mb-3 eyebrow">See it in motion</div>
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1.5fr_1fr] lg:items-center">
+            <div className="overflow-hidden rounded-lg border border-outline-variant bg-surface-bright shadow-thread">
+              <video
+                className="w-full"
+                autoPlay
+                muted
+                loop
+                playsInline
+                poster="/norn-demo-poster.png"
+                aria-label="Norn interpreting one variant end to end"
+              >
+                <source src="/norn-demo.webm" type="video/webm" />
+              </video>
+            </div>
+            <div>
+              <h2 className="display text-3xl font-semibold tracking-tight md:text-4xl">
+                Thirty seconds, one variant.
+              </h2>
+              <p className="mt-4 text-[15px] leading-relaxed text-on-surface-variant">
+                Norn gathers the evidence, weighs each ACMG criterion with Claude, and lets the engine decree the
+                classification. Watch the full annotated tour, or open the Dashboard and run your own.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <button type="button" onClick={() => setDemoOpen(true)} className="btn-primary px-5 py-2.5 text-[15px]">
+                  <Icon name="play_circle" size={18} /> Watch the guided tour
+                </button>
+                <Link href="/interpret" className="btn-outline px-5 py-2.5 text-[15px]">
+                  Open the Dashboard
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -420,6 +493,8 @@ export default function Landing() {
           </p>
         </div>
       </footer>
+
+      {demoOpen && <GuidedDemo onClose={() => setDemoOpen(false)} />}
     </div>
   );
 }

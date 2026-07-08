@@ -3,7 +3,9 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { Icon } from "./ui";
 
-export type ColorScheme = "mockup" | "clinical";
+export type ColorScheme = "clinical" | "cvd" | "contrast";
+
+const SCHEMES: ColorScheme[] = ["clinical", "cvd", "contrast"];
 
 interface PrefsValue {
   colorScheme: ColorScheme;
@@ -24,7 +26,7 @@ export function usePrefs(): PrefsValue {
 const STORAGE_KEY = "norn-prefs";
 
 export function PrefsProvider({ children }: { children: React.ReactNode }) {
-  const [colorScheme, setColorScheme] = useState<ColorScheme>("mockup");
+  const [colorScheme, setColorScheme] = useState<ColorScheme>("clinical");
   const [showReasoning, setShowReasoning] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -34,7 +36,8 @@ export function PrefsProvider({ children }: { children: React.ReactNode }) {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const p = JSON.parse(raw);
-        if (p.colorScheme === "mockup" || p.colorScheme === "clinical") setColorScheme(p.colorScheme);
+        // Legacy values ("mockup", the removed loom palette) fall back to the clinical default.
+        if (SCHEMES.includes(p.colorScheme)) setColorScheme(p.colorScheme);
         if (typeof p.showReasoning === "boolean") setShowReasoning(p.showReasoning);
       }
     } catch {
@@ -115,16 +118,22 @@ function SettingsModal({
 }) {
   const options: { key: ColorScheme; label: string; desc: string; colors: string[] }[] = [
     {
-      key: "mockup",
-      label: "Loom palette",
-      desc: "Pathogenic teal, VUS amber, benign indigo (the Norn default).",
-      colors: ["#10b981", "#f59e0b", "#6366f1"],
-    },
-    {
       key: "clinical",
       label: "Clinical convention",
-      desc: "Pathogenic red, VUS amber, benign green (familiar to most curators).",
+      desc: "Pathogenic red, VUS amber, benign green. The traffic-light convention most curators use.",
       colors: ["#dc2626", "#f59e0b", "#16a34a"],
+    },
+    {
+      key: "cvd",
+      label: "Colorblind-safe",
+      desc: "Vermillion, amber, and blue (Okabe-Ito), kept distinct under common color-vision deficiency.",
+      colors: ["#d55e00", "#e69f00", "#0072b2"],
+    },
+    {
+      key: "contrast",
+      label: "High contrast",
+      desc: "Bold, saturated tiers for projectors and print.",
+      colors: ["#b30000", "#b45309", "#0b7a1e"],
     },
   ];
 

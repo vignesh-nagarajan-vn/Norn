@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { askAboutReport, hasApiKey, type AskMessage } from "@/lib/anthropic";
+import { askAboutReport, hasApiKey, modelName, type AskMessage } from "@/lib/anthropic";
 import { reportToContext } from "@/lib/ask";
 import type { NornReport } from "@/lib/types";
 
@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
   if (!hasApiKey()) {
     return Response.json({
       live: false,
+      needsKey: true,
       answer:
         "The assistant needs ANTHROPIC_API_KEY set to answer questions about this interpretation. The report itself is still fully available above.",
     });
@@ -35,6 +36,18 @@ export async function POST(req: NextRequest) {
     const answer = await askAboutReport(reportToContext(report), question, body.history ?? []);
     return Response.json({ live: true, answer });
   } catch (err) {
-    return Response.json({ live: false, answer: `The assistant could not answer: ${(err as Error).message}` });
+    // The key IS set but the call failed. The most common cause is that
+    // ANTHROPIC_MODEL is not a model this key can access (a 404), so say so
+    // instead of blaming a missing key.
+    const message = (err as Error).message;
+    return Response.json({
+      live: false,
+      needsKey: false,
+      error: message,
+      answer:
+        `The Claude call failed: ${message}. The API key is set, so this usually means ANTHROPIC_MODEL (currently ${modelName()}) ` +
+        "is not a model this key can access, or the deployment was not redeployed after the variables changed. " +
+        "Set ANTHROPIC_MODEL to a model your key can use (for example claude-sonnet-4-6) and redeploy.",
+    });
   }
 }

@@ -4,7 +4,7 @@ Guidance for AI agents (and humans) working in this repository. Read this first.
 
 ## Keeping the docs current (do this every session)
 
-Norn documents itself in three places: this file (`CLAUDE.md`), the main `README.md`, and the docs under `docs/` (`DESIGN.md`, `MCP.md`, the diagrams, and `docs/archive/`). Any change to behavior, structure, routes, commands, environment, dependencies, or the UI must update every affected document in the same change, as applicable. That includes regenerating the README screenshots when the UI changes and moving superseded assets into `docs/archive/`. Treat the docs as part of the build: a change that leaves them stale is not done. When in doubt, update this file so the next session starts from the truth.
+Norn documents itself in several places: this file (`CLAUDE.md`), the main `README.md`, the docs under `docs/` (`DESIGN.md`, `MCP.md`, the diagrams, and `docs/archive/`), and the brand kit under `design/` (`tokens.css`, the logo, the guide). Any change to behavior, structure, routes, commands, environment, dependencies, or the UI must update every affected document in the same change, as applicable. That includes regenerating the README screenshots and the identity assets (OG/Twitter/apple/PWA icons in `app/` and `public/`, the guided-tour video) when the UI or identity changes, keeping `design/tokens.css` in sync with `app/globals.css`, and moving superseded assets into `docs/archive/`. Treat the docs as part of the build: a change that leaves them stale is not done. When in doubt, update this file so the next session starts from the truth.
 
 ## What Norn is
 
@@ -24,7 +24,8 @@ The final classification is always computed in code from the adjudicated verdict
 - No database. All external calls and all Anthropic calls happen in server-side route handlers. The API key never reaches the client.
 - Deploys on Vercel with only `ANTHROPIC_API_KEY` set. Node runtime, `maxDuration = 60` on the heavy route.
 - Fonts (Inter, JetBrains Mono, and Fraunces for display headings) and Material Symbols load via `<link>` in `app/layout.tsx` (no `next/font`, to avoid build-time font fetches).
-- Design identity is the "loom of fate": warm vellum canvas, deep ink text, Fraunces serif display, a bronze `--secondary` thread accent, and the `NornMark` (three interlocked rings). Classification colors are unchanged from the engine contract, so the redesign never touched `lib/acmg.ts`, the PDF, or the eval. The previous "Scientific Precision" UI is archived in `docs/archive/`.
+- Design identity is the "loom of fate": warm vellum canvas, deep ink text, Fraunces serif display, a bronze `--secondary` thread accent, and the `NornMark` (three interlocked rings). Classification colors are engine-contract tokens read at runtime, so retuning the chrome never touched `lib/acmg.ts`, the PDF, or the eval. The default classification palette is the clinical convention, with colorblind-safe (`cvd`) and high-contrast (`contrast`) alternates in Settings. The previous "Scientific Precision" UI is archived in `docs/archive/`.
+- Brand source assets (logo, illustrations, tokens, guide) live in `design/`. The favicon (`app/icon.svg`), OG/Twitter cards (`app/opengraph-image.png`, `app/twitter-image.png`), apple icon (`app/apple-icon.png`), PWA icons (`public/icons/`), and the guided-tour video (`public/norn-demo.webm` + poster) are generated with Playwright and committed. Regenerate them when the identity changes.
 
 ## Directory map
 
@@ -34,6 +35,7 @@ app/
   page.tsx              Landing page (dynamic overview of Norn, "three fates", links into the Dashboard)
   interpret/page.tsx    Dashboard: hero search + streaming pipeline + report (reads ?v= and auto-runs)
   icon.svg              the Norn mark, three interlocked rings (favicon)
+  opengraph-image.png / twitter-image.png / apple-icon.png   file-based metadata (Next auto-wires)
   batch/page.tsx        Batch: paste/upload list|CSV|VCF -> sortable worklist
   eval/page.tsx         Evaluation: runs the benchmark set, agreement stats
   docs/page.tsx         In-app documentation
@@ -52,7 +54,8 @@ components/
   LiteraturePanel.tsx   PubMed panel (posts to /api/literature)
   LollipopPlot.tsx      hand-rolled SVG protein lollipop
   PipelineView.tsx      the 6 stage indicators shown while running
-  Prefs.tsx             PrefsProvider + Settings modal (color scheme, show-reasoning), localStorage
+  GuidedDemo.tsx        auto-playing annotated tour (gather/weigh/decree), canned data, used on the landing
+  Prefs.tsx             PrefsProvider + Settings modal (palette: clinical|cvd|contrast, show-reasoning), localStorage
   ui.tsx                Icon, NornMark, StatusBadge, VerdictChip, classColorVar, acmgStrengthColor, ClaudeChip
   useInterpret.ts       client hook: POSTs to /api/interpret, parses the NDJSON stream, writes history
 lib/
@@ -84,6 +87,8 @@ docs/
   architecture.svg, scoring-model.svg, DESIGN.md, MCP.md
   ui-landing.png, ui-dashboard.png, ui-batch.png, ui-docs.png  README screenshots (regenerate on UI change)
   archive/              previous "Scientific Precision" UI screenshots + note
+design/                 brand kit: logo/, illustrations/, tokens.css, README (guide)
+public/                 manifest.webmanifest, icons/ (PWA), norn-demo.webm + poster
 mcp/server.ts           stdio MCP server: interpret_variant, list_eval_variants,
                         list_acmg_criteria, to_clinvar_submission
 ```
@@ -125,10 +130,11 @@ A variant's own ClinVar classification is NEVER fed into adjudication. ClinVar i
 - Responses must be strict JSON; parsed defensively and validated with Zod, with one reformat retry.
 - Model id from `ANTHROPIC_MODEL`, default `claude-opus-4-8`. NOTE: on a real Anthropic account the id must be one the account can access, or every Claude call 404s (interpretations then silently fall back to the heuristic and the Ask panel errors). If "chat doesn't work" on a live deploy, check the key is set AND the deployment was redeployed, and that the model id is valid.
 - With no key (local dev), Norn uses the labeled deterministic fallback (`lib/fallback.ts`). This is expected; the UI marks it "offline heuristic".
+- The Ask route (`/api/ask`) returns `needsKey: true` only when the key is missing; a failure with a key set returns `needsKey: false` plus the error, and `AskPanel` shows the "set the key" banner only for `needsKey`. So a 404 from an inaccessible `ANTHROPIC_MODEL` no longer masquerades as a missing key; the reply names the model and suggests setting an accessible one.
 
 ## Conventions
 
-- **Color tokens:** `app/globals.css` defines each color twice: a hex var (`--pathogenic`, for inline styles / color-mix) and a channel var (`--pathogenic-rgb`, e.g. `16 185 129`). `tailwind.config.ts` maps tokens to `rgb(var(--x-rgb) / <alpha-value>)` so Tailwind opacity modifiers (`bg-x/10`) work. If you add a color used with `/opacity`, define both forms, and use only opacity steps in the default Tailwind scale (or bracket form) since ESLint/JIT will silently drop off-scale steps. The clinical scheme is `:root[data-scheme="clinical"]` (set by `PrefsProvider`); classification colors are deliberately unconventional by default (pathogenic teal, benign indigo), switchable to clinical (pathogenic red, benign green) in Settings. The chrome tokens are the loom identity (vellum surfaces, ink text, bronze `--secondary`, `--font-display` Fraunces). The default scheme's stored key is still `mockup` (labeled "Loom palette" in Settings) so saved prefs keep working; do not rename the key.
+- **Color tokens:** `app/globals.css` defines each color twice: a hex var (`--pathogenic`, for inline styles / color-mix) and a channel var (`--pathogenic-rgb`, e.g. `220 38 38`). `tailwind.config.ts` maps tokens to `rgb(var(--x-rgb) / <alpha-value>)` so Tailwind opacity modifiers (`bg-x/10`) work. If you add a color used with `/opacity`, define both forms. The chrome tokens are the loom identity (vellum surfaces, ink text, bronze `--secondary`, `--font-display` Fraunces) and are shared across every scheme. The base `:root` classification colors are the clinical convention (the default); `PrefsProvider` sets `data-scheme` and `:root[data-scheme="cvd"]` / `:root[data-scheme="contrast"]` override only the classification tokens. `ColorScheme` is `clinical | cvd | contrast` (the removed `mockup`/loom palette maps to `clinical` on load). `design/tokens.css` is a reference copy; keep it in sync with `globals.css`.
 - **Writing style (applies to README, UI copy, code comments, commit messages, PR text):** no em dashes or en dashes anywhere; use commas, periods, or parentheses. Avoid AI-tell filler ("delve", "seamless", "robust" as filler, unnecessary hedging). Prefer a number or a source over an adjective.
 - TypeScript strict. `next.config.mjs` sets `eslint.ignoreDuringBuilds` (type errors still fail the build). ESLint is not installed.
 
@@ -155,6 +161,7 @@ How this repo has been verified in past sessions (no formal test suite): `tsc` +
 - `lib/pdf.ts` runs in the browser, dynamic-imports `jspdf`, and reads CSS variables via `getComputedStyle` so the PDF matches the current color scheme. It redraws the meter and lollipop as vectors (do not rely on html2canvas).
 - Pages that use `AppShell` must be wrapped in `PrefsProvider` (AppShell calls `usePrefs`). The landing (`app/page.tsx`) does not use `AppShell`; it is its own full-page layout.
 - `/` is the landing page; the working app is `/interpret`. The landing search, the sidebar "Recent" links, and the batch/eval variant links all navigate to `/interpret?v=<variant>`; `app/interpret/page.tsx` reads `?v=` on mount and auto-runs. If you add a new deep-link into a report, point it at `/interpret?v=`, not `/?v=`.
+- The guided tour (`components/GuidedDemo.tsx`) is fully canned (no network). It auto-opens once per browser (`localStorage norn-tour-seen`, skipped under reduced motion) and on `?demo=1`. The landing video (`public/norn-demo.webm` + poster) is a Playwright recording of `/?demo=1`. The OG/Twitter/apple PNGs are file-based Next metadata: after regenerating them you MUST rebuild so Next re-detects the files (they are wired at build time, not served live). When capturing README screenshots, seed `localStorage norn-tour-seen=1` first so the tour does not cover the landing.
 
 ## Git workflow
 

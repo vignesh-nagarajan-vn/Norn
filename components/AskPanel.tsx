@@ -27,9 +27,11 @@ export default function AskPanel({ report }: { report: NornReport }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ report, question, history }),
       });
-      const data = (await res.json()) as { answer?: string; error?: string; live?: boolean };
+      const data = (await res.json()) as { answer?: string; error?: string; live?: boolean; needsKey?: boolean };
       const notice = data.live === false;
-      if (notice) setNeedsSetup(true);
+      // Only show the "set the key" banner when the key is genuinely missing.
+      // A failure with a key set is a model/deploy issue and is explained in the reply.
+      if (data.needsKey) setNeedsSetup(true);
       setMessages((m) => [...m, { role: "assistant", content: data.answer ?? data.error ?? "No answer returned.", notice }]);
     } catch {
       setMessages((m) => [

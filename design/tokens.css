@@ -1,0 +1,47 @@
+/*
+  Norn design tokens (reference copy).
+  Source of truth is app/globals.css; keep the two in sync when either changes.
+  Each color has a hex form (inline styles / color-mix) and an -rgb channel form
+  (for Tailwind opacity modifiers).
+*/
+:root {
+  /* Chrome: vellum + ink + bronze */
+  --background: #f2ede2;   /* app canvas (warm vellum) */
+  --surface: #fbf8f1;      /* cards */
+  --surface-bright: #fffdf8;
+  --surface-high: #e7ddc9; /* inset / hover */
+  --on-surface: #221d15;   /* ink text */
+  --on-surface-variant: #665d4c;
+  --outline: #9a8f79;
+  --outline-variant: #ddd3bf; /* hairline */
+  --primary: #221d15;      /* ink buttons */
+  --on-primary: #f7f2e6;
+  --secondary: #8a5a2b;    /* bronze "thread of fate" accent */
+
+  /* Classification (default: clinical convention) */
+  --pathogenic: #dc2626;   /* red   */
+  --vus: #f59e0b;          /* amber */
+  --benign: #16a34a;       /* green */
+  /* five-tier: Benign, Likely Benign, VUS, Likely Path, Pathogenic */
+  --ben: #15803d;
+  --lben: #22c55e;
+  --lpath: #ea580c;
+  --path: #b91c1c;
+
+  /* Type */
+  --font-display: "Fraunces", Georgia, serif;   /* headings */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; /* UI + body */
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;     /* variants + data */
+}
+
+/* Alternate classification schemes (chrome unchanged) */
+:root[data-scheme="cvd"] {        /* colorblind-safe (Okabe-Ito) */
+  --pathogenic: #d55e00;
+  --vus: #e69f00;
+  --benign: #0072b2;
+}
+:root[data-scheme="contrast"] {   /* high contrast for projectors/print */
+  --pathogenic: #b30000;
+  --vus: #b45309;
+  --benign: #0b7a1e;
+}

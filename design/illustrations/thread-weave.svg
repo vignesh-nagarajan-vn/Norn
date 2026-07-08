@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="200" viewBox="0 0 480 200" fill="none">
+  <title>Woven threads</title>
+  <g fill="none" stroke-linecap="round">
+    <!-- weft (drifting horizontals) -->
+    <path d="M-10 40 C 120 10, 240 70, 490 34" stroke="#8a5a2b" stroke-opacity="0.55" stroke-width="1.6"/>
+    <path d="M-10 72 C 140 44, 260 100, 490 66" stroke="#8a5a2b" stroke-opacity="0.4" stroke-width="1.4"/>
+    <path d="M-10 104 C 120 78, 250 132, 490 98" stroke="#8a5a2b" stroke-opacity="0.5" stroke-width="1.6"/>
+    <path d="M-10 136 C 150 110, 250 164, 490 132" stroke="#8a5a2b" stroke-opacity="0.35" stroke-width="1.3"/>
+    <path d="M-10 168 C 120 142, 260 196, 490 164" stroke="#7c6a4d" stroke-opacity="0.3" stroke-width="1.2"/>
+    <!-- warp (gentle verticals) -->
+    <path d="M96 -10 C 78 60, 116 140, 92 210" stroke="#7c6a4d" stroke-opacity="0.28" stroke-width="1.2"/>
+    <path d="M200 -10 C 184 60, 220 140, 196 210" stroke="#8a5a2b" stroke-opacity="0.3" stroke-width="1.3"/>
+    <path d="M304 -10 C 288 60, 324 140, 300 210" stroke="#7c6a4d" stroke-opacity="0.26" stroke-width="1.2"/>
+    <path d="M400 -10 C 384 60, 420 140, 396 210" stroke="#8a5a2b" stroke-opacity="0.3" stroke-width="1.3"/>
+  </g>
+</svg>
