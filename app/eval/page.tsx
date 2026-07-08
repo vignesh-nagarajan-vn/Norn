@@ -126,7 +126,7 @@ export default function EvalPage() {
     <PrefsProvider>
     <AppShell active="eval">
       <div className="mx-auto max-w-6xl px-6 pb-16 pt-8">
-        <h1 className="text-2xl font-bold tracking-tight text-on-surface">Evaluation</h1>
+        <h1 className="display text-3xl font-semibold tracking-tight text-on-surface">Evaluation</h1>
         <p className="mt-2 max-w-3xl text-[15px] leading-relaxed text-on-surface-variant">
           Norn runs its full pipeline on {dataset?.variants.length ?? "a set of"} well-established variants and
           compares its computed classification to the expected ClinVar label. Two measures are reported: exact

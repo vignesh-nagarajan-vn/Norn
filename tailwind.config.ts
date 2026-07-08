@@ -1,6 +1,6 @@
 import type { Config } from "tailwindcss";
 
-// Tokens follow the "Scientific Precision" design system from the Stitch mockup.
+// Tokens follow the Norn "loom of fate" design system (see app/globals.css).
 // Colors use channel CSS variables so Tailwind opacity modifiers (bg-x/10) work.
 const c = (name: string) => `rgb(var(--${name}-rgb) / <alpha-value>)`;
 
@@ -44,6 +44,7 @@ const config: Config = {
         canvas: c("background"),
         brand: c("primary"),
         accent: c("secondary"),
+        thread: c("secondary"),
         path: c("path"),
         lpath: c("lpath"),
         lben: c("lben"),
@@ -52,13 +53,16 @@ const config: Config = {
       fontFamily: {
         sans: ["var(--font-sans)", "Inter", "ui-sans-serif", "system-ui", "sans-serif"],
         mono: ["var(--font-mono)", "JetBrains Mono", "ui-monospace", "monospace"],
+        display: ["var(--font-display)", "Fraunces", "Georgia", "serif"],
       },
       boxShadow: {
-        card: "0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.05)",
-        lift: "0 6px 20px rgba(15, 23, 42, 0.08)",
+        // Warm ink-tinted shadows to match the vellum canvas.
+        card: "0 1px 2px rgba(60, 45, 25, 0.05), 0 1px 3px rgba(60, 45, 25, 0.06)",
+        lift: "0 8px 26px rgba(60, 45, 25, 0.12)",
+        thread: "0 10px 40px rgba(60, 45, 25, 0.10)",
       },
       letterSpacing: {
-        caps: "0.05em",
+        caps: "0.11em",
       },
     },
   },

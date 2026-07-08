@@ -14,6 +14,7 @@ import {
   acmgStrengthColor,
   ClaudeChip,
   Icon,
+  NornMark,
   StatusBadge,
   VerdictChip,
   classColorVar,
@@ -64,7 +65,9 @@ function PointAggregation({ result }: { result: ClassificationResult }) {
   return (
     <section className="card p-6">
       <div className="mb-4 flex items-baseline justify-between">
-        <h2 className="text-[15px] font-semibold text-on-surface">ACMG Point Aggregation</h2>
+        <h2 className="flex items-center gap-2 text-[15px] font-semibold text-on-surface">
+          <NornMark size={16} className="text-secondary" strokeWidth={2.4} /> ACMG point aggregation
+        </h2>
         <span className="mono text-2xl font-semibold" style={{ color }}>
           {points > 0 ? `+${points}` : points} pts
         </span>
@@ -73,7 +76,7 @@ function PointAggregation({ result }: { result: ClassificationResult }) {
       <div className="relative flex h-6 overflow-hidden rounded border border-outline-variant bg-surface-high">
         <div
           className="absolute left-0 top-0 h-full transition-all duration-500"
-          style={{ width: `${fillPct}%`, background: `color-mix(in srgb, ${color} 78%, white)` }}
+          style={{ width: `${fillPct}%`, background: `color-mix(in srgb, ${color} 78%, var(--surface-bright))` }}
         />
         {[0.25, 0.5, 0.75].map((f) => (
           <div
@@ -105,7 +108,7 @@ function PointAggregation({ result }: { result: ClassificationResult }) {
 
       <p className="mt-3 text-xs text-on-surface-variant">{result.confidenceRationale}</p>
       {result.ba1Override && (
-        <div className="mt-2 inline-flex items-center gap-1.5 rounded px-2 py-0.5 text-[11px] font-semibold" style={{ background: "color-mix(in srgb, var(--benign) 12%, white)", color: "var(--benign)" }}>
+        <div className="mt-2 inline-flex items-center gap-1.5 rounded px-2 py-0.5 text-[11px] font-semibold" style={{ background: "color-mix(in srgb, var(--benign) 14%, var(--surface-bright))", color: "var(--benign)" }}>
           <Icon name="verified" size={14} /> BA1 stand-alone benign override applied
         </div>
       )}
@@ -279,15 +282,15 @@ function CopilotSummary({ report }: { report: NornReport }) {
   const riskColor = risk === "high" ? "var(--risk-high)" : risk === "moderate" ? "var(--vus)" : "var(--pathogenic)";
   return (
     <section className="relative overflow-hidden rounded-lg border border-outline-variant bg-surface-low p-5">
-      <Icon name="auto_awesome" size={48} className="absolute right-2 top-2 text-secondary opacity-15" />
+      <NornMark size={54} className="absolute right-3 top-3 text-secondary opacity-[0.12]" strokeWidth={2.4} />
       <div className="relative z-10 mb-3 flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
-          <Icon name="smart_toy" className="shrink-0 text-secondary" fill />
-          <h3 className="whitespace-nowrap text-[15px] font-semibold text-on-surface">Copilot Summary</h3>
+          <NornMark size={18} className="shrink-0 text-secondary" strokeWidth={2.4} />
+          <h3 className="whitespace-nowrap text-[15px] font-semibold text-on-surface">Reviewer critique</h3>
         </div>
         <span
           className="shrink-0 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-medium"
-          style={{ background: `color-mix(in srgb, ${riskColor} 12%, white)`, color: riskColor }}
+          style={{ background: `color-mix(in srgb, ${riskColor} 14%, var(--surface-bright))`, color: riskColor }}
         >
           {risk} risk
         </span>
@@ -380,6 +383,9 @@ function DashboardHeader({ report, result }: { report: NornReport; result: Class
   return (
     <header className="flex flex-col justify-between gap-4 border-b border-outline-variant pb-6 md:flex-row md:items-start">
       <div>
+        <div className="eyebrow mb-2">
+          <NornMark size={14} className="text-secondary" strokeWidth={2.4} /> Drafted interpretation
+        </div>
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="mono text-[26px] font-bold tracking-tight text-on-surface">{report.input}</h1>
           <StatusBadge classification={result.classification} />

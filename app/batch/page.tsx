@@ -155,7 +155,7 @@ function BatchInner() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 pb-16 pt-8">
-      <h1 className="text-2xl font-bold tracking-tight text-on-surface">Batch interpretation</h1>
+      <h1 className="display text-3xl font-semibold tracking-tight text-on-surface">Batch interpretation</h1>
       <p className="mt-2 max-w-3xl text-[15px] leading-relaxed text-on-surface-variant">
         Paste a list of variants (one per line) or upload a file (plain list, CSV, or VCF). Norn interprets each and
         builds a sortable worklist. Each variant runs through the same pipeline as the single-variant view.
@@ -213,7 +213,7 @@ function BatchInner() {
               {sorted.map((r) => (
                 <tr key={r.variant} className="border-b border-outline-variant last:border-0">
                   <td className="mono px-4 py-2 text-on-surface">
-                    <a href={`/?v=${encodeURIComponent(r.variant)}`} className="hover:text-secondary hover:underline">{r.variant}</a>
+                    <a href={`/interpret?v=${encodeURIComponent(r.variant)}`} className="hover:text-secondary hover:underline">{r.variant}</a>
                   </td>
                   <td className="px-4 py-2 text-on-surface-variant">{r.gene ?? ""}</td>
                   <td className="px-4 py-2">

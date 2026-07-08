@@ -3,72 +3,84 @@
 @tailwind utilities;
 
 /*
-  "Scientific Precision" design tokens from the Stitch mockup.
-  Classification colors: pathogenic = teal, VUS = amber, benign = indigo.
+  Norn "loom of fate" design tokens.
+
+  A warm vellum canvas, deep ink text, a bronze thread accent, and a serif
+  display face (Fraunces). The identity nods to the Norse fates who read
+  evidence and decree destiny, while staying legible for a clinical reader.
+
+  Classification colors are unchanged from the engine's contract:
+  pathogenic = teal, VUS = amber, benign = indigo (switchable to the clinical
+  convention in Settings). Only the chrome (paper, ink, bronze) is the redesign.
 
   Two forms of each token:
    - hex vars (e.g. --secondary) for inline style / color-mix usage
    - channel vars (e.g. --secondary-rgb) for Tailwind, so `/opacity` works
 */
 :root {
-  --background: #f9fafb;
-  --surface: #ffffff;
-  --surface-low: #f4f6fb;
-  --surface-container: #eef2fb;
-  --surface-high: #e6ebf6;
-  --surface-bright: #fbfcfe;
-  --surface-variant: #eef1f7;
-  --on-surface: #151c27;
-  --on-surface-variant: #4a5261;
-  --outline: #75777d;
-  --outline-variant: #e2e8f0;
-  --primary: #0f172a;
-  --on-primary: #ffffff;
-  --primary-container: #1e293b;
-  --secondary: #2563eb;
-  --on-secondary: #ffffff;
-  --secondary-container: #2563eb;
+  /* Vellum + ink chrome */
+  --background: #f2ede2;
+  --surface: #fbf8f1;
+  --surface-low: #f5f0e4;
+  --surface-container: #eee7d8;
+  --surface-high: #e7ddc9;
+  --surface-bright: #fffdf8;
+  --surface-variant: #eee7d8;
+  --on-surface: #221d15;
+  --on-surface-variant: #665d4c;
+  --outline: #9a8f79;
+  --outline-variant: #ddd3bf;
+  --primary: #221d15;
+  --on-primary: #f7f2e6;
+  --primary-container: #35291a;
+  /* Bronze "thread of fate" accent (interactive, brand) */
+  --secondary: #8a5a2b;
+  --on-secondary: #fbf8f1;
+  --secondary-container: #8a5a2b;
+
+  /* Classification scale (engine contract, unchanged) */
   --pathogenic: #10b981;
   --vus: #f59e0b;
   --benign: #6366f1;
   --risk-high: #ef4444;
   --error: #ba1a1a;
-  --acmg-vs: #1e293b;
-  --acmg-s: #334155;
-  --acmg-m: #64748b;
-  --acmg-sup: #94a3b8;
+  /* ACMG strength ramp, warmed to a carved-sepia gradient */
+  --acmg-vs: #2a2114;
+  --acmg-s: #4d3c26;
+  --acmg-m: #7c6a4d;
+  --acmg-sup: #a8977a;
   /* five-tier classification scale */
   --ben: #6366f1;
   --lben: #818cf8;
   --lpath: #10b981;
   --path: #059669;
 
-  --background-rgb: 249 250 251;
-  --surface-rgb: 255 255 255;
-  --surface-low-rgb: 244 246 251;
-  --surface-container-rgb: 238 242 251;
-  --surface-high-rgb: 230 235 246;
-  --surface-bright-rgb: 251 252 254;
-  --surface-variant-rgb: 238 241 247;
-  --on-surface-rgb: 21 28 39;
-  --on-surface-variant-rgb: 74 82 97;
-  --outline-rgb: 117 119 125;
-  --outline-variant-rgb: 226 232 240;
-  --primary-rgb: 15 23 42;
-  --on-primary-rgb: 255 255 255;
-  --primary-container-rgb: 30 41 59;
-  --secondary-rgb: 37 99 235;
-  --on-secondary-rgb: 255 255 255;
-  --secondary-container-rgb: 37 99 235;
+  --background-rgb: 242 237 226;
+  --surface-rgb: 251 248 241;
+  --surface-low-rgb: 245 240 228;
+  --surface-container-rgb: 238 231 216;
+  --surface-high-rgb: 231 221 201;
+  --surface-bright-rgb: 255 253 248;
+  --surface-variant-rgb: 238 231 216;
+  --on-surface-rgb: 34 29 21;
+  --on-surface-variant-rgb: 102 93 76;
+  --outline-rgb: 154 143 121;
+  --outline-variant-rgb: 221 211 191;
+  --primary-rgb: 34 29 21;
+  --on-primary-rgb: 247 242 230;
+  --primary-container-rgb: 53 41 26;
+  --secondary-rgb: 138 90 43;
+  --on-secondary-rgb: 251 248 241;
+  --secondary-container-rgb: 138 90 43;
   --pathogenic-rgb: 16 185 129;
   --vus-rgb: 245 158 11;
   --benign-rgb: 99 102 241;
   --risk-high-rgb: 239 68 68;
   --error-rgb: 186 26 26;
-  --acmg-vs-rgb: 30 41 59;
-  --acmg-s-rgb: 51 65 85;
-  --acmg-m-rgb: 100 116 139;
-  --acmg-sup-rgb: 148 163 184;
+  --acmg-vs-rgb: 42 33 20;
+  --acmg-s-rgb: 77 60 38;
+  --acmg-m-rgb: 124 106 77;
+  --acmg-sup-rgb: 168 151 122;
   --ben-rgb: 99 102 241;
   --lben-rgb: 129 140 248;
   --lpath-rgb: 16 185 129;
@@ -76,6 +88,7 @@
 
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-display: "Fraunces", "Iowan Old Style", Georgia, "Times New Roman", serif;
 }
 
 /* Optional clinical color convention (pathogenic red, benign green), toggled in Settings. */
@@ -134,20 +147,30 @@ body {
   .mono {
     font-family: var(--font-mono);
   }
+  .display {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    letter-spacing: -0.01em;
+  }
+  /* Small-caps section label, "carved" on the paper. */
   .label-caps {
     @apply text-[11px] font-bold uppercase tracking-caps text-on-surface-variant;
   }
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-caps text-secondary;
+  }
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-on-primary transition-opacity hover:opacity-90 disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-on-primary transition-all hover:bg-primary-container disabled:opacity-50;
   }
   .btn-outline {
-    @apply inline-flex items-center justify-center gap-2 rounded-md border border-secondary px-4 py-2 text-sm font-semibold text-secondary transition-colors hover:bg-secondary/5;
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-secondary/60 px-4 py-2 text-sm font-semibold text-secondary transition-colors hover:bg-secondary/10;
   }
   .link {
     @apply text-secondary underline-offset-2 hover:underline;
   }
 }
 
+/* Loom motif animations */
 @keyframes norn-pulse {
   0%,
   100% {
@@ -159,4 +182,58 @@ body {
 }
 .animate-norn-pulse {
   animation: norn-pulse 1.1s ease-in-out infinite;
+}
+
+/* A thread drawing itself across the loom. */
+@keyframes thread-draw {
+  from {
+    stroke-dashoffset: var(--thread-len, 1200);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.thread-draw {
+  stroke-dasharray: var(--thread-len, 1200);
+  animation: thread-draw 2.4s ease-out forwards;
+}
+
+/* A slow drift for the woven backdrop. */
+@keyframes thread-drift {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-14px);
+  }
+}
+.thread-drift {
+  animation: thread-drift 9s ease-in-out infinite alternate;
+}
+
+/* Content rising into place on mount. */
+@keyframes fate-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.fate-rise {
+  animation: fate-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-norn-pulse,
+  .thread-draw,
+  .thread-drift,
+  .fate-rise {
+    animation: none !important;
+  }
+  .thread-draw {
+    stroke-dashoffset: 0;
+  }
 }

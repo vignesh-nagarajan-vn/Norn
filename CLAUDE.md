@@ -2,6 +2,10 @@
 
 Guidance for AI agents (and humans) working in this repository. Read this first.
 
+## Keeping the docs current (do this every session)
+
+Norn documents itself in three places: this file (`CLAUDE.md`), the main `README.md`, and the docs under `docs/` (`DESIGN.md`, `MCP.md`, the diagrams, and `docs/archive/`). Any change to behavior, structure, routes, commands, environment, dependencies, or the UI must update every affected document in the same change, as applicable. That includes regenerating the README screenshots when the UI changes and moving superseded assets into `docs/archive/`. Treat the docs as part of the build: a change that leaves them stale is not done. When in doubt, update this file so the next session starts from the truth.
+
 ## What Norn is
 
 Norn is a variant-interpretation copilot for a clinical molecular geneticist or genetic counselor. A user pastes one human genetic variant (HGVS like `BRCA1:c.5266dupC`, an rsID like `rs80357906`, or a locus like `17-43057062-A-AG`). Norn gathers evidence from public genomics databases, adjudicates each ACMG/AMP criterion with Claude, applies the ClinGen points framework in code, runs a second Claude "reviewer" pass, and returns a transparent report.
@@ -19,14 +23,17 @@ The final classification is always computed in code from the adjudicated verdict
 - Next.js 14 App Router, React 18, TypeScript (strict), Tailwind CSS 3.
 - No database. All external calls and all Anthropic calls happen in server-side route handlers. The API key never reaches the client.
 - Deploys on Vercel with only `ANTHROPIC_API_KEY` set. Node runtime, `maxDuration = 60` on the heavy route.
-- Fonts (Inter, JetBrains Mono) and Material Symbols load via `<link>` in `app/layout.tsx` (no `next/font`, to avoid build-time font fetches).
+- Fonts (Inter, JetBrains Mono, and Fraunces for display headings) and Material Symbols load via `<link>` in `app/layout.tsx` (no `next/font`, to avoid build-time font fetches).
+- Design identity is the "loom of fate": warm vellum canvas, deep ink text, Fraunces serif display, a bronze `--secondary` thread accent, and the `NornMark` (three interlocked rings). Classification colors are unchanged from the engine contract, so the redesign never touched `lib/acmg.ts`, the PDF, or the eval. The previous "Scientific Precision" UI is archived in `docs/archive/`.
 
 ## Directory map
 
 ```
 app/
-  layout.tsx            root layout, font + icon <link>s
-  page.tsx              Interpret page (hero + streaming pipeline + Dashboard)
+  layout.tsx            root layout, font + icon <link>s (Inter, JetBrains Mono, Fraunces, Material Symbols)
+  page.tsx              Landing page (dynamic overview of Norn, "three fates", links into the Dashboard)
+  interpret/page.tsx    Dashboard: hero search + streaming pipeline + report (reads ?v= and auto-runs)
+  icon.svg              the Norn mark, three interlocked rings (favicon)
   batch/page.tsx        Batch: paste/upload list|CSV|VCF -> sortable worklist
   eval/page.tsx         Evaluation: runs the benchmark set, agreement stats
   docs/page.tsx         In-app documentation
@@ -35,8 +42,8 @@ app/
   api/ask/route.ts        answers questions about one report (Claude, report as context)
   api/literature/route.ts PubMed search for a gene + protein change
 components/
-  AppShell.tsx          top nav + sidebar shell (Interpret/Batch/Evaluation/Docs), Recent history
-  Hero.tsx              landing hero, search, example chips, feature cards
+  AppShell.tsx          top nav + sidebar shell (wordmark -> /, Interpret -> /interpret, Batch/Eval/Docs), Recent history
+  Hero.tsx              the Dashboard's empty state: search, example chips, three-fates strip
   Dashboard.tsx         the report: header, PointAggregation, CriteriaList, CuratorEvidence,
                         GenomicCards, LollipopPlot, CopilotSummary, AskPanel, LiteraturePanel,
                         CuratorChecklist. Holds curator-criteria state and recomputes classify() live.
@@ -46,7 +53,7 @@ components/
   LollipopPlot.tsx      hand-rolled SVG protein lollipop
   PipelineView.tsx      the 6 stage indicators shown while running
   Prefs.tsx             PrefsProvider + Settings modal (color scheme, show-reasoning), localStorage
-  ui.tsx                Icon, StatusBadge, VerdictChip, classColorVar, acmgStrengthColor, ClaudeChip
+  ui.tsx                Icon, NornMark, StatusBadge, VerdictChip, classColorVar, acmgStrengthColor, ClaudeChip
   useInterpret.ts       client hook: POSTs to /api/interpret, parses the NDJSON stream, writes history
 lib/
   acmg.ts               criteria specs (CRITERIA=10 automated, MANUAL_CRITERIA=8 curator), points,
@@ -75,6 +82,8 @@ data/
   gene-thresholds.json  illustrative gene-specific AF thresholds
 docs/
   architecture.svg, scoring-model.svg, DESIGN.md, MCP.md
+  ui-landing.png, ui-dashboard.png, ui-batch.png, ui-docs.png  README screenshots (regenerate on UI change)
+  archive/              previous "Scientific Precision" UI screenshots + note
 mcp/server.ts           stdio MCP server: interpret_variant, list_eval_variants,
                         list_acmg_criteria, to_clinvar_submission
 ```
@@ -119,7 +128,7 @@ A variant's own ClinVar classification is NEVER fed into adjudication. ClinVar i
 
 ## Conventions
 
-- **Color tokens:** `app/globals.css` defines each color twice: a hex var (`--pathogenic`, for inline styles / color-mix) and a channel var (`--pathogenic-rgb`, e.g. `16 185 129`). `tailwind.config.ts` maps tokens to `rgb(var(--x-rgb) / <alpha-value>)` so Tailwind opacity modifiers (`bg-x/10`) work. If you add a color used with `/opacity`, define both forms. The clinical scheme is `:root[data-scheme="clinical"]` (set by `PrefsProvider`); classification colors are deliberately unconventional by default (pathogenic teal, benign indigo), switchable to clinical (pathogenic red, benign green) in Settings.
+- **Color tokens:** `app/globals.css` defines each color twice: a hex var (`--pathogenic`, for inline styles / color-mix) and a channel var (`--pathogenic-rgb`, e.g. `16 185 129`). `tailwind.config.ts` maps tokens to `rgb(var(--x-rgb) / <alpha-value>)` so Tailwind opacity modifiers (`bg-x/10`) work. If you add a color used with `/opacity`, define both forms, and use only opacity steps in the default Tailwind scale (or bracket form) since ESLint/JIT will silently drop off-scale steps. The clinical scheme is `:root[data-scheme="clinical"]` (set by `PrefsProvider`); classification colors are deliberately unconventional by default (pathogenic teal, benign indigo), switchable to clinical (pathogenic red, benign green) in Settings. The chrome tokens are the loom identity (vellum surfaces, ink text, bronze `--secondary`, `--font-display` Fraunces). The default scheme's stored key is still `mockup` (labeled "Loom palette" in Settings) so saved prefs keep working; do not rename the key.
 - **Writing style (applies to README, UI copy, code comments, commit messages, PR text):** no em dashes or en dashes anywhere; use commas, periods, or parentheses. Avoid AI-tell filler ("delve", "seamless", "robust" as filler, unnecessary hedging). Prefer a number or a source over an adjective.
 - TypeScript strict. `next.config.mjs` sets `eslint.ignoreDuringBuilds` (type errors still fail the build). ESLint is not installed.
 
@@ -144,8 +153,8 @@ How this repo has been verified in past sessions (no formal test suite): `tsc` +
 - The interpret route STREAMS NDJSON. Read it with a reader loop, split on `\n`, ignore partial trailing lines. The last useful line is `{"type":"result","report":...}`; errors come as `{"type":"error","message":...}`.
 - `classify` (lib/acmg) is imported client-side in `Dashboard.tsx` for the live curator recompute. Keep it pure (no server-only imports).
 - `lib/pdf.ts` runs in the browser, dynamic-imports `jspdf`, and reads CSS variables via `getComputedStyle` so the PDF matches the current color scheme. It redraws the meter and lollipop as vectors (do not rely on html2canvas).
-- Pages that use `AppShell` must be wrapped in `PrefsProvider` (AppShell calls `usePrefs`).
-- Sidebar "Recent" links navigate to `/?v=<variant>`; `app/page.tsx` reads `?v=` on mount and auto-runs.
+- Pages that use `AppShell` must be wrapped in `PrefsProvider` (AppShell calls `usePrefs`). The landing (`app/page.tsx`) does not use `AppShell`; it is its own full-page layout.
+- `/` is the landing page; the working app is `/interpret`. The landing search, the sidebar "Recent" links, and the batch/eval variant links all navigate to `/interpret?v=<variant>`; `app/interpret/page.tsx` reads `?v=` on mount and auto-runs. If you add a new deep-link into a report, point it at `/interpret?v=`, not `/?v=`.
 
 ## Git workflow
 

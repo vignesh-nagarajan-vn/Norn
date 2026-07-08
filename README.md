@@ -8,10 +8,17 @@ Vignesh Nagarajan was selected as 1 of 500 builders (about half of them PhDs, po
 - **Hackathon:** [Built with Claude: Life Sciences](https://cerebralvalley.ai/e/built-with-claude-life-sciences)
 
 <p align="center">
-  <img src="docs/ui-home.png" width="49%" alt="Norn home: automated variant curation" />
+  <img src="docs/ui-landing.png" width="49%" alt="Norn landing page: read the evidence, draft the verdict" />
   &nbsp;
-  <img src="docs/ui-dashboard.png" width="49%" alt="Norn interpretation dashboard" />
+  <img src="docs/ui-dashboard.png" width="49%" alt="Norn interpretation dashboard with ACMG point aggregation and criteria" />
 </p>
+<p align="center">
+  <img src="docs/ui-batch.png" width="49%" alt="Norn batch worklist with classifications and points" />
+  &nbsp;
+  <img src="docs/ui-docs.png" width="49%" alt="Norn in-app documentation" />
+</p>
+
+<p align="center"><sub>The screenshots from the earlier iteration are kept in <a href="docs/archive/">docs/archive/</a>.</sub></p>
 
 ## Tech stack
 
@@ -22,7 +29,7 @@ Vignesh Nagarajan was selected as 1 of 500 builders (about half of them PhDs, po
   <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white">
   <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white">
   <img src="https://img.shields.io/badge/jsPDF-EC1C24?style=for-the-badge">
-  <img src="https://img.shields.io/badge/Google_Stitch-4285F4?style=for-the-badge&logo=google&logoColor=white">
+  <img src="https://img.shields.io/badge/Fraunces-1F1F1F?style=for-the-badge">
 </p>
 
 <p align="center"><b>Backend</b></p>
@@ -150,6 +157,7 @@ BA1 (allele frequency above 5%) is a stand-alone override to Benign regardless o
 
 Every interpretation is interactive, not a static report:
 
+- **Landing and Dashboard.** A dynamic landing page (`/`) explains what Norn does, frames the pipeline as the three Norse fates (gather, weigh, decree), and links straight into the Dashboard (`/interpret`), the working surface where every feature below lives.
 - **Live pipeline view.** Each stage (recode, VEP, gnomAD, ClinVar, adjudicate, review) lights up as it completes, streamed over newline-delimited JSON.
 - **ACMG scorecard and points meter.** A row per criterion with its strength, verdict, evidence, and source, plus a meter showing where the total lands on the Pathogenic-to-Benign scale.
 - **Curator-supplied evidence.** Toggle the criteria that need functional, segregation, de novo, or phase evidence; the classification and points recompute live.
@@ -250,9 +258,14 @@ The heavy route (`/api/interpret`) sets `maxDuration = 60` and streams progress 
 
 ```
 app/                 Next.js App Router pages and API routes
+  page.tsx           landing page (what Norn does, links into the Dashboard)
+  interpret/         the Dashboard: single-variant pipeline and report
+  batch/             batch worklist
+  eval/              eval runner page
+  docs/              in-app documentation
+  icon.svg           the Norn mark (favicon)
   api/interpret/     streaming pipeline route (NDJSON)
   api/eval/          serves the static eval dataset
-  eval/              eval runner page
 components/           UI: pipeline view, scorecard, points meter, lollipop, curator panel
 lib/                  engine and clients
   acmg.ts            criteria specs, points, classification thresholds
@@ -294,6 +307,12 @@ Still ahead:
 - **Calibrated predictors.** Replace SIFT and PolyPhen concordance for PP3 and BP4 with calibrated meta-predictors (REVEL, AlphaMissense, BayesDel) at published thresholds.
 - **Audit trail.** A server-side store of interpretations and sign-off history so a lab can track who reviewed what and when.
 - **Confidence calibration.** Score Norn against a larger labeled set and report calibrated confidence per classification.
+
+Presentation and craft (how Norn is built and shown, not the product itself):
+
+- **A complete identity kit.** Grow the "loom of fate" system past the app chrome: a full favicon and app-icon set (seeded in `app/icon.svg`), an Open Graph social-preview card so shared links unfurl with the Norn mark, and a small set of hand-drawn thread and rune illustrations, so the identity carries into link previews and slides, not only the pages.
+- **A guided demo mode.** A first-run tour that auto-plays one interpretation and annotates each fate step (gather, weigh, decree), so a judge or new visitor understands the pipeline in about thirty seconds without typing a variant.
+- **A living style guide with visual-regression snapshots.** A `/style` page documenting the design tokens, the loom motif, and the criterion and verdict components, backed by the Playwright screenshot pass in CI so a future redesign cannot silently regress the four views in this README.
 
 ## References
 

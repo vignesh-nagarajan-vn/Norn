@@ -1,7 +1,8 @@
 "use client";
 
-import type { StageName } from "@/lib/types";
 import { STAGES, type StageState } from "./useInterpret";
+import { NornMark } from "./ui";
+import type { StageName } from "@/lib/types";
 
 function dotColor(status: StageState["status"]): string {
   switch (status) {
@@ -28,7 +29,7 @@ function StageNode({ state }: { state: StageState & { label: string; sub: string
         className={`flex h-9 w-9 items-center justify-center rounded-full border-2 ${running ? "animate-norn-pulse" : ""}`}
         style={{
           borderColor: color,
-          background: done || running ? `color-mix(in srgb, ${color} 14%, white)` : "var(--surface)",
+          background: done || running ? `color-mix(in srgb, ${color} 16%, var(--surface-bright))` : "var(--surface)",
         }}
       >
         {done ? (
@@ -55,7 +56,9 @@ export default function PipelineView({
   return (
     <div className="card p-5">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-on-surface">Evidence pipeline</h2>
+        <h2 className="flex items-center gap-2 text-sm font-semibold text-on-surface">
+          <NornMark size={16} className="text-secondary" strokeWidth={2.4} /> Weaving the thread
+        </h2>
         <span className="label-caps">6 stages</span>
       </div>
       <div className="flex items-start gap-2">
@@ -63,7 +66,7 @@ export default function PipelineView({
           <div key={s.key} className="flex flex-1 items-start">
             <StageNode state={{ ...stages[s.key], label: s.label, sub: s.sub }} />
             {i < STAGES.length - 1 && (
-              <div className="mt-4 h-0.5 w-full flex-1 self-start" style={{ background: "var(--outline-variant)" }} />
+              <div className="mt-4 h-0.5 w-full flex-1 self-start" style={{ background: "color-mix(in srgb, var(--secondary) 35%, var(--outline-variant))" }} />
             )}
           </div>
         ))}

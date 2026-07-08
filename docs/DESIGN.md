@@ -2,6 +2,16 @@
 
 This records the decisions behind Norn that are not obvious from the code.
 
+## Visual identity: the loom of fate
+
+Norn is named for the Norse fates who read evidence and decree destiny. The UI leans into that without becoming fantasy: a warm vellum canvas with deep ink text, the Fraunces serif for display headings, JetBrains Mono for variant and data strings, and a single bronze "thread of fate" accent for interactive chrome. The mark is three interlocked rings, the three fates bound together (`components/ui.tsx` `NornMark`, and `app/icon.svg` as the favicon). Tokens are defined once in `app/globals.css` as a hex form and a channel (`-rgb`) form so Tailwind opacity modifiers work.
+
+The classification colors are deliberately left untouched from the engine's contract (pathogenic teal, VUS amber, benign indigo, switchable to the clinical convention in Settings), so retuning the chrome never reached into `lib/acmg.ts`, the PDF export, or the eval. The pipeline is drawn as beads on a thread and the points meter as a scale, but the math behind both is unchanged. The previous "Scientific Precision" UI (a flat Google Stitch mockup) is archived in `docs/archive/`.
+
+## Landing separate from the Dashboard
+
+`/` is a landing page that explains what Norn does and frames the pipeline as the three fates (Urðr, gather; Verðandi, weigh; Skuld, decree). The working app lives at `/interpret`, reached by the landing's "Open the Dashboard" button and by its variant search, which deep-links to `/interpret?v=...`. The sidebar Recent links and the batch and eval variant links point at `/interpret?v=...` as well. Splitting the two lets the landing sell the idea while the Dashboard stays a focused workspace.
+
 ## Named user first
 
 Norn is scoped to one person: a molecular geneticist or genetic counselor doing variant curation. Every screen answers a question that person actually asks (what is the consequence, how rare is it, what do neighbors look like, what does the evidence add up to, what should I check). Features that did not serve that user were left out.

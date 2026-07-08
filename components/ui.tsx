@@ -22,6 +22,33 @@ export function Icon({
   );
 }
 
+/*
+  The Norn mark: three interlocked rings, the three fates bound together,
+  reused as the wordmark glyph, in the sidebar, and on the copilot summary.
+  Inherits `currentColor` unless a stroke is passed.
+*/
+export function NornMark({
+  size = 28,
+  className = "",
+  stroke = "currentColor",
+  strokeWidth = 1.8,
+}: {
+  size?: number;
+  className?: string;
+  stroke?: string;
+  strokeWidth?: number;
+}) {
+  return (
+    <svg viewBox="0 0 32 32" width={size} height={size} fill="none" aria-hidden className={className}>
+      <g stroke={stroke} strokeWidth={strokeWidth}>
+        <circle cx="16" cy="11.4" r="6.6" />
+        <circle cx="10.8" cy="20.2" r="6.6" />
+        <circle cx="21.2" cy="20.2" r="6.6" />
+      </g>
+    </svg>
+  );
+}
+
 export function classColorVar(c: Classification): string {
   switch (c) {
     case "Pathogenic":
@@ -71,9 +98,9 @@ export function StatusBadge({ classification }: { classification: Classification
     <span
       className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold"
       style={{
-        background: `color-mix(in srgb, ${color} 12%, white)`,
+        background: `color-mix(in srgb, ${color} 14%, var(--surface-bright))`,
         color,
-        border: `1px solid color-mix(in srgb, ${color} 28%, white)`,
+        border: `1px solid color-mix(in srgb, ${color} 32%, var(--surface-bright))`,
       }}
     >
       <Icon name={classIcon(classification)} size={16} fill />
@@ -93,11 +120,11 @@ export function VerdictChip({
     const color = direction === "pathogenic" ? "var(--pathogenic)" : "var(--benign)";
     return (
       <span
-        className="inline-flex items-center rounded px-2 py-0.5 text-xs font-bold"
+        className="inline-flex items-center rounded px-2 py-0.5 text-xs font-bold tracking-wide"
         style={{
-          background: `color-mix(in srgb, ${color} 12%, white)`,
+          background: `color-mix(in srgb, ${color} 14%, var(--surface-bright))`,
           color,
-          border: `1px solid color-mix(in srgb, ${color} 25%, white)`,
+          border: `1px solid color-mix(in srgb, ${color} 28%, var(--surface-bright))`,
         }}
       >
         MET
@@ -106,18 +133,18 @@ export function VerdictChip({
   }
   if (verdict === "not_met") {
     return (
-      <span className="inline-flex items-center rounded border border-outline-variant bg-surface-variant px-2 py-0.5 text-xs font-bold text-on-surface-variant">
+      <span className="inline-flex items-center rounded border border-outline-variant bg-surface-variant px-2 py-0.5 text-xs font-bold tracking-wide text-on-surface-variant">
         NOT MET
       </span>
     );
   }
   return (
     <span
-      className="inline-flex items-center rounded px-2 py-0.5 text-xs font-bold"
+      className="inline-flex items-center rounded px-2 py-0.5 text-xs font-bold tracking-wide"
       style={{
-        background: "color-mix(in srgb, var(--vus) 12%, white)",
+        background: "color-mix(in srgb, var(--vus) 14%, var(--surface-bright))",
         color: "var(--vus)",
-        border: "1px solid color-mix(in srgb, var(--vus) 25%, white)",
+        border: "1px solid color-mix(in srgb, var(--vus) 28%, var(--surface-bright))",
       }}
     >
       UNKNOWN

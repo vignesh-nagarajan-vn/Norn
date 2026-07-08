@@ -19,7 +19,7 @@ function Block({ children }: { children: string }) {
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
     <section id={id} className="scroll-mt-20 border-t border-outline-variant pt-6">
-      <h2 className="mb-3 text-lg font-semibold text-on-surface">{title}</h2>
+      <h2 className="display mb-3 text-xl font-semibold text-on-surface">{title}</h2>
       <div className="space-y-3 text-[15px] leading-relaxed text-on-surface-variant">{children}</div>
     </section>
   );
@@ -45,7 +45,7 @@ function DocsInner() {
     <div className="mx-auto max-w-4xl px-6 pb-20 pt-8">
       <div className="flex items-center gap-2">
         <Icon name="menu_book" className="text-secondary" />
-        <h1 className="text-2xl font-bold tracking-tight text-on-surface">Documentation</h1>
+        <h1 className="display text-3xl font-semibold tracking-tight text-on-surface">Documentation</h1>
       </div>
       <p className="mt-2 max-w-3xl text-[15px] leading-relaxed text-on-surface-variant">
         How to use Norn: interpreting variants, adding your own evidence, running batches, exporting, and connecting

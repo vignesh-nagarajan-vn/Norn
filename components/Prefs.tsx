@@ -116,8 +116,8 @@ function SettingsModal({
   const options: { key: ColorScheme; label: string; desc: string; colors: string[] }[] = [
     {
       key: "mockup",
-      label: "Design system",
-      desc: "Pathogenic teal, VUS amber, benign indigo (matches the Norn mockup).",
+      label: "Loom palette",
+      desc: "Pathogenic teal, VUS amber, benign indigo (the Norn default).",
       colors: ["#10b981", "#f59e0b", "#6366f1"],
     },
     {
