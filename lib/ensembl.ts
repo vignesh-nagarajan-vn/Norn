@@ -113,15 +113,21 @@ export async function recode(raw: string): Promise<RecodeResult> {
   return empty;
 }
 
+// Request MANE and canonical flags plus HGVS notation. Without mane/canonical,
+// VEP does not mark the clinical transcript, and the picker can fall back to a
+// non-canonical transcript with the wrong protein position (which then queries
+// ClinVar for the wrong residue in PS1/PM5).
+const VEP_PARAMS = "content-type=application/json&mane=1&canonical=1&hgvs=1";
+
 export async function vepByHgvs(hgvs: string): Promise<unknown[]> {
-  const url = `${BASE}/vep/human/hgvs/${encodeURIComponent(hgvs)}?content-type=application/json`;
+  const url = `${BASE}/vep/human/hgvs/${encodeURIComponent(hgvs)}?${VEP_PARAMS}`;
   return cached(`vep-hgvs:${hgvs}`, TTL, () =>
     fetchJson<unknown[]>(url, { source: "Ensembl VEP", timeoutMs: 10000, retries: 1 }),
   );
 }
 
 export async function vepById(rsid: string): Promise<unknown[]> {
-  const url = `${BASE}/vep/human/id/${encodeURIComponent(rsid)}?content-type=application/json`;
+  const url = `${BASE}/vep/human/id/${encodeURIComponent(rsid)}?${VEP_PARAMS}`;
   return cached(`vep-id:${rsid}`, TTL, () =>
     fetchJson<unknown[]>(url, { source: "Ensembl VEP", timeoutMs: 10000, retries: 1 }),
   );

@@ -140,7 +140,7 @@ export async function runPipeline(
   const normalized: NormalizedInput = {
     raw: rawInput,
     kind,
-    rsid: recoded?.rsid ?? fixture?.normalized.rsid ?? null,
+    rsid: recoded?.rsid ?? (kind === "rsid" ? rawInput.trim() : null) ?? fixture?.normalized.rsid ?? null,
     hgvsg: recoded?.hgvsg ?? fixture?.normalized.hgvsg ?? null,
     hgvscList: recoded?.hgvscList?.length ? recoded.hgvscList : fixture?.normalized.hgvscList ?? [],
     hgvsp: recoded?.hgvsp ?? consequence.hgvsp ?? fixture?.normalized.hgvsp ?? null,
@@ -201,6 +201,7 @@ export async function runPipeline(
   const pos = consequence.proteinPosition ?? null;
   const refAa = consequence.refAa ?? null;
   const altAa = consequence.altAa ?? null;
+  const queryCdna = consequence.hgvsc?.match(/c\.[A-Za-z0-9_>+.-]+/)?.[0] ?? null;
 
   const clinvarP: Promise<ClinVarEvidence> = (async () => {
     if (annotationFromFixture && fixture) {
@@ -210,7 +211,7 @@ export async function runPipeline(
     }
     const canNeighbors = Boolean(gene && pos != null && refAa);
     const [neighbors, geneVars] = await Promise.allSettled([
-      canNeighbors ? clinvarNeighbors(gene!, refAa!, pos!, altAa) : Promise.resolve(null),
+      canNeighbors ? clinvarNeighbors(gene!, refAa!, pos!, altAa, queryCdna) : Promise.resolve(null),
       gene ? clinvarGeneVariants(gene) : Promise.resolve([]),
     ]);
 
@@ -260,6 +261,21 @@ export async function runPipeline(
     sourceStatus,
     fixtureUsed,
   };
+
+  // If nothing resolved (no annotation, not in gnomAD, no fixture), the input
+  // did not identify a real variant. Fail with a clear message instead of
+  // returning an empty "Uncertain Significance" report.
+  if (
+    !consequence.geneSymbol &&
+    !fixtureUsed &&
+    !frequency.found &&
+    sourceStatus.vep !== "ok" &&
+    sourceStatus.gnomad !== "ok"
+  ) {
+    throw new Error(
+      `Could not resolve "${rawInput}". Enter HGVS (BRCA1:c.5266dupC), an rsID (rs80357906), or a locus (17-43057062-A-AG).`,
+    );
+  }
 
   // Stage 5: adjudicate (Claude or deterministic fallback).
   stage("adjudicate", "start");

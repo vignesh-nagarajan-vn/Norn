@@ -130,11 +130,19 @@ function parseProteinChange(
   return null;
 }
 
+// The cDNA change from a ClinVar title, e.g. "NM_007294.4(BRCA1):c.5096G>A ...".
+function parseCdna(title: string | undefined): string | null {
+  if (!title) return null;
+  const m = title.match(/:(c\.[A-Za-z0-9_>+.-]+)/);
+  return m ? m[1] : null;
+}
+
 export async function clinvarNeighbors(
   gene: string,
   refAa: string,
   pos: number,
   altAa: string | null,
+  queryCdna: string | null,
 ): Promise<Pick<ClinVarEvidence, "sameAaChange" | "sameResidueDifferentAa" | "residuePosition">> {
   const three = AA1_TO_3[refAa] ?? refAa;
   const term = `${gene}[gene] AND (${three}${pos} OR ${refAa}${pos})`;
@@ -142,11 +150,15 @@ export async function clinvarNeighbors(
   const records = await esummary(ids);
 
   const atResidue = records.filter((r) => r.proteinPosition === pos);
+  // Exclude the query variant's own record so PS1 does not match the variant
+  // against itself (anti-circularity). PS1 requires a different nucleotide
+  // change that yields the same amino acid change.
+  const isSelf = (r: ClinVarNeighbor) => Boolean(queryCdna) && parseCdna(r.title) === queryCdna;
   const sameAaChange = atResidue.filter(
-    (r) => altAa && r.altAa === altAa && isPathogenic(r.classification),
+    (r) => altAa && r.altAa === altAa && isPathogenic(r.classification) && !isSelf(r),
   );
   const sameResidueDifferentAa = atResidue.filter(
-    (r) => (!altAa || r.altAa !== altAa) && isPathogenic(r.classification),
+    (r) => (!altAa || r.altAa !== altAa) && isPathogenic(r.classification) && !isSelf(r),
   );
   return { residuePosition: pos, sameAaChange, sameResidueDifferentAa };
 }

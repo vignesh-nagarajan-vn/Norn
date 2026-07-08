@@ -68,6 +68,11 @@ function PointAggregation({ report }: { report: NornReport }) {
             style={{ left: `${f * 100}%` }}
           />
         ))}
+        {/* Position marker, always visible even when the fill is near zero. */}
+        <div
+          className="absolute top-0 z-20 h-full w-[3px] rounded-sm transition-all duration-500"
+          style={{ left: `calc(${Math.min(99.5, Math.max(0.5, fillPct))}% - 1.5px)`, background: color }}
+        />
       </div>
 
       <div className="mt-2 flex justify-between">
