@@ -3,9 +3,57 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import GuidedDemo from "@/components/GuidedDemo";
 import { PrefsProvider, ThemeToggle } from "@/components/Prefs";
 import { Icon, NornMark, StatusBadge } from "@/components/ui";
+
+/* A full-screen player for the demo video. Opened from the "Watch" buttons and ?demo=1. */
+function VideoLightbox({ onClose }: { onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[60] flex flex-col items-center justify-center p-4 sm:p-8"
+      style={{ background: "rgba(18, 14, 9, 0.92)" }}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Norn demo video"
+      onClick={onClose}
+    >
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Close"
+        className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/20 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+      >
+        <Icon name="close" size={22} />
+      </button>
+      <div className="w-full max-w-6xl" onClick={(e) => e.stopPropagation()}>
+        <video
+          className="max-h-[78vh] w-full rounded-lg border border-white/15 bg-black shadow-2xl"
+          src="/norn-demo.webm"
+          poster="/norn-demo-poster.png"
+          autoPlay
+          muted
+          loop
+          controls
+          playsInline
+        />
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+          <span className="text-sm text-white/70">A screen recording of one real interpretation, end to end.</span>
+          <Link href="/interpret" onClick={onClose} className="btn-primary bg-white text-[#17130e] hover:bg-white/90">
+            Open the Dashboard <Icon name="arrow_forward" size={18} />
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /* A woven backdrop: threads drawn left to right, drifting slowly. */
 function LoomBackdrop() {
@@ -166,35 +214,11 @@ export default function LandingPage() {
 function Landing() {
   const router = useRouter();
   const [q, setQ] = useState("");
-  const [demoOpen, setDemoOpen] = useState(false);
+  const [videoOpen, setVideoOpen] = useState(false);
 
-  // Open the guided tour on ?demo=1, or once on a first visit (unless the
-  // visitor prefers reduced motion).
+  // Deep link straight into the demo video with ?demo=1.
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("demo") === "1") {
-      setDemoOpen(true);
-      return;
-    }
-    let reduced = false;
-    let seen = false;
-    try {
-      reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      seen = Boolean(localStorage.getItem("norn-tour-seen"));
-    } catch {
-      /* ignore */
-    }
-    if (!reduced && !seen) {
-      const id = setTimeout(() => {
-        setDemoOpen(true);
-        try {
-          localStorage.setItem("norn-tour-seen", "1");
-        } catch {
-          /* ignore */
-        }
-      }, 1100);
-      return () => clearTimeout(id);
-    }
+    if (new URLSearchParams(window.location.search).get("demo") === "1") setVideoOpen(true);
   }, []);
 
   const go = (variant: string) => {
@@ -256,7 +280,7 @@ function Landing() {
               <Link href="/interpret" className="btn-primary px-5 py-2.5 text-[15px]">
                 Open the Dashboard <Icon name="arrow_forward" size={18} />
               </Link>
-              <button type="button" onClick={() => setDemoOpen(true)} className="btn-outline px-5 py-2.5 text-[15px]">
+              <button type="button" onClick={() => setVideoOpen(true)} className="btn-outline px-5 py-2.5 text-[15px]">
                 <Icon name="play_circle" size={18} /> Watch the 30-second demo
               </button>
               <Link href="/docs" className="px-2 py-2.5 text-[15px] font-semibold text-on-surface-variant underline-offset-4 hover:text-on-surface hover:underline">
@@ -343,7 +367,12 @@ function Landing() {
         <div className="mx-auto max-w-6xl px-6 py-20">
           <div className="mb-3 eyebrow">See it in motion</div>
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1.5fr_1fr] lg:items-center">
-            <div className="overflow-hidden rounded-lg border border-outline-variant bg-surface-bright shadow-thread">
+            <button
+              type="button"
+              onClick={() => setVideoOpen(true)}
+              aria-label="Play the demo full screen"
+              className="group relative block w-full overflow-hidden rounded-lg border border-outline-variant bg-surface-bright text-left shadow-thread"
+            >
               <video
                 className="w-full"
                 autoPlay
@@ -351,22 +380,27 @@ function Landing() {
                 loop
                 playsInline
                 poster="/norn-demo-poster.png"
-                aria-label="Norn interpreting one variant end to end"
+                aria-hidden
               >
                 <source src="/norn-demo.webm" type="video/webm" />
               </video>
-            </div>
+              <span className="absolute inset-0 flex items-center justify-center bg-ink/0 transition-colors group-hover:bg-ink/10">
+                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/90 text-on-primary opacity-90 shadow-lift transition-transform group-hover:scale-110">
+                  <Icon name="play_arrow" size={30} fill />
+                </span>
+              </span>
+            </button>
             <div>
               <h2 className="display text-3xl font-semibold tracking-tight md:text-4xl">
                 Thirty seconds, one variant.
               </h2>
               <p className="mt-4 text-[15px] leading-relaxed text-on-surface-variant">
                 Norn gathers the evidence, weighs each ACMG criterion with Claude, and lets the engine decree the
-                classification. Watch the full annotated tour, or open the Dashboard and run your own.
+                classification. Play the recording full screen, or open the Dashboard and run your own.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
-                <button type="button" onClick={() => setDemoOpen(true)} className="btn-primary px-5 py-2.5 text-[15px]">
-                  <Icon name="play_circle" size={18} /> Watch the guided tour
+                <button type="button" onClick={() => setVideoOpen(true)} className="btn-primary px-5 py-2.5 text-[15px]">
+                  <Icon name="fullscreen" size={18} /> Play full screen
                 </button>
                 <Link href="/interpret" className="btn-outline px-5 py-2.5 text-[15px]">
                   Open the Dashboard
@@ -504,7 +538,7 @@ function Landing() {
         </div>
       </footer>
 
-      {demoOpen && <GuidedDemo onClose={() => setDemoOpen(false)} />}
+      {videoOpen && <VideoLightbox onClose={() => setVideoOpen(false)} />}
     </div>
   );
 }

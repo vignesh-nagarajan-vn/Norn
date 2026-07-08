@@ -30,8 +30,11 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f2ede2",
+  themeColor: "#17130e",
 };
+
+// Applied before first paint so the theme (dark by default) does not flash.
+const themeInit = `(function(){try{var p=JSON.parse(localStorage.getItem('norn-prefs')||'{}');var t=(p.theme==='light'||p.theme==='dark')?p.theme:'dark';var s=['clinical','cvd','contrast'].indexOf(p.colorScheme)>-1?p.colorScheme:'clinical';var d=document.documentElement;d.dataset.theme=t;d.dataset.scheme=s;}catch(e){document.documentElement.dataset.theme='dark';}})();`;
 
 export default function RootLayout({
   children,
@@ -41,6 +44,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInit }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

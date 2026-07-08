@@ -51,7 +51,7 @@ A woven "thread of fate": the pipeline is beads on a thread, the points meter is
 
 ## Dark mode
 
-A dark theme reverses the chrome (a warm near-black canvas, light text, a lighter bronze mark), toggled from the top bar or Settings. It changes chrome only; classification colors and the engine are unchanged. Tokens are in [`../app/globals.css`](../app/globals.css) under `:root[data-theme="dark"]`.
+Dark is the default. It reverses the chrome (a warm near-black canvas, light text, a lighter bronze mark); a light theme is one toggle away, from the top bar or Settings. The theme changes chrome only; classification colors and the engine are unchanged. Tokens are in [`../app/globals.css`](../app/globals.css) under `:root[data-theme="dark"]`.
 
 ## Print and slides
 

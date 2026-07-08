@@ -32,7 +32,10 @@ const STORAGE_KEY = "norn-prefs";
 export function PrefsProvider({ children }: { children: React.ReactNode }) {
   const [colorScheme, setColorScheme] = useState<ColorScheme>("clinical");
   const [showReasoning, setShowReasoning] = useState(true);
-  const [theme, setTheme] = useState<Theme>("light");
+  // Dark is the default; a pre-paint script in app/layout.tsx sets data-theme
+  // from localStorage so there is no flash, and the effects below only take over
+  // after the saved prefs are read (guarded by `loaded`).
+  const [theme, setTheme] = useState<Theme>("dark");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
@@ -53,12 +56,14 @@ export function PrefsProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (!loaded) return;
     document.documentElement.dataset.scheme = colorScheme;
-  }, [colorScheme]);
+  }, [colorScheme, loaded]);
 
   useEffect(() => {
+    if (!loaded) return;
     document.documentElement.dataset.theme = theme;
-  }, [theme]);
+  }, [theme, loaded]);
 
   useEffect(() => {
     if (!loaded) return;
