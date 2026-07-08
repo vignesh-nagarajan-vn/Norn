@@ -42,6 +42,7 @@ export interface CriterionResult extends CriterionSpec {
   appliedPoints: number; // points actually contributed to the total
   provisional?: boolean; // caveat, e.g. PVS1 disease-mechanism not verified
   signalDisagreement?: boolean; // model verdict conflicts with a hard signal
+  manual?: boolean; // curator-supplied criterion, not adjudicated by Norn
 }
 
 export interface NormalizedInput {
@@ -125,12 +126,40 @@ export interface ClinVarEvidence {
 export interface DeterministicSignals {
   pvs1: { lof: boolean; consequence?: string | null };
   ps1: { present: boolean };
+  pm1: { hotspot: boolean; pathogenicNearby: number; benignNearby: number; window: number };
   pm2: { rare: boolean; threshold: number; observedAf: number | null };
   pm5: { present: boolean };
   pp3: { damaging: boolean };
   ba1: { common: boolean; threshold: number; observedAf: number | null };
   bs1: { elevated: boolean; threshold: number; observedAf: number | null };
   bp4: { tolerant: boolean };
+  bp7: { synonymous: boolean };
+}
+
+// gnomAD gene-level constraint, used to inform PVS1 (loss-of-function mechanism).
+export interface GeneConstraint {
+  available: boolean;
+  pli: number | null; // probability of loss-of-function intolerance
+  loeuf: number | null; // observed/expected LOF upper bound (lower = more intolerant)
+  misZ: number | null;
+  lofIntolerant: boolean; // pLI >= 0.9 or LOEUF < 0.35
+  note: string;
+}
+
+export interface GeneThresholdInfo {
+  gene: string;
+  source: string; // e.g. "ClinGen VCEP" or "default"
+  ba1Af: number;
+  bs1Af: number;
+  pm2Af: number;
+}
+
+export interface LiteratureHit {
+  pmid: string;
+  title: string;
+  year: string;
+  journal: string;
+  url: string;
 }
 
 export interface EvidenceBundle {
@@ -140,6 +169,8 @@ export interface EvidenceBundle {
   frequency: FrequencyEvidence;
   computational: ComputationalEvidence;
   clinvar: ClinVarEvidence;
+  constraint: GeneConstraint;
+  thresholds: GeneThresholdInfo;
   signals: DeterministicSignals;
   sourceStatus: Record<string, SourceState>;
   fixtureUsed: boolean;

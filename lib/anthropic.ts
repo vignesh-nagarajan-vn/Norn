@@ -11,7 +11,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
-import { CRITERIA, THRESHOLDS } from "./acmg";
+import { CRITERIA } from "./acmg";
 import type {
   AdjudicatedCriterion,
   ClassificationResult,
@@ -103,9 +103,16 @@ function summarize(bundle: EvidenceBundle) {
       queried: cv.queried,
       sameAminoAcidChangePathogenic: cv.sameAaChange.map((x) => `${x.accession}: ${x.title} (${x.classification})`),
       differentChangeSameResiduePathogenic: cv.sameResidueDifferentAa.map((x) => `${x.accession}: ${x.title} (${x.classification})`),
+      geneVariantCount: cv.geneVariants.length,
+    },
+    geneConstraint: {
+      available: bundle.constraint.available,
+      pli: bundle.constraint.pli,
+      loeuf: bundle.constraint.loeuf,
+      lofIntolerant: bundle.constraint.lofIntolerant,
     },
     computedSignals: s,
-    thresholds: THRESHOLDS,
+    thresholds: bundle.thresholds,
   };
 }
 

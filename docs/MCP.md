@@ -13,7 +13,8 @@ The server is at [`mcp/server.ts`](../mcp/server.ts) and speaks stdio.
 | --- | --- | --- |
 | `interpret_variant` | `variant` (HGVS, rsID, or locus), optional `format` (`json` or `text`) | The full interpretation report, or a compact text summary. |
 | `list_eval_variants` | none | The 20-variant benchmark set with expected ClinVar labels and accessions. |
-| `list_acmg_criteria` | none | The eight criteria Norn implements, their ClinGen points, and the documented thresholds. |
+| `list_acmg_criteria` | none | The automated and curator-supplied criteria, their ClinGen points, and the documented thresholds. |
+| `to_clinvar_submission` | `variant` | A draft ClinVar germline submission row (JSON fields). A starting point, not a validated submission. |
 
 `interpret_variant` runs the same pipeline as the web app, so it uses the two
 Claude passes when `ANTHROPIC_API_KEY` is set and the labeled deterministic

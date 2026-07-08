@@ -60,6 +60,16 @@ export function heuristicAdjudicate(bundle: EvidenceBundle): AdjudicatedCriterio
           : "ClinVar could not be queried for this position.",
     ),
     mk(
+      "PM1",
+      s.pm1.hotspot ? "met" : cv.geneVariants.length > 0 ? "not_met" : "unknown",
+      "ClinVar",
+      s.pm1.hotspot
+        ? `${s.pm1.pathogenicNearby} pathogenic variants within ${s.pm1.window} residues and no benign variation.`
+        : cv.geneVariants.length > 0
+          ? `Not a pathogenic cluster (${s.pm1.pathogenicNearby} pathogenic, ${s.pm1.benignNearby} benign nearby).`
+          : "Gene-wide ClinVar variants were unavailable to assess clustering.",
+    ),
+    mk(
       "PM2",
       freqVerdict(s.pm2.rare),
       "gnomAD v4",
@@ -108,6 +118,14 @@ export function heuristicAdjudicate(bundle: EvidenceBundle): AdjudicatedCriterio
       compAvailable
         ? `SIFT ${comp.siftPrediction}, PolyPhen ${comp.polyphenPrediction}.`
         : "Computational predictions were unavailable.",
+    ),
+    mk(
+      "BP7",
+      bundle.consequence.mostSevereConsequence ? (s.bp7.synonymous ? "met" : "not_met") : "unknown",
+      "Ensembl VEP",
+      s.bp7.synonymous
+        ? "Synonymous variant with no predicted splice impact."
+        : `Consequence is ${bundle.consequence.mostSevereConsequence ?? "unknown"}, not a synonymous change.`,
     ),
   ];
 }

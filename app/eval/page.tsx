@@ -124,7 +124,7 @@ export default function EvalPage() {
 
   return (
     <PrefsProvider>
-    <AppShell topActive="eval" sidebarActive="metrics">
+    <AppShell active="eval">
       <div className="mx-auto max-w-6xl px-6 pb-16 pt-8">
         <h1 className="text-2xl font-bold tracking-tight text-on-surface">Evaluation</h1>
         <p className="mt-2 max-w-3xl text-[15px] leading-relaxed text-on-surface-variant">

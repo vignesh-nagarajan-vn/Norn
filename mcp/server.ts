@@ -10,9 +10,10 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { CRITERIA, THRESHOLDS } from "../lib/acmg";
+import { CRITERIA, MANUAL_CRITERIA, THRESHOLDS } from "../lib/acmg";
 import { reportToContext } from "../lib/ask";
 import { runPipeline } from "../lib/pipeline";
+import { toClinvarSubmission } from "../lib/submission";
 import evalDataset from "../data/eval-variants.json";
 
 const server = new McpServer({ name: "norn", version: "0.1.0" });
@@ -52,10 +53,25 @@ server.registerTool(
   {
     title: "List ACMG criteria",
     description:
-      "Return the eight ACMG/AMP criteria Norn implements, their ClinGen point values and strengths, and the documented frequency thresholds.",
+      "Return the ACMG/AMP criteria Norn implements automatically plus the curator-supplied criteria, their ClinGen point values and strengths, and the documented frequency thresholds.",
     inputSchema: {},
   },
-  async () => asText(JSON.stringify({ criteria: CRITERIA, thresholds: THRESHOLDS }, null, 2)),
+  async () =>
+    asText(JSON.stringify({ automated: CRITERIA, curatorSupplied: MANUAL_CRITERIA, thresholds: THRESHOLDS }, null, 2)),
+);
+
+server.registerTool(
+  "to_clinvar_submission",
+  {
+    title: "Draft a ClinVar submission",
+    description:
+      "Interpret a variant and return a draft ClinVar germline submission row (as JSON fields). A starting point for a curator, not a validated submission; requires human sign-off.",
+    inputSchema: { variant: z.string().describe("HGVS, rsID, or locus") },
+  },
+  async ({ variant }) => {
+    const report = await runPipeline(variant, {});
+    return asText(JSON.stringify(toClinvarSubmission(report), null, 2));
+  },
 );
 
 async function main() {

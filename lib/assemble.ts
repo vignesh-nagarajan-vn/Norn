@@ -3,7 +3,7 @@
 // the concrete evidence string, source link, points, and any signal/verdict
 // disagreement are built deterministically in code.
 
-import { appliedPointsFor, CRITERIA, THRESHOLDS } from "./acmg";
+import { appliedPointsFor, CRITERIA } from "./acmg";
 import { clinvarSearchUrl, clinvarVariantUrl } from "./clinvar";
 import { gnomadUrl } from "./gnomad";
 import type {
@@ -45,10 +45,13 @@ function buildFor(code: string, b: EvidenceBundle): Built {
     case "PVS1": {
       if (c.isLof) {
         const hgvs = [c.hgvsc, c.hgvsp].filter(Boolean).join(" ");
+        const constraintNote = b.constraint.available
+          ? ` gnomAD constraint: pLI ${b.constraint.pli?.toFixed(2) ?? "n/a"}, LOEUF ${b.constraint.loeuf?.toFixed(2) ?? "n/a"} (${b.constraint.lofIntolerant ? "LOF-intolerant" : "not flagged LOF-intolerant"}).`
+          : "";
         return {
-          evidence: `${c.lofType} in ${gene} ${hgvs}. Predicted null allele.`,
+          evidence: `${c.lofType} in ${gene} ${hgvs}. Predicted null allele.${constraintNote}`,
           sourceUrl: ensemblTranscriptUrl(c.transcriptId),
-          signalVerdict: null, // requires disease-mechanism check Norn cannot do
+          signalVerdict: null, // final PVS1 strength still needs human confirmation of mechanism
         };
       }
       return {
@@ -78,13 +81,26 @@ function buildFor(code: string, b: EvidenceBundle): Built {
         signalVerdict: "not_met",
       };
     }
+    case "PM1": {
+      const p = s.pm1;
+      if (b.clinvar.geneVariants.length === 0) {
+        return { evidence: "Gene-wide ClinVar variants unavailable to assess residue clustering.", signalVerdict: null };
+      }
+      return {
+        evidence: p.hotspot
+          ? `${p.pathogenicNearby} pathogenic ClinVar variants within ${p.window} residues of ${pos}, with no benign variation (hotspot).`
+          : `${p.pathogenicNearby} pathogenic and ${p.benignNearby} benign ClinVar variants within ${p.window} residues of ${pos}.`,
+        sourceUrl: pos != null ? clinvarSearchUrl(gene, pos) : undefined,
+        signalVerdict: p.hotspot ? "met" : "not_met",
+      };
+    }
     case "PM2": {
       if (!freqAvailable) {
         return { evidence: "gnomAD frequency unavailable.", sourceUrl: gnomad, signalVerdict: null };
       }
       const af = s.pm2.observedAf;
       return {
-        evidence: `gnomAD representative AF ${fmtAf(af)} versus PM2 rare threshold ${fmtAf(THRESHOLDS.pm2Af)}.`,
+        evidence: `gnomAD representative AF ${fmtAf(af)} versus PM2 threshold ${fmtAf(b.thresholds.pm2Af)} (${b.thresholds.source}).`,
         sourceUrl: gnomad,
         signalVerdict: s.pm2.rare ? "met" : "not_met",
       };
@@ -122,7 +138,7 @@ function buildFor(code: string, b: EvidenceBundle): Built {
         return { evidence: "gnomAD frequency unavailable.", sourceUrl: gnomad, signalVerdict: null };
       }
       return {
-        evidence: `gnomAD representative AF ${fmtAf(s.ba1.observedAf)} versus BA1 threshold 5%.`,
+        evidence: `gnomAD representative AF ${fmtAf(s.ba1.observedAf)} versus BA1 threshold ${fmtAf(b.thresholds.ba1Af)}.`,
         sourceUrl: gnomad,
         signalVerdict: s.ba1.common ? "met" : "not_met",
       };
@@ -132,7 +148,7 @@ function buildFor(code: string, b: EvidenceBundle): Built {
         return { evidence: "gnomAD frequency unavailable.", sourceUrl: gnomad, signalVerdict: null };
       }
       return {
-        evidence: `gnomAD representative AF ${fmtAf(s.bs1.observedAf)} versus BS1 threshold 1%.`,
+        evidence: `gnomAD representative AF ${fmtAf(s.bs1.observedAf)} versus BS1 threshold ${fmtAf(b.thresholds.bs1Af)} (${b.thresholds.source}).`,
         sourceUrl: gnomad,
         signalVerdict: s.bs1.elevated ? "met" : "not_met",
       };
@@ -145,6 +161,18 @@ function buildFor(code: string, b: EvidenceBundle): Built {
         evidence: `SIFT ${c.siftPrediction ?? "n/a"}, PolyPhen ${c.polyphenPrediction ?? "n/a"}.`,
         sourceUrl: ensemblTranscriptUrl(c.transcriptId),
         signalVerdict: s.bp4.tolerant ? "met" : b.computational.damagingConcordant ? "not_met" : null,
+      };
+    }
+    case "BP7": {
+      if (!c.mostSevereConsequence) {
+        return { evidence: "Molecular consequence unavailable.", signalVerdict: null };
+      }
+      return {
+        evidence: s.bp7.synonymous
+          ? "Synonymous variant with no predicted splice impact."
+          : `Consequence is ${c.mostSevereConsequence}, not a synonymous change.`,
+        sourceUrl: ensemblTranscriptUrl(c.transcriptId),
+        signalVerdict: s.bp7.synonymous ? "met" : "not_met",
       };
     }
     default:
@@ -174,7 +202,8 @@ export function assembleCriteria(
       source: spec.dataSource,
       sourceUrl: built.sourceUrl,
       appliedPoints: appliedPointsFor(spec, verdict),
-      provisional: spec.code === "PVS1" ? true : undefined,
+      // PVS1 is provisional unless the gene is loss-of-function intolerant.
+      provisional: spec.code === "PVS1" ? !bundle.constraint.lofIntolerant : undefined,
       signalDisagreement: disagreement || undefined,
     };
   });

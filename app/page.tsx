@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import AppShell from "@/components/AppShell";
 import Dashboard from "@/components/Dashboard";
 import Hero, { type Example } from "@/components/Hero";
@@ -17,9 +18,16 @@ const EXAMPLES: Example[] = [
 export default function Home() {
   const { status, stages, report, error, run, reset } = useInterpret();
 
+  // Auto-run a variant passed as ?v= (used by the sidebar Recent links).
+  useEffect(() => {
+    const v = new URLSearchParams(window.location.search).get("v");
+    if (v) run(v);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <PrefsProvider>
-      <AppShell topActive="search" sidebarActive="interpretation" onSearch={run} onNew={reset}>
+      <AppShell active="interpret" onSearch={run} onNew={reset}>
         {report ? (
           <Dashboard report={report} onNew={reset} />
         ) : (

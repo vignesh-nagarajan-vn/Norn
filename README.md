@@ -47,6 +47,7 @@ Vignesh Nagarajan was selected as 1 of 500 builders (about half of them PhDs, po
   <img src="https://img.shields.io/badge/gnomAD_v4-1f6feb?style=for-the-badge">
   <img src="https://img.shields.io/badge/GraphQL-E10098?style=for-the-badge&logo=graphql&logoColor=white">
   <img src="https://img.shields.io/badge/ClinVar-2a9d8f?style=for-the-badge">
+  <img src="https://img.shields.io/badge/PubMed-326599?style=for-the-badge">
   <img src="https://img.shields.io/badge/NCBI_E--utilities-20558a?style=for-the-badge">
 </p>
 
@@ -85,39 +86,44 @@ The home page includes one-click chips, each backed by a bundled fixture so the 
 
 | Input | Variant | Norn result |
 | --- | --- | --- |
-| `BRCA1:c.5266dupC` | frameshift (5382insC) | Likely Pathogenic (PVS1 + PM2, +9 points) |
+| `BRCA1:c.5266dupC` | frameshift (5382insC) | Likely Pathogenic (PVS1) |
 | `CFTR:c.1408A>G` | p.Met470Val, common | Benign (BA1 stand-alone override) |
-| `BRCA1:c.5096G>A` | p.Arg1699Gln, reduced penetrance | Uncertain Significance (PM2 + PM5 + PP3, +4 points) |
+| `BRCA1:c.5096G>A` | p.Arg1699Gln, reduced penetrance | Uncertain Significance |
 
-Norn is deliberately conservative. It implements eight criteria and applies PM2 at supporting strength, so a classic loss-of-function variant lands at Likely Pathogenic (+9) rather than Pathogenic (+10 or more). That is the correct behavior under current ClinGen guidance, and it is stated plainly rather than inflated.
+Norn is deliberately conservative. It applies PM2 at supporting strength and leaves evidence-dependent criteria to the curator, so a classic loss-of-function variant lands at Likely Pathogenic rather than Pathogenic on the automated evidence alone. That is the correct behavior under current ClinGen guidance, and it is stated plainly rather than inflated.
 
 ## The ACMG criteria Norn implements
 
-Norn implements eight high-yield criteria well rather than all 28 shallowly. Points follow the ClinGen Bayesian model (Tavtigian et al. 2018): Very Strong 8, Strong 4, Moderate 2, Supporting 1, benign criteria negative.
+Norn adjudicates ten criteria automatically and lets the curator supply the eight that depend on evidence it cannot fetch. Points follow the ClinGen Bayesian model (Tavtigian et al. 2018): Very Strong 8, Strong 4, Moderate 2, Supporting 1, benign criteria negative.
+
+**Automated (adjudicated by Norn):**
 
 | Code | Meaning | Strength (points) | Evidence source |
 | --- | --- | --- | --- |
-| PVS1 | Predicted loss of function (nonsense, frameshift, canonical splice) | Very Strong (+8), provisional | Ensembl VEP |
+| PVS1 | Predicted loss of function (nonsense, frameshift, canonical splice) | Very Strong (+8) | Ensembl VEP, gnomAD constraint |
 | PS1 | Same amino acid change as an established pathogenic variant | Strong (+4) | ClinVar |
+| PM1 | Mutational hotspot or functional domain (local pathogenic cluster) | Moderate (+2) | ClinVar |
 | PM2 | Absent or very rare in gnomAD | Moderate downgraded to Supporting (+1) | gnomAD v4 |
 | PM5 | Different pathogenic missense at the same residue | Moderate (+2) | ClinVar |
 | PP3 | Concordant computational evidence for damage | Supporting (+1) | VEP (SIFT, PolyPhen) |
 | BA1 | Allele frequency above 5% | Stand-alone benign override | gnomAD v4 |
 | BS1 | Frequency greater than expected for the disorder | Strong (-4) | gnomAD v4 |
 | BP4 | Concordant computational evidence for tolerance | Supporting (-1) | VEP (SIFT, PolyPhen) |
+| BP7 | Synonymous with no predicted splice impact | Supporting (-1) | Ensembl VEP |
+
+**Curator-supplied (toggled in the report, classification recomputes live):** PS2, PS3, PS4, PM3, PM6, PP1 (pathogenic) and BS3, BS4 (benign). These need functional, segregation, de novo, or allelic-phase evidence that Norn does not fetch, so a human applies them.
 
 Two caveats are surfaced in the report, not hidden:
 
-- **PVS1 is provisional.** It also requires that loss of function is a known disease mechanism for the gene. Norn does not verify that, so PVS1 is flagged and the reviewer checklist always asks a human to confirm it.
+- **PVS1 disease mechanism.** PVS1 also requires that loss of function is a known disease mechanism for the gene. Norn firms this with gnomAD gene constraint (pLI, LOEUF): a LOF-intolerant gene clears the provisional flag, otherwise PVS1 stays flagged for a human to confirm.
 - **PM2 is applied at supporting strength (+1)**, following current ClinGen SVI guidance, even though its nominal ACMG strength is Moderate.
 
 ### Documented thresholds
 
-These are demonstration defaults. Real curation uses gene- and disease-specific values from ClinGen Variant Curation Expert Panels.
+Norn uses gene-specific allele-frequency thresholds where a rule is available (a small table inspired by ClinGen Variant Curation Expert Panels, in `data/gene-thresholds.json`), and generic defaults otherwise. The report shows which source was used.
 
-- BA1: representative allele frequency above 0.05 (Richards et al. 2015).
-- BS1: representative allele frequency above 0.01 (generic placeholder, should be disease-calibrated).
-- PM2: representative allele frequency below 0.0001, or absent (generic dominant-disease default).
+- Generic defaults: BA1 above 0.05 (Richards et al. 2015), BS1 above 0.01, PM2 below 0.0001 or absent.
+- Gene-specific example: BRCA1/BRCA2 use much stricter thresholds (illustrative ENIGMA-style values), so a low-frequency founder allele does not clear PM2.
 - Computational concordance: PP3 when SIFT is deleterious and PolyPhen is probably damaging; BP4 when SIFT is tolerated and PolyPhen is benign. Modern practice uses calibrated meta-predictors; this two-tool concordance is a documented simplification.
 
 The representative allele frequency is the larger of the global and popmax frequencies, which approximates a filtering allele frequency for this demo.
@@ -146,11 +152,16 @@ Every interpretation is interactive, not a static report:
 
 - **Live pipeline view.** Each stage (recode, VEP, gnomAD, ClinVar, adjudicate, review) lights up as it completes, streamed over newline-delimited JSON.
 - **ACMG scorecard and points meter.** A row per criterion with its strength, verdict, evidence, and source, plus a meter showing where the total lands on the Pathogenic-to-Benign scale.
+- **Curator-supplied evidence.** Toggle the criteria that need functional, segregation, de novo, or phase evidence; the classification and points recompute live.
 - **Protein lollipop.** The query variant plotted against ClinVar variants at nearby residues, colored by classification.
 - **Ask the copilot.** A chat panel where the curator can question the interpretation. Claude answers using only that report as its knowledge base, so it explains the call without inventing new evidence or a different label.
-- **Export.** Download the interpretation as a formatted PDF or as JSON.
+- **Literature.** Search PubMed for the gene and protein change to surface functional and case evidence Norn does not read itself.
+- **Batch mode.** Paste a list or upload a plain list, CSV, or VCF and interpret many variants into a sortable worklist (`/batch`).
+- **Export.** Download a formatted PDF (with the points meter and lollipop drawn as vector graphics), the full JSON, or a draft ClinVar submission row.
+- **History.** Recent interpretations are kept in the browser and listed in the sidebar.
 - **Settings.** Switch between the design-system colors (pathogenic teal) and the clinical convention (pathogenic red), and toggle the per-criterion model reasoning. Preferences persist in the browser.
 - **Sign-off.** A curator can mark a draft as reviewed. Norn records the intent; it never signs off on its own.
+- **Docs.** An in-app documentation page (`/docs`) covers the workflow, exports, and the MCP server.
 
 ## The Claude reasoning layer
 
@@ -169,7 +180,7 @@ A variant's own ClinVar classification is never fed into adjudication. ClinVar i
 
 ## Model Context Protocol server
 
-Norn ships an MCP server ([`mcp/server.ts`](mcp/server.ts)) so other tools can import its data directly. It exposes `interpret_variant`, `list_eval_variants`, and `list_acmg_criteria` over stdio, using the same pipeline as the web app. Run it with `npm run mcp` and connect any MCP client (for example Claude Desktop). See [docs/MCP.md](docs/MCP.md) for the config.
+Norn ships an MCP server ([`mcp/server.ts`](mcp/server.ts)) so other tools can import its data directly. It exposes `interpret_variant`, `list_eval_variants`, `list_acmg_criteria`, and `to_clinvar_submission` over stdio, using the same pipeline as the web app. Run it with `npm run mcp` and connect any MCP client (for example Claude Desktop). See [docs/MCP.md](docs/MCP.md) for the config.
 
 ## Evaluation
 
@@ -268,16 +279,20 @@ docs/                architecture and scoring diagrams, design notes
 
 ## Roadmap
 
-Ideas to round Norn out into a fuller curation suite:
+Delivered in the current build:
 
-- **More ACMG criteria.** Add functional (PS3, BS3), segregation (PP1, BS4), de novo and in-trans (PS2, PM6, PM3), hotspot and domain (PM1), and synonymous (BP7) criteria so classifications rest on more than eight lines of evidence.
-- **Firm up PVS1.** Check the gene disease mechanism and loss-of-function intolerance (ClinGen gene curation, gnomAD constraint) so PVS1 no longer needs to be flagged provisional.
+- **More ACMG criteria.** Ten criteria are adjudicated automatically (adding PM1 hotspot clustering and BP7 synonymous), and PS2, PS3, PS4, PM3, PM6, PP1, BS3, and BS4 are curator-supplied with live recompute.
+- **Firmed PVS1.** gnomAD gene constraint (pLI, LOEUF) clears the provisional flag for loss-of-function-intolerant genes.
+- **Gene-specific thresholds.** A gene-threshold table (illustrative VCEP-style values) replaces the generic defaults where available.
+- **Batch mode.** Paste a list or upload a plain list, CSV, or VCF and interpret many variants into a sortable worklist.
+- **Persistence.** Recent interpretations are kept in the browser and listed in the sidebar.
+- **Write-back.** A draft ClinVar submission row is available as a CSV export and as the `to_clinvar_submission` MCP tool.
+- **Literature mining.** A PubMed search surfaces functional and case evidence for the gene and protein change.
+
+Still ahead:
+
 - **Calibrated predictors.** Replace SIFT and PolyPhen concordance for PP3 and BP4 with calibrated meta-predictors (REVEL, AlphaMissense, BayesDel) at published thresholds.
-- **Gene- and disease-specific thresholds.** Load ClinGen VCEP frequency rules instead of the generic defaults.
-- **Batch mode.** Upload a VCF or a gene panel and interpret many variants at once, with a sortable worklist.
-- **Persistence and audit trail.** Save interpretations and sign-off history so a lab can track who reviewed what and when.
-- **Write-back tools.** Extend the MCP server to emit a ClinVar submission spreadsheet or push a finalized classification into a lab system, closing the loop from draft to submission.
-- **Literature mining.** Pull functional and case evidence from PubMed to support criteria Norn cannot currently reach.
+- **Audit trail.** A server-side store of interpretations and sign-off history so a lab can track who reviewed what and when.
 - **Confidence calibration.** Score Norn against a larger labeled set and report calibrated confidence per classification.
 
 ## References

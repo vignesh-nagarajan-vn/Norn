@@ -58,6 +58,16 @@ export const CRITERIA: CriterionSpec[] = [
       "Same amino acid change as a previously established pathogenic variant, regardless of nucleotide change.",
   },
   {
+    code: "PM1",
+    name: "Mutational hotspot or functional domain",
+    direction: "pathogenic",
+    strength: "Moderate",
+    points: 2,
+    dataSource: "ClinVar",
+    description:
+      "Located in a mutational hotspot or well-studied functional domain, approximated by a local cluster of pathogenic variants with no benign variation nearby.",
+  },
+  {
     code: "PM2",
     name: "Absent or very rare in population data",
     direction: "pathogenic",
@@ -118,10 +128,36 @@ export const CRITERIA: CriterionSpec[] = [
     description:
       "Concordant in-silico prediction of tolerance (SIFT tolerated and PolyPhen benign).",
   },
+  {
+    code: "BP7",
+    name: "Synonymous with no predicted splice impact",
+    direction: "benign",
+    strength: "Supporting",
+    points: -1,
+    dataSource: "Ensembl VEP",
+    description:
+      "Synonymous variant that is not at a conserved splice position and has no predicted effect on splicing.",
+  },
 ];
 
+// Criteria that depend on evidence Norn cannot fetch automatically (functional
+// assays, segregation, de novo status, allelic phase, case-control data). The
+// curator supplies these in the report; the classification recomputes live.
+export const MANUAL_CRITERIA: CriterionSpec[] = [
+  { code: "PS2", name: "De novo (confirmed parentage)", direction: "pathogenic", strength: "Strong", points: 4, dataSource: "Curator", description: "Confirmed de novo in a patient with the disease and no family history." },
+  { code: "PS3", name: "Functional studies show damage", direction: "pathogenic", strength: "Strong", points: 4, dataSource: "Curator", description: "Well-established in-vitro or in-vivo functional studies support a damaging effect." },
+  { code: "PS4", name: "Increased prevalence in affected", direction: "pathogenic", strength: "Strong", points: 4, dataSource: "Curator", description: "Prevalence in affected individuals is significantly higher than in controls." },
+  { code: "PM3", name: "In trans with pathogenic (recessive)", direction: "pathogenic", strength: "Moderate", points: 2, dataSource: "Curator", description: "For recessive disorders, detected in trans with a pathogenic variant." },
+  { code: "PM6", name: "Assumed de novo (unconfirmed)", direction: "pathogenic", strength: "Moderate", points: 2, dataSource: "Curator", description: "Assumed de novo without confirmation of parentage." },
+  { code: "PP1", name: "Cosegregation with disease", direction: "pathogenic", strength: "Supporting", points: 1, dataSource: "Curator", description: "Cosegregation with disease in multiple affected family members." },
+  { code: "BS3", name: "Functional studies show no damage", direction: "benign", strength: "Strong", points: -4, dataSource: "Curator", description: "Well-established functional studies show no damaging effect." },
+  { code: "BS4", name: "Lack of segregation in family", direction: "benign", strength: "Strong", points: -4, dataSource: "Curator", description: "Lack of segregation in affected members of a family." },
+];
+
+export const ALL_CRITERIA: CriterionSpec[] = [...CRITERIA, ...MANUAL_CRITERIA];
+
 export function specByCode(code: string): CriterionSpec | undefined {
-  return CRITERIA.find((c) => c.code === code);
+  return ALL_CRITERIA.find((c) => c.code === code);
 }
 
 export function pointsToClassification(points: number): Classification {

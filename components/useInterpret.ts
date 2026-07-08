@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { addHistory } from "@/lib/history";
 import type {
   NornReport,
   PipelineEvent,
@@ -82,6 +83,12 @@ export function useInterpret() {
           }));
         } else if (event.type === "result") {
           setReport(event.report);
+          addHistory({
+            variant: v,
+            classification: event.report.result.classification,
+            points: event.report.result.points,
+            at: Date.now(),
+          });
         } else if (event.type === "error") {
           setError(event.message);
         }

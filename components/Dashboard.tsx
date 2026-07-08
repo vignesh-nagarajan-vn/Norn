@@ -1,9 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { classify, MANUAL_CRITERIA } from "@/lib/acmg";
 import { exportReportPdf } from "@/lib/pdf";
-import type { CriterionResult, NornReport } from "@/lib/types";
+import { submissionCsv } from "@/lib/submission";
+import type { ClassificationResult, CriterionResult, NornReport, Verdict } from "@/lib/types";
 import AskPanel from "./AskPanel";
+import CuratorEvidence from "./CuratorEvidence";
+import LiteraturePanel from "./LiteraturePanel";
 import LollipopPlot from "./LollipopPlot";
 import { usePrefs } from "./Prefs";
 import {
@@ -14,6 +18,16 @@ import {
   VerdictChip,
   classColorVar,
 } from "./ui";
+
+function download(name: string, text: string, type: string) {
+  const blob = new Blob([text], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 function fmtAf(af: number | null | undefined): string {
   if (af == null) return "n/a";
@@ -41,8 +55,8 @@ function activeBandIndex(points: number): number {
   return 0;
 }
 
-function PointAggregation({ report }: { report: NornReport }) {
-  const { points, classification } = report.result;
+function PointAggregation({ result }: { result: ClassificationResult }) {
+  const { points, classification } = result;
   const color = classColorVar(classification);
   const fillPct = ((Math.max(DMIN, Math.min(DMAX, points)) - DMIN) / (DMAX - DMIN)) * 100;
   const active = activeBandIndex(points);
@@ -89,8 +103,8 @@ function PointAggregation({ report }: { report: NornReport }) {
         ))}
       </div>
 
-      <p className="mt-3 text-xs text-on-surface-variant">{report.result.confidenceRationale}</p>
-      {report.result.ba1Override && (
+      <p className="mt-3 text-xs text-on-surface-variant">{result.confidenceRationale}</p>
+      {result.ba1Override && (
         <div className="mt-2 inline-flex items-center gap-1.5 rounded px-2 py-0.5 text-[11px] font-semibold" style={{ background: "color-mix(in srgb, var(--benign) 12%, white)", color: "var(--benign)" }}>
           <Icon name="verified" size={14} /> BA1 stand-alone benign override applied
         </div>
@@ -196,7 +210,7 @@ function KeyVal({ label, value, accent }: { label: string; value: React.ReactNod
 }
 
 function GenomicCards({ report }: { report: NornReport }) {
-  const { consequence: c, frequency: f, normalized: n, sourceStatus } = report.evidence;
+  const { consequence: c, frequency: f, normalized: n, sourceStatus, constraint, thresholds } = report.evidence;
   return (
     <section id="evidence" className="scroll-mt-20 space-y-4">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -214,6 +228,7 @@ function GenomicCards({ report }: { report: NornReport }) {
               value={f.popmaxAf != null ? `${fmtAf(f.popmaxAf)}${f.popmaxPopulation ? ` (${f.popmaxPopulation})` : ""}` : "n/a"}
             />
             <KeyVal label="Allele count / number" value={f.ac != null ? `${f.ac} / ${f.an ?? "?"}` : "n/a"} />
+            <KeyVal label="Thresholds" value={thresholds.source} />
           </div>
         </div>
         <div className="card p-4">
@@ -226,6 +241,14 @@ function GenomicCards({ report }: { report: NornReport }) {
             <KeyVal label="Protein change" value={c.hgvsp} />
             <KeyVal label="Transcript" value={c.transcriptId} />
             <KeyVal label="SIFT / PolyPhen" value={`${c.siftPrediction ?? "n/a"} / ${c.polyphenPrediction ?? "n/a"}`} />
+            <KeyVal
+              label="Constraint pLI / LOEUF"
+              value={
+                constraint.available
+                  ? `${constraint.pli?.toFixed(2) ?? "n/a"} / ${constraint.loeuf?.toFixed(2) ?? "n/a"}${constraint.lofIntolerant ? " (LOF-intol.)" : ""}`
+                  : "n/a"
+              }
+            />
             <KeyVal label="rsID" value={n.rsid} />
           </div>
         </div>
@@ -335,10 +358,12 @@ function CuratorChecklist({ report }: { report: NornReport }) {
   );
 }
 
-function DashboardHeader({ report }: { report: NornReport }) {
+function DashboardHeader({ report, result }: { report: NornReport; result: ClassificationResult }) {
   const [signed, setSigned] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const { consequence: c, normalized: n } = report.evidence;
+  const liveReport: NornReport = { ...report, result };
+  const base = `norn-${report.input.replace(/[^a-z0-9]+/gi, "_")}`;
   const subtitle = [
     c.transcriptId,
     "GRCh38",
@@ -348,22 +373,16 @@ function DashboardHeader({ report }: { report: NornReport }) {
     .filter(Boolean)
     .join("  •  ");
 
-  const exportJson = () => {
-    const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `norn-${report.input.replace(/[^a-z0-9]+/gi, "_")}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  const exportJson = () => download(`${base}.json`, JSON.stringify(liveReport, null, 2), "application/json");
+  const exportSubmission = () =>
+    download(`${base}-clinvar-submission.csv`, submissionCsv(liveReport), "text/csv;charset=utf-8");
 
   return (
     <header className="flex flex-col justify-between gap-4 border-b border-outline-variant pb-6 md:flex-row md:items-start">
       <div>
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="mono text-[26px] font-bold tracking-tight text-on-surface">{report.input}</h1>
-          <StatusBadge classification={report.result.classification} />
+          <StatusBadge classification={result.classification} />
           {signed && (
             <span className="inline-flex items-center gap-1 rounded-full bg-pathogenic/10 px-2.5 py-1 text-xs font-semibold text-pathogenic">
               <Icon name="check_circle" size={14} fill /> Signed off
@@ -381,15 +400,15 @@ function DashboardHeader({ report }: { report: NornReport }) {
           {menuOpen && (
             <>
               <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
-              <div className="absolute right-0 z-20 mt-1 w-44 overflow-hidden rounded-md border border-outline-variant bg-surface shadow-lift">
+              <div className="absolute right-0 z-20 mt-1 w-56 overflow-hidden rounded-md border border-outline-variant bg-surface shadow-lift">
                 <button
                   onClick={() => {
                     setMenuOpen(false);
-                    void exportReportPdf(report).catch(() => {});
+                    void exportReportPdf(liveReport).catch(() => {});
                   }}
                   className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-on-surface hover:bg-surface-high"
                 >
-                  <Icon name="picture_as_pdf" size={18} className="text-risk-high" /> Download PDF
+                  <Icon name="picture_as_pdf" size={18} className="text-risk-high" /> Report PDF (with graphs)
                 </button>
                 <button
                   onClick={() => {
@@ -398,7 +417,16 @@ function DashboardHeader({ report }: { report: NornReport }) {
                   }}
                   className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-on-surface hover:bg-surface-high"
                 >
-                  <Icon name="data_object" size={18} className="text-secondary" /> Download JSON
+                  <Icon name="data_object" size={18} className="text-secondary" /> Report JSON
+                </button>
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    exportSubmission();
+                  }}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-on-surface hover:bg-surface-high"
+                >
+                  <Icon name="table_view" size={18} className="text-pathogenic" /> ClinVar submission (CSV)
                 </button>
               </div>
             </>
@@ -416,22 +444,43 @@ function DashboardHeader({ report }: { report: NornReport }) {
   );
 }
 
-export default function Dashboard({ report, onNew }: { report: NornReport; onNew?: () => void }) {
-  const queryLabel = useMemo(() => {
-    const c = report.evidence.consequence;
-    return c.aminoAcids && c.proteinPosition
-      ? `${c.refAa ?? ""}${c.proteinPosition}${c.altAa ?? ""}`
-      : "query";
-  }, [report]);
+export default function Dashboard({ report }: { report: NornReport; onNew?: () => void }) {
+  const c = report.evidence.consequence;
+  const queryLabel =
+    c.aminoAcids && c.proteinPosition ? `${c.refAa ?? ""}${c.proteinPosition}${c.altAa ?? ""}` : "query";
+
+  // Curator-supplied criteria toggle state; the classification recomputes live.
+  const [applied, setApplied] = useState<Record<string, boolean>>({});
+  const manualCriteria = useMemo<CriterionResult[]>(
+    () =>
+      MANUAL_CRITERIA.map((spec) => ({
+        ...spec,
+        verdict: (applied[spec.code] ? "met" : "not_met") as Verdict,
+        evidence: applied[spec.code] ? "Applied by the curator." : "Not applied by the curator.",
+        reasoning: "",
+        source: "Curator",
+        appliedPoints: applied[spec.code] ? spec.points : 0,
+        manual: true,
+      })),
+    [applied],
+  );
+  const result = useMemo(
+    () => classify([...report.result.criteria, ...manualCriteria]),
+    [report, manualCriteria],
+  );
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6 pb-16">
-      <DashboardHeader report={report} />
+      <DashboardHeader report={report} result={result} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         <div className="flex flex-col gap-6 lg:col-span-8">
-          <PointAggregation report={report} />
+          <PointAggregation result={result} />
           <CriteriaList report={report} />
+          <CuratorEvidence
+            applied={applied}
+            onToggle={(code) => setApplied((a) => ({ ...a, [code]: !a[code] }))}
+          />
           <GenomicCards report={report} />
           <div className="card p-5">
             <LollipopPlot
@@ -445,6 +494,7 @@ export default function Dashboard({ report, onNew }: { report: NornReport; onNew
         <div className="flex flex-col gap-6 lg:col-span-4">
           <CopilotSummary report={report} />
           <AskPanel report={report} />
+          <LiteraturePanel gene={c.geneSymbol ?? null} proteinChange={c.hgvsp ?? null} />
           <CuratorChecklist report={report} />
           {report.warnings.length > 0 && (
             <details className="card px-5 py-3 text-sm text-on-surface-variant">

@@ -18,13 +18,15 @@ import {
 } from "./ensembl";
 import { heuristicAdjudicate, heuristicReview } from "./fallback";
 import { findFixture } from "./fixtures";
-import { gnomadFrequency } from "./gnomad";
+import { gnomadFrequency, gnomadGeneConstraint } from "./gnomad";
 import { computationalEvidence, computeSignals } from "./signals";
+import { resolveThresholds } from "./thresholds";
 import type {
   ClinVarEvidence,
   ConsequenceEvidence,
   EvidenceBundle,
   FrequencyEvidence,
+  GeneConstraint,
   NormalizedInput,
   NornReport,
   PipelineEvent,
@@ -54,6 +56,15 @@ function emptyFrequency(variantId: string | null): FrequencyEvidence {
     an: null,
   };
 }
+
+const DEFAULT_CONSTRAINT: GeneConstraint = {
+  available: false,
+  pli: null,
+  loeuf: null,
+  misZ: null,
+  lofIntolerant: false,
+  note: "Gene constraint not available.",
+};
 
 function emptyClinvar(): ClinVarEvidence {
   return {
@@ -202,6 +213,10 @@ export async function runPipeline(
   const refAa = consequence.refAa ?? null;
   const altAa = consequence.altAa ?? null;
   const queryCdna = consequence.hgvsc?.match(/c\.[A-Za-z0-9_>+.-]+/)?.[0] ?? null;
+  const thresholds = resolveThresholds(gene);
+  const constraintP: Promise<GeneConstraint> = gene
+    ? gnomadGeneConstraint(gene).catch(() => DEFAULT_CONSTRAINT)
+    : Promise.resolve(DEFAULT_CONSTRAINT);
 
   const clinvarP: Promise<ClinVarEvidence> = (async () => {
     if (annotationFromFixture && fixture) {
@@ -244,11 +259,11 @@ export async function runPipeline(
     };
   })();
 
-  const [frequency, clinvar] = await Promise.all([gnomadP, clinvarP]);
+  const [frequency, clinvar, constraint] = await Promise.all([gnomadP, clinvarP, constraintP]);
 
   const computational = computationalEvidence(consequence);
   const freqAvailable = sourceStatus.gnomad === "ok";
-  const signals = computeSignals(consequence, frequency, computational, clinvar, freqAvailable);
+  const signals = computeSignals(consequence, frequency, computational, clinvar, thresholds, freqAvailable);
 
   const bundle: EvidenceBundle = {
     input: rawInput,
@@ -257,21 +272,20 @@ export async function runPipeline(
     frequency,
     computational,
     clinvar,
+    constraint,
+    thresholds,
     signals,
     sourceStatus,
     fixtureUsed,
   };
 
-  // If nothing resolved (no annotation, not in gnomAD, no fixture), the input
-  // did not identify a real variant. Fail with a clear message instead of
-  // returning an empty "Uncertain Significance" report.
-  if (
-    !consequence.geneSymbol &&
-    !fixtureUsed &&
-    !frequency.found &&
-    sourceStatus.vep !== "ok" &&
-    sourceStatus.gnomad !== "ok"
-  ) {
+  // Fail clearly when the input does not identify a variant: either the format
+  // is unparseable, or VEP explicitly returned no annotation (a real "not
+  // found"). A source timeout is treated as an outage, not a bad variant, so a
+  // valid input still yields a (degraded) report rather than an error.
+  const nothingResolved =
+    !consequence.geneSymbol && !fixtureUsed && !frequency.found && sourceStatus.gnomad !== "ok";
+  if (nothingResolved && (kind === "unknown" || sourceStatus.vep === "empty")) {
     throw new Error(
       `Could not resolve "${rawInput}". Enter HGVS (BRCA1:c.5266dupC), an rsID (rs80357906), or a locus (17-43057062-A-AG).`,
     );

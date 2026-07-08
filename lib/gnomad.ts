@@ -9,7 +9,7 @@
 
 import { cached } from "./cache";
 import { fetchWithRetry, SourceError } from "./http";
-import type { FrequencyEvidence } from "./types";
+import type { FrequencyEvidence, GeneConstraint } from "./types";
 
 const ENDPOINT = "https://gnomad.broadinstitute.org/api";
 const TTL = 1000 * 60 * 60;
@@ -166,4 +166,42 @@ export async function gnomadFrequency(ident: {
 
 export function gnomadUrl(variantId: string): string {
   return `https://gnomad.broadinstitute.org/variant/${variantId}?dataset=${DATASET}`;
+}
+
+const CONSTRAINT_QUERY = `query GeneConstraint($gene: String!) {
+  gene(gene_symbol: $gene, reference_genome: GRCh38) {
+    gnomad_constraint { pli oe_lof_upper mis_z }
+  }
+}`;
+
+// gnomAD gene-level loss-of-function constraint, used to inform PVS1: a
+// LOF-intolerant gene supports the loss-of-function disease mechanism.
+export async function gnomadGeneConstraint(gene: string): Promise<GeneConstraint> {
+  const body = JSON.stringify({ query: CONSTRAINT_QUERY, variables: { gene } });
+  const json = await cached(`gnomad-constraint:${gene}`, TTL, async () => {
+    const res = await fetchWithRetry(ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body,
+      source: "gnomAD constraint",
+      timeoutMs: 10000,
+      retries: 1,
+    });
+    return (await res.json()) as {
+      data?: { gene?: { gnomad_constraint?: { pli?: number; oe_lof_upper?: number; mis_z?: number } | null } | null };
+    };
+  });
+
+  const c = json.data?.gene?.gnomad_constraint;
+  if (!c) {
+    return { available: false, pli: null, loeuf: null, misZ: null, lofIntolerant: false, note: "No gnomAD constraint data for this gene." };
+  }
+  const pli = c.pli ?? null;
+  const loeuf = c.oe_lof_upper ?? null;
+  const misZ = c.mis_z ?? null;
+  const lofIntolerant = (pli != null && pli >= 0.9) || (loeuf != null && loeuf < 0.35);
+  const note = lofIntolerant
+    ? "Gene is loss-of-function intolerant (gnomAD constraint), consistent with a LOF disease mechanism."
+    : "Gene is not flagged loss-of-function intolerant by gnomAD constraint; confirm the LOF disease mechanism for this gene.";
+  return { available: true, pli, loeuf, misZ, lofIntolerant, note };
 }

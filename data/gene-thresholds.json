@@ -1,0 +1,16 @@
+{
+  "note": "Illustrative gene-specific allele-frequency thresholds inspired by ClinGen Variant Curation Expert Panel rules. Demonstration values, not the official VCEP specifications. Genes not listed fall back to the generic default.",
+  "default": { "ba1Af": 0.05, "bs1Af": 0.01, "pm2Af": 0.0001, "source": "generic default" },
+  "genes": {
+    "BRCA1": { "ba1Af": 0.001, "bs1Af": 0.0001, "pm2Af": 0.00001, "source": "ENIGMA BRCA1/2 VCEP (illustrative)" },
+    "BRCA2": { "ba1Af": 0.001, "bs1Af": 0.0001, "pm2Af": 0.00001, "source": "ENIGMA BRCA1/2 VCEP (illustrative)" },
+    "CFTR": { "ba1Af": 0.01, "bs1Af": 0.005, "pm2Af": 0.0001, "source": "CFTR2 (illustrative)" },
+    "TP53": { "ba1Af": 0.001, "bs1Af": 0.0003, "pm2Af": 0.00002, "source": "ClinGen TP53 VCEP (illustrative)" },
+    "MLH1": { "ba1Af": 0.001, "bs1Af": 0.0001, "pm2Af": 0.00001, "source": "InSiGHT (illustrative)" },
+    "MSH2": { "ba1Af": 0.001, "bs1Af": 0.0001, "pm2Af": 0.00001, "source": "InSiGHT (illustrative)" },
+    "MSH6": { "ba1Af": 0.001, "bs1Af": 0.0001, "pm2Af": 0.00001, "source": "InSiGHT (illustrative)" },
+    "APC": { "ba1Af": 0.001, "bs1Af": 0.0001, "pm2Af": 0.00001, "source": "ClinGen APC VCEP (illustrative)" },
+    "HFE": { "ba1Af": 0.05, "bs1Af": 0.03, "pm2Af": 0.001, "source": "hemochromatosis, common (illustrative)" },
+    "HBB": { "ba1Af": 0.05, "bs1Af": 0.02, "pm2Af": 0.0005, "source": "hemoglobinopathy, common carriers (illustrative)" }
+  }
+}
