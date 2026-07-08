@@ -4,6 +4,7 @@ import AppShell from "@/components/AppShell";
 import Dashboard from "@/components/Dashboard";
 import Hero, { type Example } from "@/components/Hero";
 import PipelineView from "@/components/PipelineView";
+import { PrefsProvider } from "@/components/Prefs";
 import { Icon } from "@/components/ui";
 import { useInterpret } from "@/components/useInterpret";
 
@@ -17,25 +18,27 @@ export default function Home() {
   const { status, stages, report, error, run, reset } = useInterpret();
 
   return (
-    <AppShell topActive="search" sidebarActive="interpretation" onSearch={run} onNew={reset}>
-      {report ? (
-        <Dashboard report={report} onNew={reset} />
-      ) : (
-        <>
-          <Hero onSubmit={run} running={status === "running"} examples={EXAMPLES} />
-          {(status === "running" || error) && (
-            <div className="mx-auto max-w-5xl px-6 pb-16">
-              {status === "running" && <PipelineView stages={stages} />}
-              {error && (
-                <div className="mt-4 flex items-start gap-2 rounded-lg border px-4 py-3 text-sm" style={{ borderColor: "var(--risk-high)", color: "var(--risk-high)", background: "color-mix(in srgb, var(--risk-high) 6%, white)" }}>
-                  <Icon name="error" size={18} className="mt-0.5" />
-                  {error}
-                </div>
-              )}
-            </div>
-          )}
-        </>
-      )}
-    </AppShell>
+    <PrefsProvider>
+      <AppShell topActive="search" sidebarActive="interpretation" onSearch={run} onNew={reset}>
+        {report ? (
+          <Dashboard report={report} onNew={reset} />
+        ) : (
+          <>
+            <Hero onSubmit={run} running={status === "running"} examples={EXAMPLES} />
+            {(status === "running" || error) && (
+              <div className="mx-auto max-w-5xl px-6 pb-16">
+                {status === "running" && <PipelineView stages={stages} />}
+                {error && (
+                  <div className="mt-4 flex items-start gap-2 rounded-lg border px-4 py-3 text-sm" style={{ borderColor: "var(--risk-high)", color: "var(--risk-high)", background: "color-mix(in srgb, var(--risk-high) 6%, white)" }}>
+                    <Icon name="error" size={18} className="mt-0.5" />
+                    {error}
+                  </div>
+                )}
+              </div>
+            )}
+          </>
+        )}
+      </AppShell>
+    </PrefsProvider>
   );
 }

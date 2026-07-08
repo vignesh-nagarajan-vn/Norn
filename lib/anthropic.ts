@@ -236,3 +236,36 @@ export async function reviewWithClaude(
   }
   throw new ModelError("Reviewer failed.");
 }
+
+export interface AskMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+const ASK_SYSTEM = [
+  "You are Norn's assistant, embedded in a single variant-interpretation report.",
+  "Answer the curator's questions using only the interpretation provided below as your knowledge base.",
+  "If a question is not covered by this interpretation, say so plainly rather than guessing, and suggest what evidence would be needed.",
+  "Be concise (2 to 5 sentences). Reference ACMG criterion codes and the named sources when relevant.",
+  "Never invent evidence, and never assert a different final classification than the one computed in the report.",
+  "If asked for clinical or diagnostic advice, remind the user that Norn is a research and demonstration tool, not a diagnostic device.",
+].join(" ");
+
+// Answers a question grounded in a single interpretation. The reportContext is a
+// compact text rendering of the report built by the caller.
+export async function askAboutReport(
+  reportContext: string,
+  question: string,
+  history: AskMessage[],
+): Promise<string> {
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const trimmed = history.slice(-8);
+  const msg = await client.messages.create({
+    model: modelName(),
+    max_tokens: 700,
+    temperature: 0.2,
+    system: `${ASK_SYSTEM}\n\nINTERPRETATION (your only knowledge base):\n${reportContext}`,
+    messages: [...trimmed, { role: "user" as const, content: question }],
+  });
+  return extractText(msg);
+}

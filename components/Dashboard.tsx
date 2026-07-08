@@ -1,8 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { exportReportPdf } from "@/lib/pdf";
 import type { CriterionResult, NornReport } from "@/lib/types";
+import AskPanel from "./AskPanel";
 import LollipopPlot from "./LollipopPlot";
+import { usePrefs } from "./Prefs";
 import {
   acmgStrengthColor,
   ClaudeChip,
@@ -92,6 +95,7 @@ function PointAggregation({ report }: { report: NornReport }) {
 }
 
 function CriterionRow({ c, live }: { c: CriterionResult; live: boolean }) {
+  const { showReasoning } = usePrefs();
   const met = c.verdict === "met";
   const barColor = met
     ? c.direction === "pathogenic"
@@ -135,7 +139,7 @@ function CriterionRow({ c, live }: { c: CriterionResult; live: boolean }) {
             )}
           </div>
           <p className="text-sm text-on-surface-variant">{c.evidence}</p>
-          {c.reasoning && c.reasoning !== "No reasoning provided." && (
+          {showReasoning && c.reasoning && c.reasoning !== "No reasoning provided." && (
             <p className="mt-0.5 text-[13px] italic text-outline">{c.reasoning}</p>
           )}
           <p className="mono mt-1 text-xs text-outline">
@@ -326,8 +330,9 @@ function CuratorChecklist({ report }: { report: NornReport }) {
   );
 }
 
-function DashboardHeader({ report, onNew }: { report: NornReport; onNew?: () => void }) {
+function DashboardHeader({ report }: { report: NornReport }) {
   const [signed, setSigned] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const { consequence: c, normalized: n } = report.evidence;
   const subtitle = [
     c.transcriptId,
@@ -338,7 +343,7 @@ function DashboardHeader({ report, onNew }: { report: NornReport; onNew?: () => 
     .filter(Boolean)
     .join("  •  ");
 
-  const exportReport = () => {
+  const exportJson = () => {
     const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -363,9 +368,37 @@ function DashboardHeader({ report, onNew }: { report: NornReport; onNew?: () => 
         <div className="mono mt-1 text-sm text-on-surface-variant">{subtitle || report.input}</div>
       </div>
       <div className="flex gap-2">
-        <button onClick={exportReport} className="btn-outline">
-          <Icon name="download" size={18} /> Export Report
-        </button>
+        <div className="relative">
+          <button onClick={() => setMenuOpen((o) => !o)} className="btn-outline">
+            <Icon name="download" size={18} /> Export Report
+            <Icon name="expand_more" size={16} />
+          </button>
+          {menuOpen && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+              <div className="absolute right-0 z-20 mt-1 w-44 overflow-hidden rounded-md border border-outline-variant bg-surface shadow-lift">
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    void exportReportPdf(report).catch(() => {});
+                  }}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-on-surface hover:bg-surface-high"
+                >
+                  <Icon name="picture_as_pdf" size={18} className="text-risk-high" /> Download PDF
+                </button>
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    exportJson();
+                  }}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-on-surface hover:bg-surface-high"
+                >
+                  <Icon name="data_object" size={18} className="text-secondary" /> Download JSON
+                </button>
+              </div>
+            </>
+          )}
+        </div>
         <button
           onClick={() => setSigned((s) => !s)}
           className="btn-primary"
@@ -388,7 +421,7 @@ export default function Dashboard({ report, onNew }: { report: NornReport; onNew
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6 pb-16">
-      <DashboardHeader report={report} onNew={onNew} />
+      <DashboardHeader report={report} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         <div className="flex flex-col gap-6 lg:col-span-8">
@@ -406,6 +439,7 @@ export default function Dashboard({ report, onNew }: { report: NornReport; onNew
         </div>
         <div className="flex flex-col gap-6 lg:col-span-4">
           <CopilotSummary report={report} />
+          <AskPanel report={report} />
           <CuratorChecklist report={report} />
           {report.warnings.length > 0 && (
             <details className="card px-5 py-3 text-sm text-on-surface-variant">

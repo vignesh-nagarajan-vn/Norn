@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { usePrefs } from "./Prefs";
 import { Icon } from "./ui";
 
 type SidebarKey = "interpretation" | "evidence" | "checklist" | "metrics";
@@ -40,21 +41,42 @@ function SidebarItem({
   href,
   active,
   onClick,
+  external,
 }: {
   icon: string;
   label: string;
-  href: string;
+  href?: string;
   active?: boolean;
   onClick?: () => void;
+  external?: boolean;
 }) {
-  const base = "flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm transition-colors";
+  const base = "flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm transition-colors";
   const cls = active
     ? `${base} bg-secondary text-on-secondary font-semibold`
     : `${base} text-on-surface-variant hover:bg-surface-high`;
-  return (
-    <Link href={href} onClick={onClick} className={cls}>
+  const inner = (
+    <>
       <Icon name={icon} size={20} />
       <span>{label}</span>
+    </>
+  );
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className={`${cls} text-left`}>
+        {inner}
+      </button>
+    );
+  }
+  if (external && href) {
+    return (
+      <a href={href} target="_blank" rel="noreferrer" className={cls}>
+        {inner}
+      </a>
+    );
+  }
+  return (
+    <Link href={href ?? "#"} className={cls}>
+      {inner}
     </Link>
   );
 }
@@ -73,6 +95,7 @@ export default function AppShell({
   children: React.ReactNode;
 }) {
   const [q, setQ] = useState("");
+  const { openSettings } = usePrefs();
 
   return (
     <div className="flex h-screen flex-col">
@@ -165,13 +188,18 @@ export default function AppShell({
           </nav>
 
           <div className="mt-auto space-y-1 border-t border-outline-variant pt-4">
-            <SidebarItem icon="settings" label="Settings" href="#" />
-            <SidebarItem icon="help" label="Support" href="#" />
+            <SidebarItem icon="settings" label="Settings" onClick={openSettings} />
+            <SidebarItem
+              icon="help"
+              label="Support"
+              href="https://github.com/vignesh-nagarajan-vn/Norn/issues"
+              external
+            />
           </div>
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto bg-surface">{children}</main>
+        <main className="flex-1 overflow-y-auto scroll-smooth bg-surface">{children}</main>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AppShell from "@/components/AppShell";
+import { PrefsProvider } from "@/components/Prefs";
 import { classColorVar, Icon } from "@/components/ui";
 import {
   isConcordant,
@@ -122,6 +123,7 @@ export default function EvalPage() {
   const pctConcordant = stats.done ? Math.round((stats.concordant / stats.done) * 100) : 0;
 
   return (
+    <PrefsProvider>
     <AppShell topActive="eval" sidebarActive="metrics">
       <div className="mx-auto max-w-6xl px-6 pb-16 pt-8">
         <h1 className="text-2xl font-bold tracking-tight text-on-surface">Evaluation</h1>
@@ -219,5 +221,6 @@ export default function EvalPage() {
         </p>
       </div>
     </AppShell>
+    </PrefsProvider>
   );
 }

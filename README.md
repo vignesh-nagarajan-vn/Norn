@@ -8,30 +8,37 @@ Norn was built as a selectee of Built with Claude: Life Sciences, 1 of 500 chose
 
 <p align="center"><em>Built by Vignesh Nagarajan.</em></p>
 
+<p align="center">
+  <img src="docs/ui-home.png" width="49%" alt="Norn home: automated variant curation" />
+  &nbsp;
+  <img src="docs/ui-dashboard.png" width="49%" alt="Norn interpretation dashboard" />
+</p>
+
 ## Tech stack
 
-<p align="center"><b>Frameworks &amp; Runtime</b></p>
+<p align="center"><b>Frontend</b></p>
 <p align="center">
   <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white">
   <img src="https://img.shields.io/badge/React-20232a?style=for-the-badge&logo=react&logoColor=61DAFB">
   <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white">
-  <img src="https://img.shields.io/badge/Node.js-5FA04E?style=for-the-badge&logo=nodedotjs&logoColor=white">
+  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white">
+  <img src="https://img.shields.io/badge/jsPDF-EC1C24?style=for-the-badge">
+  <img src="https://img.shields.io/badge/Google_Stitch-4285F4?style=for-the-badge&logo=google&logoColor=white">
 </p>
 
-<p align="center"><b>Styling &amp; Visuals</b></p>
+<p align="center"><b>Backend</b></p>
 <p align="center">
-  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white">
-  <img src="https://img.shields.io/badge/PostCSS-DD3A0A?style=for-the-badge&logo=postcss&logoColor=white">
-  <img src="https://img.shields.io/badge/Autoprefixer-DD3735?style=for-the-badge&logo=autoprefixer&logoColor=white">
-  <img src="https://img.shields.io/badge/SVG-FFB13B?style=for-the-badge&logo=svg&logoColor=black">
+  <img src="https://img.shields.io/badge/Node.js-5FA04E?style=for-the-badge&logo=nodedotjs&logoColor=white">
+  <img src="https://img.shields.io/badge/Serverless_Functions-000000?style=for-the-badge&logo=vercel&logoColor=white">
+  <img src="https://img.shields.io/badge/Zod-3E67B1?style=for-the-badge&logo=zod&logoColor=white">
+  <img src="https://img.shields.io/badge/Model_Context_Protocol-1F1F1F?style=for-the-badge">
 </p>
 
 <p align="center"><b>AI Reasoning</b></p>
 <p align="center">
   <img src="https://img.shields.io/badge/Anthropic_Claude-D97757?style=for-the-badge&logo=anthropic&logoColor=white">
+  <img src="https://img.shields.io/badge/Claude_Science-D97757?style=for-the-badge&logo=anthropic&logoColor=white">
   <img src="https://img.shields.io/badge/Anthropic_SDK-191919?style=for-the-badge&logo=anthropic&logoColor=white">
-  <img src="https://img.shields.io/badge/Zod-3E67B1?style=for-the-badge&logo=zod&logoColor=white">
-  <img src="https://img.shields.io/badge/JSON-000000?style=for-the-badge&logo=json&logoColor=white">
 </p>
 
 <p align="center"><b>Genomics Data</b></p>
@@ -44,18 +51,14 @@ Norn was built as a selectee of Built with Claude: Life Sciences, 1 of 500 chose
   <img src="https://img.shields.io/badge/NCBI_E--utilities-20558a?style=for-the-badge">
 </p>
 
-<p align="center"><b>Deploy &amp; Tooling</b></p>
+<p align="center"><b>Deployment &amp; Tooling</b></p>
 <p align="center">
   <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white">
   <img src="https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white">
   <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white">
   <img src="https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white">
-</p>
-
-<p align="center"><b>Built with Claude</b></p>
-<p align="center">
+  <img src="https://img.shields.io/badge/tsx-3178C6?style=for-the-badge&logo=typescript&logoColor=white">
   <img src="https://img.shields.io/badge/Claude_Code-D97757?style=for-the-badge&logo=anthropic&logoColor=white">
-  <img src="https://img.shields.io/badge/Claude_Science-D97757?style=for-the-badge&logo=anthropic&logoColor=white">
 </p>
 
 ## Who it is for
@@ -138,6 +141,18 @@ BA1 (allele frequency above 5%) is a stand-alone override to Benign regardless o
 
 ![Norn scoring model](docs/scoring-model.svg)
 
+## In the app
+
+Every interpretation is interactive, not a static report:
+
+- **Live pipeline view.** Each stage (recode, VEP, gnomAD, ClinVar, adjudicate, review) lights up as it completes, streamed over newline-delimited JSON.
+- **ACMG scorecard and points meter.** A row per criterion with its strength, verdict, evidence, and source, plus a meter showing where the total lands on the Pathogenic-to-Benign scale.
+- **Protein lollipop.** The query variant plotted against ClinVar variants at nearby residues, colored by classification.
+- **Ask the copilot.** A chat panel where the curator can question the interpretation. Claude answers using only that report as its knowledge base, so it explains the call without inventing new evidence or a different label.
+- **Export.** Download the interpretation as a formatted PDF or as JSON.
+- **Settings.** Switch between the design-system colors (pathogenic teal) and the clinical convention (pathogenic red), and toggle the per-criterion model reasoning. Preferences persist in the browser.
+- **Sign-off.** A curator can mark a draft as reviewed. Norn records the intent; it never signs off on its own.
+
 ## The Claude reasoning layer
 
 Two server-side Anthropic calls run per variant. The API key never reaches the client.
@@ -152,6 +167,10 @@ Model selection: read from `ANTHROPIC_MODEL`, default `claude-opus-4-8`. `claude
 ## Anti-circularity
 
 A variant's own ClinVar classification is never fed into adjudication. ClinVar is used only for two things: neighboring-residue evidence for PS1 and PM5, and the ground-truth labels in the eval set. This keeps the adjudication from simply echoing an existing ClinVar call.
+
+## Model Context Protocol server
+
+Norn ships an MCP server ([`mcp/server.ts`](mcp/server.ts)) so other tools can import its data directly. It exposes `interpret_variant`, `list_eval_variants`, and `list_acmg_criteria` over stdio, using the same pipeline as the web app. Run it with `npm run mcp` and connect any MCP client (for example Claude Desktop). See [docs/MCP.md](docs/MCP.md) for the config.
 
 ## Evaluation
 
@@ -191,6 +210,12 @@ Build and type-check:
 ```bash
 npm run build
 npm run typecheck
+```
+
+Run the MCP server (exposes Norn to other MCP clients):
+
+```bash
+npm run mcp
 ```
 
 ## Deploy on Vercel
@@ -241,6 +266,20 @@ docs/                architecture and scoring diagrams, design notes
 - The gnomAD variant lookup for complex indels can miss if coordinate normalization does not match gnomAD's minimal representation. The affected criteria degrade to unknown.
 - The protein lollipop shows a sample of ClinVar variants for the gene and is best-effort. It falls back cleanly when protein positions are unavailable.
 - Norn is not a diagnostic device and must not be used for clinical decisions.
+
+## Roadmap
+
+Ideas to round Norn out into a fuller curation suite:
+
+- **More ACMG criteria.** Add functional (PS3, BS3), segregation (PP1, BS4), de novo and in-trans (PS2, PM6, PM3), hotspot and domain (PM1), and synonymous (BP7) criteria so classifications rest on more than eight lines of evidence.
+- **Firm up PVS1.** Check the gene disease mechanism and loss-of-function intolerance (ClinGen gene curation, gnomAD constraint) so PVS1 no longer needs to be flagged provisional.
+- **Calibrated predictors.** Replace SIFT and PolyPhen concordance for PP3 and BP4 with calibrated meta-predictors (REVEL, AlphaMissense, BayesDel) at published thresholds.
+- **Gene- and disease-specific thresholds.** Load ClinGen VCEP frequency rules instead of the generic defaults.
+- **Batch mode.** Upload a VCF or a gene panel and interpret many variants at once, with a sortable worklist.
+- **Persistence and audit trail.** Save interpretations and sign-off history so a lab can track who reviewed what and when.
+- **Write-back tools.** Extend the MCP server to emit a ClinVar submission spreadsheet or push a finalized classification into a lab system, closing the loop from draft to submission.
+- **Literature mining.** Pull functional and case evidence from PubMed to support criteria Norn cannot currently reach.
+- **Confidence calibration.** Score Norn against a larger labeled set and report calibrated confidence per classification.
 
 ## References
 
