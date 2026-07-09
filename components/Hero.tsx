@@ -8,6 +8,7 @@ export interface Example {
   tag: string;
   color: string;
   consequence: string;
+  note?: string; // one line on what to watch when this one runs
 }
 
 const FATES = [
@@ -128,6 +129,11 @@ export default function Hero({
                 {ex.input}
               </span>
               <span className="mt-1 text-xs text-on-surface-variant">{ex.consequence}</span>
+              {ex.note ? (
+                <span className="mt-2 border-t border-outline-variant pt-2 text-[11px] leading-snug text-outline">
+                  {ex.note}
+                </span>
+              ) : null}
             </button>
           ))}
         </div>

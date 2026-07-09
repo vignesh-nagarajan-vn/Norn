@@ -94,6 +94,9 @@ function summarize(bundle: EvidenceBundle) {
     },
     computational: {
       available: bundle.computational.available,
+      predictor: bundle.computational.predictor,
+      alphaMissenseScore: bundle.computational.alphaMissenseScore,
+      alphaMissenseClass: bundle.computational.alphaMissenseClass,
       sift: c.siftPrediction,
       polyphen: c.polyphenPrediction,
       siftScore: c.siftScore,

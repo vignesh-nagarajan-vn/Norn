@@ -65,11 +65,11 @@ lib/
                         thresholds constants, pointsToClassification, classify, confidence
   pipeline.ts           orchestrator: recode+VEP -> gnomAD+ClinVar+constraint -> signals -> adjudicate
                         -> classify -> review. Emits stage events. Fixture fallback. Unresolvable guard.
-  ensembl.ts            variant_recoder + VEP (VEP url MUST include mane=1&canonical=1&hgvs=1)
-  gnomad.ts             frequency (by rsID first, then variantId) + gnomadGeneConstraint (pLI/LOEUF)
+  ensembl.ts            variant_recoder + VEP (VEP url MUST include mane=1&canonical=1&hgvs=1&AlphaMissense=1)
+  gnomad.ts             frequency (by rsID first, then variantId) incl. faf95 filtering AF + gnomadGeneConstraint (pLI/LOEUF)
   clinvar.ts            E-utilities: PS1/PM5 neighbors (excludes the query's own cDNA) + gene-wide set
   pubmed.ts             PubMed E-utilities literature search
-  signals.ts            code-computed booleans per criterion (incl. PM1 clustering, BP7 synonymous)
+  signals.ts            code-computed booleans per criterion (incl. PM1 clustering, BP7 synonymous, AlphaMissense-driven PP3/BP4) + describeComputational()
   thresholds.ts         resolveThresholds(gene) using data/gene-thresholds.json
   assemble.ts           builds CriterionResult[] from adjudicated verdicts + evidence strings + source URLs
   anthropic.ts          the two Claude passes (adjudicator, reviewer) + askAboutReport + summarize()
@@ -106,8 +106,10 @@ mcp/server.ts           stdio MCP server: interpret_variant, list_eval_variants,
 
 **Notable derivations:**
 - PM1: approximated from a local cluster of pathogenic ClinVar variants (>=3 pathogenic within +/-7 residues, no benign) using the gene-wide ClinVar set.
+- PP3/BP4: calibrated on **AlphaMissense** (Cheng et al. 2023) carried by the VEP call. `am_class` maps directly (`likely_pathogenic` -> PP3, `likely_benign` -> BP4, `ambiguous` -> neither). SIFT/PolyPhen concordance is the fallback only when AlphaMissense does not cover the variant (for example indels). `lib/signals.ts` `computationalEvidence` sets `predictor` (`AlphaMissense` | `SIFT+PolyPhen` | null) and `describeComputational` renders the one-line evidence shared by the assembler and the fallback. Kept at Supporting strength.
 - BP7: synonymous consequence with no splice term.
 - PVS1 firming: gnomAD gene constraint. `pLI >= 0.9 or LOEUF < 0.35` => LOF-intolerant => PVS1 `provisional` flag cleared; otherwise PVS1 stays flagged for human confirmation of the disease mechanism.
+- Frequency criteria (PM2/BS1/BA1) run against `frequency.representativeAf`, which is gnomAD's **faf95** filtering AF (the 95% CI grpmax, the ClinGen SVI recommendation) when present, falling back to `max(global, popmax)` only when counts are too low for an faf95. This is what stops a noisy small-population popmax point estimate from overcalling BS1 (for example BRCA1 R1699Q: popmax 1.19e-4 but faf95 3.98e-5, so BS1 does not fire and it stays a VUS).
 - Thresholds are gene-specific when `data/gene-thresholds.json` has an entry, else generic defaults; the report shows which source was used.
 - Confidence (High/Moderate/Low) is distance to the nearest band boundary, capped down when many criteria are unknown.
 
@@ -117,8 +119,8 @@ A variant's own ClinVar classification is NEVER fed into adjudication. ClinVar i
 
 ## External data sources and their quirks
 
-- **Ensembl VEP** (`lib/ensembl.ts`): the VEP URL must include `mane=1&canonical=1&hgvs=1`. Without these, VEP does not flag the canonical/MANE transcript and the picker falls back to the wrong transcript (wrong protein position -> wrong PS1/PM5 residue). Ensembl REST is slow/flaky from some sandboxes; that is why the example chips have fixtures.
-- **gnomAD** (`lib/gnomad.ts`): GraphQL. Look up frequency by rsID first (robust for indels), then by chrom-pos-ref-alt. A genuine "not found" means absent (supports PM2); a thrown error means unavailable (unknown). `gnomadGeneConstraint` returns pLI/LOEUF.
+- **Ensembl VEP** (`lib/ensembl.ts`): the VEP URL must include `mane=1&canonical=1&hgvs=1&AlphaMissense=1`. Without mane/canonical/hgvs, VEP does not flag the canonical/MANE transcript and the picker falls back to the wrong transcript (wrong protein position -> wrong PS1/PM5 residue); `AlphaMissense=1` attaches the calibrated missense score under `transcript_consequences[].alphamissense` (`am_pathogenicity`, `am_class`) used for PP3/BP4. Ensembl REST is slow/flaky from some sandboxes; that is why the example chips have fixtures.
+- **gnomAD** (`lib/gnomad.ts`): GraphQL. Look up frequency by rsID first (robust for indels), then by chrom-pos-ref-alt. A genuine "not found" means absent (supports PM2); a thrown error means unavailable (unknown). The query pulls `faf95 { popmax }` per genome/exome; `representativeAf` prefers that filtering AF over the raw popmax. `gnomadGeneConstraint` returns pLI/LOEUF.
 - **ClinVar / PubMed**: NCBI E-utilities (esearch + esummary). `NCBI_API_KEY` raises rate limits. ClinVar germline classification lives under `germline_classification` (new) or `clinical_significance` (legacy) - handle both.
 
 ## Resilience
@@ -179,4 +181,4 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
 
 ## Roadmap (not yet done)
 
-Calibrated meta-predictors for PP3/BP4 (REVEL, AlphaMissense, BayesDel - no free per-variant API), a server-side audit trail (needs a datastore), and confidence calibration against a larger labeled set. See the Roadmap section in `README.md`.
+PP3/BP4 now use the calibrated AlphaMissense score carried by the VEP call, and BS1/BA1 use gnomAD's faf95 filtering AF. Still ahead: additional calibrated meta-predictors (REVEL, BayesDel) and per-strength thresholds, a server-side audit trail (needs a datastore), and confidence calibration against a larger labeled set. See the Roadmap section in `README.md`.

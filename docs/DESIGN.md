@@ -34,7 +34,7 @@ Norn is scoped to one person: a molecular geneticist or genetic counselor doing 
 
 The final classification is computed in code from the adjudicated verdicts. The model is never asked for the label. This keeps the output reproducible and auditable: given the same verdicts, the classification and points are always the same. The model's job is to read messy evidence and return a clean per-criterion verdict with reasoning, which is what language models are good at. The combining rules are arithmetic, which code should own.
 
-To make the model's verdicts trustworthy, Norn first computes objective signals in code (frequency against thresholds, computational concordance, loss-of-function consequence, ClinVar neighbor presence) and passes them to the adjudicator as strong priors. Norn then compares the model's verdict to the signal and flags any disagreement, so a model that drifts from the data is caught rather than trusted blindly.
+To make the model's verdicts trustworthy, Norn first computes objective signals in code (frequency against thresholds using gnomAD's faf95 filtering AF, the calibrated AlphaMissense score for PP3/BP4, loss-of-function consequence, ClinVar neighbor presence) and passes them to the adjudicator as strong priors. Norn then compares the model's verdict to the signal and flags any disagreement, so a model that drifts from the data is caught rather than trusted blindly.
 
 ## Anti-circularity
 

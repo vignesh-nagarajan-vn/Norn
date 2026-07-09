@@ -94,9 +94,9 @@ export const CRITERIA: CriterionSpec[] = [
     direction: "pathogenic",
     strength: "Supporting",
     points: 1,
-    dataSource: "Ensembl VEP (SIFT, PolyPhen)",
+    dataSource: "Ensembl VEP (AlphaMissense)",
     description:
-      "Concordant in-silico prediction of a deleterious effect (SIFT deleterious and PolyPhen probably damaging).",
+      "Calibrated in-silico prediction of a deleterious effect: AlphaMissense likely_pathogenic (Cheng et al. 2023), or SIFT deleterious and PolyPhen probably damaging when AlphaMissense does not cover the variant.",
   },
   {
     code: "BA1",
@@ -124,9 +124,9 @@ export const CRITERIA: CriterionSpec[] = [
     direction: "benign",
     strength: "Supporting",
     points: -1,
-    dataSource: "Ensembl VEP (SIFT, PolyPhen)",
+    dataSource: "Ensembl VEP (AlphaMissense)",
     description:
-      "Concordant in-silico prediction of tolerance (SIFT tolerated and PolyPhen benign).",
+      "Calibrated in-silico prediction of tolerance: AlphaMissense likely_benign (Cheng et al. 2023), or SIFT tolerated and PolyPhen benign when AlphaMissense does not cover the variant.",
   },
   {
     code: "BP7",

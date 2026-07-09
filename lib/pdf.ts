@@ -334,7 +334,7 @@ export async function exportReportPdf(report: NornReport): Promise<void> {
     { size: 9, gap: 2 },
   );
   text(
-    `Consequence: ${c.mostSevereConsequence ?? "n/a"}   |   SIFT ${c.siftPrediction ?? "n/a"} / PolyPhen ${c.polyphenPrediction ?? "n/a"}   |   gene constraint pLI ${e.constraint.pli?.toFixed(2) ?? "n/a"}, LOEUF ${e.constraint.loeuf?.toFixed(2) ?? "n/a"}.`,
+    `Consequence: ${c.mostSevereConsequence ?? "n/a"}   |   AlphaMissense ${c.alphaMissenseScore != null ? `${c.alphaMissenseScore.toFixed(3)} (${(c.alphaMissenseClass ?? "").replace(/_/g, " ")})` : "n/a"}   |   SIFT ${c.siftPrediction ?? "n/a"} / PolyPhen ${c.polyphenPrediction ?? "n/a"}   |   pLI ${e.constraint.pli?.toFixed(2) ?? "n/a"}, LOEUF ${e.constraint.loeuf?.toFixed(2) ?? "n/a"}.`,
     { size: 9, gap: 8 },
   );
 

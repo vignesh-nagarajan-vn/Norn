@@ -20,7 +20,7 @@ export function reportToContext(report: NornReport): string {
     `Gene: ${c.geneSymbol ?? "n/a"}, transcript: ${c.transcriptId ?? "n/a"}, cDNA: ${c.hgvsc ?? "n/a"}, protein: ${c.hgvsp ?? "n/a"}, consequence: ${c.mostSevereConsequence ?? "n/a"}.`,
     `Classification: ${r.classification} (${r.points} points, ${r.confidence} confidence). BA1 override: ${r.ba1Override}. Rationale: ${r.confidenceRationale}`,
     `Population frequency: representative AF ${f.representativeAf}, genome ${f.genomeAf}, exome ${f.exomeAf}, popmax ${f.popmaxAf}${f.popmaxPopulation ? ` (${f.popmaxPopulation})` : ""}. gnomAD id ${f.gnomadVariantId ?? "n/a"}.`,
-    `Computational: SIFT ${c.siftPrediction ?? "n/a"}, PolyPhen ${c.polyphenPrediction ?? "n/a"}.`,
+    `Computational: AlphaMissense ${c.alphaMissenseScore != null ? `${c.alphaMissenseScore} (${c.alphaMissenseClass ?? "n/a"})` : "n/a"}, SIFT ${c.siftPrediction ?? "n/a"}, PolyPhen ${c.polyphenPrediction ?? "n/a"}.`,
     `ClinVar neighbors: PS1 same-amino-acid candidates ${e.clinvar.sameAaChange.length}, PM5 same-residue candidates ${e.clinvar.sameResidueDifferentAa.length}.`,
     "",
     "Criteria adjudication:",

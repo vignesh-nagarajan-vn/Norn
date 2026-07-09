@@ -104,6 +104,8 @@ export const FIXTURES: VariantFixture[] = [
       siftScore: null,
       polyphenPrediction: null,
       polyphenScore: null,
+      alphaMissenseScore: null, // frameshift: AlphaMissense scores missense only
+      alphaMissenseClass: null,
       canonical: true,
     },
     frequency: {
@@ -114,6 +116,7 @@ export const FIXTURES: VariantFixture[] = [
       globalAf: 6.9e-5,
       popmaxAf: 7.5e-5,
       popmaxPopulation: "nfe",
+      filteringAf: null, // too rare for a robust faf95; falls back to popmax
       representativeAf: 7.5e-5,
       ac: 24,
       an: 348000,
@@ -161,6 +164,8 @@ export const FIXTURES: VariantFixture[] = [
       siftScore: 0.34,
       polyphenPrediction: "benign",
       polyphenScore: 0.01,
+      alphaMissenseScore: 0.049,
+      alphaMissenseClass: "likely_benign",
       canonical: true,
     },
     frequency: {
@@ -171,7 +176,8 @@ export const FIXTURES: VariantFixture[] = [
       globalAf: 0.5574,
       popmaxAf: 0.62,
       popmaxPopulation: "eas",
-      representativeAf: 0.62,
+      filteringAf: 0.872, // faf95 grpmax, well above BA1
+      representativeAf: 0.872,
       ac: 840000,
       an: 1450000,
     },
@@ -215,9 +221,11 @@ export const FIXTURES: VariantFixture[] = [
       refAa: "R",
       altAa: "Q",
       siftPrediction: "deleterious",
-      siftScore: 0.02,
-      polyphenPrediction: "probably_damaging",
-      polyphenScore: 0.96,
+      siftScore: 0.0,
+      polyphenPrediction: "possibly_damaging",
+      polyphenScore: 0.61,
+      alphaMissenseScore: 0.734,
+      alphaMissenseClass: "likely_pathogenic",
       canonical: true,
     },
     frequency: {
@@ -226,9 +234,10 @@ export const FIXTURES: VariantFixture[] = [
       genomeAf: 6.6e-6,
       exomeAf: 2.7e-6,
       globalAf: 6.6e-6,
-      popmaxAf: 1.2e-5,
-      popmaxPopulation: "nfe",
-      representativeAf: 1.2e-5,
+      popmaxAf: 1.19e-4,
+      popmaxPopulation: "afr",
+      filteringAf: 3.98e-5, // faf95 grpmax: below BRCA1 BS1, so BS1 does not fire
+      representativeAf: 3.98e-5,
       ac: 4,
       an: 610000,
     },

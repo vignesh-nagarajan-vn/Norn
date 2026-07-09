@@ -224,13 +224,18 @@ function GenomicCards({ report }: { report: NornReport }) {
             <h3 className="text-[15px] font-semibold">Population Frequency</h3>
           </div>
           <div className="mono space-y-2 text-xs">
-            <KeyVal label="gnomAD v4 (representative)" value={fmtAf(f.representativeAf)} />
             <KeyVal label="Genome AF" value={fmtAf(f.genomeAf)} />
             <KeyVal label="Exome AF" value={fmtAf(f.exomeAf)} />
             <KeyVal
               label="Popmax"
               value={f.popmaxAf != null ? `${fmtAf(f.popmaxAf)}${f.popmaxPopulation ? ` (${f.popmaxPopulation})` : ""}` : "n/a"}
             />
+            <KeyVal
+              label="Filtering AF (faf95)"
+              value={f.filteringAf != null ? fmtAf(f.filteringAf) : "n/a"}
+              accent="var(--secondary)"
+            />
+            <KeyVal label="Used vs thresholds" value={fmtAf(f.representativeAf)} />
             <KeyVal label="Allele count / number" value={f.ac != null ? `${f.ac} / ${f.an ?? "?"}` : "n/a"} />
             <KeyVal label="Thresholds" value={thresholds.source} />
           </div>
@@ -244,6 +249,15 @@ function GenomicCards({ report }: { report: NornReport }) {
             <KeyVal label="Type" value={c.mostSevereConsequence} accent="var(--acmg-vs)" />
             <KeyVal label="Protein change" value={c.hgvsp} />
             <KeyVal label="Transcript" value={c.transcriptId} />
+            <KeyVal
+              label="AlphaMissense"
+              value={
+                c.alphaMissenseScore != null
+                  ? `${c.alphaMissenseScore.toFixed(3)} (${(c.alphaMissenseClass ?? "").replace(/_/g, " ") || "n/a"})`
+                  : "n/a (non-missense)"
+              }
+              accent="var(--secondary)"
+            />
             <KeyVal label="SIFT / PolyPhen" value={`${c.siftPrediction ?? "n/a"} / ${c.polyphenPrediction ?? "n/a"}`} />
             <KeyVal
               label="Constraint pLI / LOEUF"

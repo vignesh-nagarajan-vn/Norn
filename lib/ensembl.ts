@@ -4,7 +4,7 @@
 
 import { cached } from "./cache";
 import { fetchJson, SourceError } from "./http";
-import type { ConsequenceEvidence } from "./types";
+import type { AlphaMissenseClass, ConsequenceEvidence } from "./types";
 
 const BASE = "https://rest.ensembl.org";
 const TTL = 1000 * 60 * 60; // 1 hour
@@ -116,8 +116,9 @@ export async function recode(raw: string): Promise<RecodeResult> {
 // Request MANE and canonical flags plus HGVS notation. Without mane/canonical,
 // VEP does not mark the clinical transcript, and the picker can fall back to a
 // non-canonical transcript with the wrong protein position (which then queries
-// ClinVar for the wrong residue in PS1/PM5).
-const VEP_PARAMS = "content-type=application/json&mane=1&canonical=1&hgvs=1";
+// ClinVar for the wrong residue in PS1/PM5). AlphaMissense=1 attaches the
+// calibrated missense pathogenicity score used for PP3/BP4.
+const VEP_PARAMS = "content-type=application/json&mane=1&canonical=1&hgvs=1&AlphaMissense=1";
 
 export async function vepByHgvs(hgvs: string): Promise<unknown[]> {
   const url = `${BASE}/vep/human/hgvs/${encodeURIComponent(hgvs)}?${VEP_PARAMS}`;
@@ -143,6 +144,7 @@ interface TranscriptConsequence {
   sift_score?: number;
   polyphen_prediction?: string;
   polyphen_score?: number;
+  alphamissense?: { am_pathogenicity?: number; am_class?: string };
   protein_start?: number;
   amino_acids?: string;
   hgvsc?: string;
@@ -190,6 +192,11 @@ export function parseVep(vep: unknown[]): ConsequenceEvidence {
 
   const terms = tc.consequence_terms ?? [];
   const lofType = terms.find((t) => LOF_TERMS.has(t)) ?? null;
+  const amRaw = tc.alphamissense?.am_class;
+  const amClass: AlphaMissenseClass | null =
+    amRaw === "likely_benign" || amRaw === "ambiguous" || amRaw === "likely_pathogenic"
+      ? amRaw
+      : null;
   const amino = tc.amino_acids ?? null;
   let refAa: string | null = null;
   let altAa: string | null = null;
@@ -219,6 +226,8 @@ export function parseVep(vep: unknown[]): ConsequenceEvidence {
     siftScore: tc.sift_score ?? null,
     polyphenPrediction: tc.polyphen_prediction ?? null,
     polyphenScore: tc.polyphen_score ?? null,
+    alphaMissenseScore: tc.alphamissense?.am_pathogenicity ?? null,
+    alphaMissenseClass: amClass,
     canonical: tc.canonical === 1,
   };
 }

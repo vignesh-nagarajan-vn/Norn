@@ -3,6 +3,7 @@
 // returns a full, honest report. It is labeled "heuristic" in the UI, never
 // presented as model reasoning.
 
+import { describeComputational } from "./signals";
 import type {
   AdjudicatedCriterion,
   ClassificationResult,
@@ -15,12 +16,13 @@ export function heuristicAdjudicate(bundle: EvidenceBundle): AdjudicatedCriterio
   const { signals: s, computational: comp, clinvar: cv } = bundle;
   const freqAvailable = s.pm2.observedAf != null;
   const compAvailable = comp.available;
+  const compSummary = describeComputational(comp);
 
   const compVerdict = (damaging: boolean): Verdict => {
     if (!compAvailable) return "unknown";
-    if (comp.damagingConcordant) return damaging ? "met" : "not_met";
-    if (comp.tolerantConcordant) return damaging ? "not_met" : "met";
-    return "unknown"; // predictions disagree, e.g. possibly_damaging
+    if (comp.damaging) return damaging ? "met" : "not_met";
+    if (comp.tolerant) return damaging ? "not_met" : "met";
+    return "unknown"; // predictor is ambiguous
   };
 
   const clinvarVerdict = (present: boolean): Verdict => {
@@ -91,9 +93,7 @@ export function heuristicAdjudicate(bundle: EvidenceBundle): AdjudicatedCriterio
       "PP3",
       compVerdict(true),
       "Ensembl VEP",
-      compAvailable
-        ? `SIFT ${comp.siftPrediction}, PolyPhen ${comp.polyphenPrediction}.`
-        : "Computational predictions were unavailable.",
+      compAvailable ? compSummary : "Computational predictions were unavailable.",
     ),
     mk(
       "BA1",
@@ -115,9 +115,7 @@ export function heuristicAdjudicate(bundle: EvidenceBundle): AdjudicatedCriterio
       "BP4",
       compVerdict(false),
       "Ensembl VEP",
-      compAvailable
-        ? `SIFT ${comp.siftPrediction}, PolyPhen ${comp.polyphenPrediction}.`
-        : "Computational predictions were unavailable.",
+      compAvailable ? compSummary : "Computational predictions were unavailable.",
     ),
     mk(
       "BP7",

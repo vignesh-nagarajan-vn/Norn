@@ -87,7 +87,7 @@ The user is a molecular geneticist or genetic counselor doing variant curation. 
 ## What it does, end to end
 
 1. Normalizes the input with Ensembl variant_recoder.
-2. Annotates it with Ensembl VEP: molecular consequence, transcript, protein change, SIFT and PolyPhen.
+2. Annotates it with Ensembl VEP: molecular consequence, transcript, protein change, and in-silico scores (AlphaMissense, SIFT, PolyPhen).
 3. Reads population frequency from gnomAD v4.
 4. Reads neighboring-residue evidence from ClinVar (for PS1 and PM5 only).
 5. Computes objective signals and thresholds in code.
@@ -124,10 +124,10 @@ Norn adjudicates ten criteria automatically and lets the curator supply the eigh
 | PM1 | Mutational hotspot or functional domain (local pathogenic cluster) | Moderate (+2) | ClinVar |
 | PM2 | Absent or very rare in gnomAD | Moderate downgraded to Supporting (+1) | gnomAD v4 |
 | PM5 | Different pathogenic missense at the same residue | Moderate (+2) | ClinVar |
-| PP3 | Concordant computational evidence for damage | Supporting (+1) | VEP (SIFT, PolyPhen) |
+| PP3 | Calibrated computational evidence for damage | Supporting (+1) | VEP (AlphaMissense) |
 | BA1 | Allele frequency above 5% | Stand-alone benign override | gnomAD v4 |
 | BS1 | Frequency greater than expected for the disorder | Strong (-4) | gnomAD v4 |
-| BP4 | Concordant computational evidence for tolerance | Supporting (-1) | VEP (SIFT, PolyPhen) |
+| BP4 | Calibrated computational evidence for tolerance | Supporting (-1) | VEP (AlphaMissense) |
 | BP7 | Synonymous with no predicted splice impact | Supporting (-1) | Ensembl VEP |
 
 **Curator-supplied (toggled in the report, classification recomputes live):** PS2, PS3, PS4, PM3, PM6, PP1 (pathogenic) and BS3, BS4 (benign). These need functional, segregation, de novo, or allelic-phase evidence that Norn does not fetch, so a human applies them.
@@ -143,9 +143,9 @@ Norn uses gene-specific allele-frequency thresholds where a rule is available (a
 
 - Generic defaults: BA1 above 0.05 (Richards et al. 2015), BS1 above 0.01, PM2 below 0.0001 or absent.
 - Gene-specific example: BRCA1/BRCA2 use much stricter thresholds (illustrative ENIGMA-style values), so a low-frequency founder allele does not clear PM2.
-- Computational concordance: PP3 when SIFT is deleterious and PolyPhen is probably damaging; BP4 when SIFT is tolerated and PolyPhen is benign. Modern practice uses calibrated meta-predictors; this two-tool concordance is a documented simplification.
+- Computational evidence: PP3 and BP4 are driven by AlphaMissense (Cheng et al. 2023), a calibrated missense predictor carried by the same VEP call. Its published class cutoffs map to a supporting call: `likely_pathogenic` fires PP3, `likely_benign` fires BP4, and `ambiguous` fires neither. SIFT and PolyPhen concordance is the fallback only when AlphaMissense does not cover the variant (for example indels), and both are shown for corroboration. Applied at Supporting strength.
 
-The representative allele frequency is the larger of the global and popmax frequencies, which approximates a filtering allele frequency for this demo.
+For the benign frequency criteria (BA1, BS1), the representative allele frequency is gnomAD's faf95 (the 95% CI filtering allele frequency of the grpmax population, the ClinGen SVI recommendation), falling back to the larger of the global and popmax point estimates when a variant is too rare for an faf95. Using the filtering AF, not the raw popmax, keeps a noisy small-population estimate from overcalling BS1. For example, BRCA1 p.Arg1699Gln has a popmax of 1.19e-4 but an faf95 of 3.98e-5, so it stays a VUS rather than being called Likely Benign.
 
 ### Points to classification
 
@@ -223,8 +223,8 @@ Because Norn applies PM2 at supporting strength, exact agreement is lower than d
 
 ## Data sources
 
-- **Ensembl VEP and variant_recoder** (REST): molecular consequence, transcript, protein change, in-silico scores, and input normalization. https://rest.ensembl.org
-- **gnomAD v4** (GraphQL): population allele frequency and gene constraint (pLI, LOEUF). https://gnomad.broadinstitute.org
+- **Ensembl VEP and variant_recoder** (REST): molecular consequence, transcript, protein change, in-silico scores (AlphaMissense, SIFT, PolyPhen), and input normalization. https://rest.ensembl.org
+- **gnomAD v4** (GraphQL): population allele frequency including the faf95 filtering AF, and gene constraint (pLI, LOEUF). https://gnomad.broadinstitute.org
 - **ClinVar** (NCBI E-utilities): neighboring-residue evidence and eval ground truth. https://www.ncbi.nlm.nih.gov/clinvar/
 - **PubMed** (NCBI E-utilities): literature search for the gene and protein change. https://pubmed.ncbi.nlm.nih.gov
 - **AlphaFold** (via UniProt): the predicted protein structure for the optional 3D view, fetched through a same-origin proxy. https://alphafold.ebi.ac.uk
@@ -313,7 +313,7 @@ docs/                architecture and scoring diagrams, design notes, archived U
 - Norn automates 10 of the 28 ACMG/AMP criteria and leaves 8 evidence-dependent ones (functional, segregation, de novo, allelic) to the curator; it does not curate literature itself.
 - PVS1 does not verify that loss of function is a disease mechanism for the gene. It is flagged provisional.
 - Frequency thresholds are generic defaults, not gene- and disease-specific.
-- Computational evidence uses SIFT and PolyPhen concordance, not calibrated meta-predictors.
+- Computational evidence (PP3/BP4) uses the calibrated AlphaMissense score at its published class cutoffs, with SIFT and PolyPhen concordance as the fallback for variants it does not cover. It is applied at a single Supporting strength rather than the full tiered (Supporting/Moderate/Strong) calibration.
 - The gnomAD variant lookup for complex indels can miss if coordinate normalization does not match gnomAD's minimal representation. The affected criteria degrade to unknown.
 - The protein lollipop shows a sample of ClinVar variants for the gene and is best-effort. It falls back cleanly when protein positions are unavailable.
 - Norn is not a diagnostic device and must not be used for clinical decisions.
@@ -322,7 +322,7 @@ docs/                architecture and scoring diagrams, design notes, archived U
 
 Still ahead for the product:
 
-- **Calibrated predictors.** Replace SIFT and PolyPhen concordance for PP3 and BP4 with calibrated meta-predictors (REVEL, AlphaMissense, BayesDel) at published thresholds.
+- **Calibrated predictors.** PP3 and BP4 now use AlphaMissense at its published class cutoffs (delivered). Still ahead: additional meta-predictors (REVEL, BayesDel) and the full tiered strength calibration (Pejaver et al. 2022), so a very high or very low score can reach Moderate or Strong rather than only Supporting.
 - **Audit trail.** A server-side store of interpretations and sign-off history so a lab can track who reviewed what and when.
 - **Confidence calibration.** Score Norn against a larger labeled set and report calibrated confidence per classification.
 

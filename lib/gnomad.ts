@@ -2,10 +2,13 @@
 // Endpoint: https://gnomad.broadinstitute.org/api
 //
 // Looks up a variant by rsID when available (exact, including indels) and
-// otherwise by chrom-pos-ref-alt. Reads genome and exome global AF
-// plus per-population counts, and derives a popmax (highest continental AF).
-// The representative AF used against ACMG thresholds is the larger of the
-// global and popmax values, approximating a filtering allele frequency.
+// otherwise by chrom-pos-ref-alt. Reads genome and exome global AF plus
+// per-population counts, the popmax (highest continental AF point estimate), and
+// faf95, gnomAD's filtering allele frequency (the 95% CI lower bound of the
+// grpmax population AF). The representative AF used against the ACMG thresholds
+// is the faf95 filtering AF when available (the ClinGen SVI recommendation for
+// BA1/BS1, robust to noisy small-population point estimates), and falls back to
+// the larger of the global and popmax values for variants without an faf95.
 
 import { cached } from "./cache";
 import { fetchWithRetry, SourceError } from "./http";
@@ -27,6 +30,7 @@ interface FreqBlock {
   ac: number | null;
   an: number | null;
   af: number | null;
+  faf95?: { popmax: number | null; popmax_population: string | null } | null;
   populations?: Populations[];
 }
 interface GnomadResponse {
@@ -48,8 +52,8 @@ function query(byRsid: boolean): string {
   return `query VariantFreq(${varsDef}) {
     variant(${arg}, dataset: $dataset) {
       variant_id
-      genome { ac an af populations { id ac an } }
-      exome { ac an af populations { id ac an } }
+      genome { ac an af faf95 { popmax popmax_population } populations { id ac an } }
+      exome { ac an af faf95 { popmax popmax_population } populations { id ac an } }
     }
   }`;
 }
@@ -102,7 +106,13 @@ function shape(json: GnomadResponse, fallbackId: string): FrequencyEvidence {
   const popmaxAf = Math.max(pmGenome.af ?? 0, pmExome.af ?? 0);
   const popmaxPopulation =
     (pmGenome.af ?? 0) >= (pmExome.af ?? 0) ? pmGenome.pop : pmExome.pop;
-  const representativeAf = Math.max(globalAf, popmaxAf);
+  // faf95: the 95% CI filtering allele frequency (grpmax). Preferred for the
+  // benign frequency criteria; null when counts are too low to compute one.
+  const genFaf = v.genome?.faf95?.popmax ?? null;
+  const exoFaf = v.exome?.faf95?.popmax ?? null;
+  const filteringAf =
+    genFaf != null || exoFaf != null ? Math.max(genFaf ?? 0, exoFaf ?? 0) : null;
+  const representativeAf = filteringAf ?? Math.max(globalAf, popmaxAf);
   return {
     found: true,
     gnomadVariantId: v.variant_id ?? fallbackId,
@@ -111,6 +121,7 @@ function shape(json: GnomadResponse, fallbackId: string): FrequencyEvidence {
     globalAf,
     popmaxAf,
     popmaxPopulation,
+    filteringAf,
     representativeAf,
     ac: (v.genome?.ac ?? 0) + (v.exome?.ac ?? 0),
     an: Math.max(v.genome?.an ?? 0, v.exome?.an ?? 0) || null,
@@ -126,6 +137,7 @@ function absent(id: string): FrequencyEvidence {
     globalAf: 0,
     popmaxAf: 0,
     popmaxPopulation: null,
+    filteringAf: null,
     representativeAf: 0,
     ac: 0,
     an: null,

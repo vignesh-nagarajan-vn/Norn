@@ -6,6 +6,7 @@
 import { appliedPointsFor, CRITERIA } from "./acmg";
 import { clinvarSearchUrl, clinvarVariantUrl } from "./clinvar";
 import { gnomadUrl } from "./gnomad";
+import { describeComputational } from "./signals";
 import type {
   AdjudicatedCriterion,
   CriterionResult,
@@ -125,12 +126,12 @@ function buildFor(code: string, b: EvidenceBundle): Built {
     }
     case "PP3": {
       if (!b.computational.available) {
-        return { evidence: "SIFT and PolyPhen predictions not available for this variant.", signalVerdict: null };
+        return { evidence: "No computational predictor (AlphaMissense, SIFT, or PolyPhen) available for this variant.", signalVerdict: null };
       }
       return {
-        evidence: `SIFT ${c.siftPrediction ?? "n/a"}, PolyPhen ${c.polyphenPrediction ?? "n/a"}.`,
+        evidence: describeComputational(b.computational),
         sourceUrl: ensemblTranscriptUrl(c.transcriptId),
-        signalVerdict: s.pp3.damaging ? "met" : b.computational.tolerantConcordant ? "not_met" : null,
+        signalVerdict: s.pp3.damaging ? "met" : b.computational.tolerant ? "not_met" : null,
       };
     }
     case "BA1": {
@@ -155,12 +156,12 @@ function buildFor(code: string, b: EvidenceBundle): Built {
     }
     case "BP4": {
       if (!b.computational.available) {
-        return { evidence: "SIFT and PolyPhen predictions not available for this variant.", signalVerdict: null };
+        return { evidence: "No computational predictor (AlphaMissense, SIFT, or PolyPhen) available for this variant.", signalVerdict: null };
       }
       return {
-        evidence: `SIFT ${c.siftPrediction ?? "n/a"}, PolyPhen ${c.polyphenPrediction ?? "n/a"}.`,
+        evidence: describeComputational(b.computational),
         sourceUrl: ensemblTranscriptUrl(c.transcriptId),
-        signalVerdict: s.bp4.tolerant ? "met" : b.computational.damagingConcordant ? "not_met" : null,
+        signalVerdict: s.bp4.tolerant ? "met" : b.computational.damaging ? "not_met" : null,
       };
     }
     case "BP7": {

@@ -43,7 +43,7 @@
   <rect x="268" y="242" width="196" height="66" rx="10" fill="#fbf8f1" stroke="#ddd3bf" stroke-width="1.5"/>
   <text x="282" y="266" class="h" font-size="13">2. Annotate</text>
   <text x="282" y="285" class="sub" font-size="11">Ensembl VEP: consequence,</text>
-  <text x="282" y="299" class="sub" font-size="11">protein position, SIFT, PolyPhen</text>
+  <text x="282" y="299" class="sub" font-size="11">protein position, AlphaMissense</text>
 
   <rect x="480" y="242" width="204" height="66" rx="10" fill="#fbf8f1" stroke="#ddd3bf" stroke-width="1.5"/>
   <text x="494" y="266" class="h" font-size="13">3. Evidence (parallel)</text>

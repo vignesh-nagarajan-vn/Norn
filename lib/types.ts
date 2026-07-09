@@ -18,6 +18,10 @@ export type Classification =
 
 export type Confidence = "High" | "Moderate" | "Low";
 
+// AlphaMissense pathogenicity class (Cheng et al. 2023, Science), as returned by
+// Ensembl VEP: likely_benign <= 0.34, ambiguous, likely_pathogenic >= 0.564.
+export type AlphaMissenseClass = "likely_benign" | "ambiguous" | "likely_pathogenic";
+
 export type SourceState = "ok" | "unavailable" | "empty";
 
 // The static definition of one ACMG/AMP criterion as Norn implements it.
@@ -78,6 +82,8 @@ export interface ConsequenceEvidence {
   siftScore?: number | null;
   polyphenPrediction?: string | null;
   polyphenScore?: number | null;
+  alphaMissenseScore?: number | null; // 0..1, missense only
+  alphaMissenseClass?: AlphaMissenseClass | null;
   canonical?: boolean;
 }
 
@@ -87,9 +93,10 @@ export interface FrequencyEvidence {
   genomeAf?: number | null;
   exomeAf?: number | null;
   globalAf?: number | null; // max of genome / exome global AF
-  popmaxAf?: number | null; // max continental-population AF
+  popmaxAf?: number | null; // max continental-population AF (point estimate)
   popmaxPopulation?: string | null;
-  representativeAf?: number | null; // AF used against thresholds
+  filteringAf?: number | null; // gnomAD faf95 popmax (95% CI filtering AF)
+  representativeAf?: number | null; // AF used against thresholds (faf95 when available)
   ac?: number | null;
   an?: number | null;
 }
@@ -99,9 +106,12 @@ export interface ComputationalEvidence {
   siftScore?: number | null;
   polyphenPrediction?: string | null;
   polyphenScore?: number | null;
-  damagingConcordant: boolean;
-  tolerantConcordant: boolean;
-  available: boolean;
+  alphaMissenseScore?: number | null;
+  alphaMissenseClass?: AlphaMissenseClass | null;
+  predictor: "AlphaMissense" | "SIFT+PolyPhen" | null; // which predictor drove PP3/BP4
+  damaging: boolean; // calibrated call supports a damaging effect (PP3)
+  tolerant: boolean; // calibrated call supports tolerance (BP4)
+  available: boolean; // a usable computational predictor was returned
 }
 
 export interface ClinVarNeighbor {

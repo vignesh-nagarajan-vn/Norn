@@ -24,6 +24,11 @@ function isBenignLabel(c: string): boolean {
   return l.includes("benign") && !l.includes("pathogenic") && !l.includes("conflict");
 }
 
+// PP3/BP4 evidence. AlphaMissense (Cheng et al. 2023) is a calibrated missense
+// predictor and is preferred when present; its published class cutoffs map
+// directly to a supporting call (likely_pathogenic -> damaging, likely_benign ->
+// tolerant, ambiguous -> neither). SIFT/PolyPhen concordance is the fallback for
+// variants AlphaMissense does not cover (for example indels near a coding edge).
 export function computationalEvidence(c: ConsequenceEvidence): ComputationalEvidence {
   const sift = (c.siftPrediction ?? "").toLowerCase();
   const poly = (c.polyphenPrediction ?? "").toLowerCase();
@@ -31,17 +36,54 @@ export function computationalEvidence(c: ConsequenceEvidence): ComputationalEvid
   const siftTolerated = sift.startsWith("tolerated");
   const polyDamaging = poly === "probably_damaging";
   const polyBenign = poly === "benign";
-  const available = Boolean(sift) && Boolean(poly);
+  const siftPolyAvailable = Boolean(sift) && Boolean(poly);
+
+  const amScore = c.alphaMissenseScore ?? null;
+  const amClass = c.alphaMissenseClass ?? null;
+  const hasAlphaMissense = amScore != null && amClass != null;
+
+  let predictor: ComputationalEvidence["predictor"] = null;
+  let damaging = false;
+  let tolerant = false;
+  if (hasAlphaMissense) {
+    predictor = "AlphaMissense";
+    damaging = amClass === "likely_pathogenic";
+    tolerant = amClass === "likely_benign";
+  } else if (siftPolyAvailable) {
+    predictor = "SIFT+PolyPhen";
+    damaging = siftDeleterious && polyDamaging;
+    tolerant = siftTolerated && polyBenign;
+  }
 
   return {
     siftPrediction: c.siftPrediction ?? null,
     siftScore: c.siftScore ?? null,
     polyphenPrediction: c.polyphenPrediction ?? null,
     polyphenScore: c.polyphenScore ?? null,
-    damagingConcordant: siftDeleterious && polyDamaging,
-    tolerantConcordant: siftTolerated && polyBenign,
-    available,
+    alphaMissenseScore: amScore,
+    alphaMissenseClass: amClass,
+    predictor,
+    damaging,
+    tolerant,
+    available: predictor != null,
   };
+}
+
+// One human-readable line describing the computational evidence, shared by the
+// assembler and the deterministic fallback so both read identically.
+export function describeComputational(comp: ComputationalEvidence): string {
+  const parts: string[] = [];
+  if (comp.alphaMissenseScore != null && comp.alphaMissenseClass) {
+    parts.push(
+      `AlphaMissense ${comp.alphaMissenseScore.toFixed(3)} (${comp.alphaMissenseClass.replace(/_/g, " ")})`,
+    );
+  }
+  const sp: string[] = [];
+  if (comp.siftPrediction) sp.push(`SIFT ${comp.siftPrediction}`);
+  if (comp.polyphenPrediction) sp.push(`PolyPhen ${comp.polyphenPrediction}`);
+  if (sp.length) parts.push(sp.join(", "));
+  if (parts.length === 0) return "No computational predictor available.";
+  return `${parts.join("; ")}.`;
 }
 
 export function computeSignals(
@@ -79,10 +121,10 @@ export function computeSignals(
     pm1: { hotspot, pathogenicNearby, benignNearby, window: PM1_WINDOW },
     pm2: { rare: af != null && af < thresholds.pm2Af, threshold: thresholds.pm2Af, observedAf: af },
     pm5: { present: clinvar.sameResidueDifferentAa.length > 0 },
-    pp3: { damaging: computational.damagingConcordant },
+    pp3: { damaging: computational.damaging },
     ba1: { common: af != null && af > thresholds.ba1Af, threshold: thresholds.ba1Af, observedAf: af },
     bs1: { elevated: af != null && af > thresholds.bs1Af, threshold: thresholds.bs1Af, observedAf: af },
-    bp4: { tolerant: computational.tolerantConcordant },
+    bp4: { tolerant: computational.tolerant },
     bp7: { synonymous },
   };
 }

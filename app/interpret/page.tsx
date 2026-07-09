@@ -9,10 +9,31 @@ import { PrefsProvider } from "@/components/Prefs";
 import { Icon } from "@/components/ui";
 import { useInterpret } from "@/components/useInterpret";
 
+// The three chips are a scripted demo path: one clear pathogenic, one clear
+// benign, and one VUS that a curator flips with toggles. Each note points at the
+// differentiator it shows off.
 const EXAMPLES: Example[] = [
-  { input: "BRCA1:c.5266dupC", tag: "Pathogenic", color: "var(--pathogenic)", consequence: "Frameshift variant" },
-  { input: "CFTR:c.1408A>G", tag: "Benign", color: "var(--benign)", consequence: "Common missense (BA1)" },
-  { input: "BRCA1:c.5096G>A", tag: "VUS", color: "var(--vus)", consequence: "Reduced-penetrance missense" },
+  {
+    input: "BRCA1:c.5266dupC",
+    tag: "Pathogenic",
+    color: "var(--pathogenic)",
+    consequence: "Frameshift variant",
+    note: "PVS1 null allele: the engine adds +8 in code, the model only justifies.",
+  },
+  {
+    input: "CFTR:c.1408A>G",
+    tag: "Benign",
+    color: "var(--benign)",
+    consequence: "Common missense (BA1)",
+    note: "62% in gnomAD trips BA1, a stand-alone override straight to Benign.",
+  },
+  {
+    input: "BRCA1:c.5096G>A",
+    tag: "VUS",
+    color: "var(--vus)",
+    consequence: "Reduced-penetrance missense",
+    note: "AlphaMissense drives PP3; sits at +3 (VUS). Toggle curator evidence to flip it live.",
+  },
 ];
 
 export default function InterpretPage() {

@@ -84,7 +84,7 @@
 
   <rect x="496" y="350" width="418" height="50" rx="8" fill="#fffdf8" stroke="#eadfce"/>
   <text x="510" y="371" class="mono" font-size="12" font-weight="700" fill="#221d15">BRCA1:c.5096G&gt;A</text>
-  <text x="510" y="390" class="tiny">PM2 +1, PM5 +2, PP3 +1  =  +4</text>
+  <text x="510" y="390" class="tiny">PM5 +2, PP3 +1 (AlphaMissense)  =  +3</text>
   <rect x="782" y="364" width="120" height="24" rx="12" fill="#eae4d6"/>
   <text x="842" y="380" text-anchor="middle" font-size="11" font-weight="700" fill="#665d4c">Uncertain (VUS)</text>
 
