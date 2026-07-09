@@ -88,7 +88,7 @@ data/
   gene-thresholds.json  illustrative gene-specific AF thresholds
 docs/
   architecture.svg, scoring-model.svg, DESIGN.md, MCP.md
-  ui-landing.png, ui-dashboard.png, ui-batch.png, ui-docs.png (dark, the default), ui-dashboard-light.png  README screenshots
+  ui-landing.png, ui-dashboard.png, ui-3d.png, ui-landing-drafted.png, ui-batch.png, ui-docs.png (dark, the default), ui-dashboard-light.png  README screenshots
   archive/              previous "Scientific Precision" UI screenshots and diagrams + note
 design/                 brand kit: logo/, illustrations/, slides/deck.html, tokens.css, README (guide)
 public/                 manifest.webmanifest, icons/ (PWA), norn-demo.webm + poster, deck.html + norn-deck.pdf

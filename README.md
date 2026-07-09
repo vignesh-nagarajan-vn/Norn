@@ -228,8 +228,10 @@ Because Norn applies PM2 at supporting strength, exact agreement is lower than d
 ## Data sources
 
 - **Ensembl VEP and variant_recoder** (REST): molecular consequence, transcript, protein change, in-silico scores, and input normalization. https://rest.ensembl.org
-- **gnomAD v4** (GraphQL): population allele frequency. https://gnomad.broadinstitute.org
+- **gnomAD v4** (GraphQL): population allele frequency and gene constraint (pLI, LOEUF). https://gnomad.broadinstitute.org
 - **ClinVar** (NCBI E-utilities): neighboring-residue evidence and eval ground truth. https://www.ncbi.nlm.nih.gov/clinvar/
+- **PubMed** (NCBI E-utilities): literature search for the gene and protein change. https://pubmed.ncbi.nlm.nih.gov
+- **AlphaFold** (via UniProt): the predicted protein structure for the optional 3D view, fetched through a same-origin proxy. https://alphafold.ebi.ac.uk
 
 Every external call has a timeout, one retry, and graceful degradation. If a source is unavailable, the affected criteria are marked unknown rather than failing the whole request. In-memory caching keeps repeated lookups within a warm serverless instance cheap.
 
@@ -291,7 +293,10 @@ app/                 Next.js App Router pages and API routes
   opengraph-image.png, twitter-image.png, apple-icon.png   social + app icons
   api/interpret/     streaming pipeline route (NDJSON)
   api/eval/          serves the static eval dataset
-components/           UI: pipeline view, scorecard, points meter, lollipop, curator panel
+  api/ask/           Ask-the-copilot chat (Claude)
+  api/literature/    PubMed search
+  api/structure/     AlphaFold structure proxy (for the 3D view)
+components/           UI: pipeline view, scorecard, points meter, lollipop, curator panel, 3D structure
 lib/                  engine and clients
   acmg.ts            criteria specs, points, classification thresholds
   anthropic.ts       the two Claude passes
@@ -302,8 +307,8 @@ lib/                  engine and clients
   fallback.ts        deterministic heuristic when no key is set
   fixtures.ts        offline demo data for the example chips
 data/eval-variants.json   the 20-variant evaluation set
-design/              brand kit: logo, illustrations, tokens, guide
-public/              manifest, PWA icons, the demo video and poster
+design/              brand kit: logo, illustrations, tokens, guide, deck template
+public/              manifest, PWA icons, the demo video and poster, the deck (HTML + PDF)
 docs/                architecture and scoring diagrams, design notes, archived UI
 ```
 

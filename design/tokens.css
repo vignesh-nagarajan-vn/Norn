@@ -45,3 +45,21 @@
   --vus: #b45309;
   --benign: #0b7a1e;
 }
+
+/* Dark theme is the default: it reverses the chrome only (independent of scheme). */
+:root[data-theme="dark"] {
+  --background: #17130e;   /* night vellum */
+  --surface: #211b14;
+  --surface-bright: #251f17;
+  --surface-high: #332b21;
+  --on-surface: #f1e9da;   /* light text */
+  --on-surface-variant: #bcb09b;
+  --outline: #7a6f5d;
+  --outline-variant: #3c3327;
+  --primary: #f1e9da;      /* light button */
+  --on-primary: #17130e;
+  --secondary: #d49b60;    /* lighter bronze */
+  /* deepest classification tiers lifted for legibility on the dark canvas */
+  --path: #ef4444;
+  --ben: #22c55e;
+}
