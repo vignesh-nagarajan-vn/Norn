@@ -13,6 +13,11 @@ Vignesh Nagarajan was selected as 1 of 500 builders (about half of them PhDs, po
   <img src="docs/ui-dashboard.png" width="49%" alt="Norn interpretation dashboard with ACMG point aggregation and criteria" />
 </p>
 <p align="center">
+  <img src="docs/ui-3d.png" width="49%" alt="Norn 3D structure: the variant residue highlighted on the AlphaFold model" />
+  &nbsp;
+  <img src="docs/ui-landing-drafted.png" width="49%" alt="Norn landing: a drafted interpretation, sourced and yours to confirm" />
+</p>
+<p align="center">
   <img src="docs/ui-batch.png" width="49%" alt="Norn batch worklist with classifications and points" />
   &nbsp;
   <img src="docs/ui-docs.png" width="49%" alt="Norn in-app documentation" />
@@ -32,6 +37,7 @@ Vignesh Nagarajan was selected as 1 of 500 builders (about half of them PhDs, po
   <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white">
   <img src="https://img.shields.io/badge/jsPDF-EC1C24?style=for-the-badge">
   <img src="https://img.shields.io/badge/3Dmol.js-2E7D32?style=for-the-badge">
+  <img src="https://img.shields.io/badge/WebGL-990000?style=for-the-badge&logo=webgl&logoColor=white">
   <img src="https://img.shields.io/badge/Fraunces-1F1F1F?style=for-the-badge">
 </p>
 
@@ -58,6 +64,7 @@ Vignesh Nagarajan was selected as 1 of 500 builders (about half of them PhDs, po
   <img src="https://img.shields.io/badge/GraphQL-E10098?style=for-the-badge&logo=graphql&logoColor=white">
   <img src="https://img.shields.io/badge/ClinVar-2a9d8f?style=for-the-badge">
   <img src="https://img.shields.io/badge/AlphaFold-1a5276?style=for-the-badge">
+  <img src="https://img.shields.io/badge/UniProt-00549F?style=for-the-badge">
   <img src="https://img.shields.io/badge/PubMed-326599?style=for-the-badge">
   <img src="https://img.shields.io/badge/NCBI_E--utilities-20558a?style=for-the-badge">
 </p>

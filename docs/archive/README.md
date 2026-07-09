@@ -8,8 +8,9 @@ These screenshots and diagrams are from Norn's first UI, the "Scientific Precisi
 | `ui-dashboard-v1.png` | the old interpretation dashboard |
 | `architecture-v1.svg` | the old architecture diagram (blue/indigo) |
 | `scoring-model-v1.svg` | the old scoring diagram (blue/indigo) |
+| `norn-demo-v1.webm` | the previous 30-second demo video (before the loading bar and 3D structure) |
 
-The current `docs/architecture.svg` and `docs/scoring-model.svg` are restyled to the loom identity (vellum, ink, bronze, the mark) with updated info (ten automated criteria).
+The current `docs/architecture.svg` and `docs/scoring-model.svg` are restyled to the loom identity (vellum, ink, bronze, the mark) with updated info (ten automated criteria). The current demo video (`public/norn-demo.webm`) was re-recorded to show the whole interpretation cycle with the recent changes. (The video is kept as WebM because the bundled encoder has no h264/mp4 or mp3 support.)
 
 <p align="center">
   <img src="ui-home-v1.png" width="49%" alt="Archived Norn home page (previous iteration)" />

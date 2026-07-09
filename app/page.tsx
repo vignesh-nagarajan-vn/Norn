@@ -367,29 +367,36 @@ function Landing() {
         <div className="mx-auto max-w-6xl px-6 py-20">
           <div className="mb-3 eyebrow">See it in motion</div>
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1.5fr_1fr] lg:items-center">
-            <button
-              type="button"
-              onClick={() => setVideoOpen(true)}
-              aria-label="Play the demo full screen"
-              className="group relative block w-full overflow-hidden rounded-lg border border-outline-variant bg-surface-bright text-left shadow-thread"
-            >
-              <video
-                className="w-full"
-                autoPlay
-                muted
-                loop
-                playsInline
-                poster="/norn-demo-poster.png"
-                aria-hidden
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={() => setVideoOpen(true)}
+                aria-label="Play the demo full screen"
+                className="group relative block w-full overflow-hidden rounded-lg border border-outline-variant bg-surface-bright text-left shadow-thread"
               >
-                <source src="/norn-demo.webm" type="video/webm" />
-              </video>
-              <span className="absolute inset-0 flex items-center justify-center bg-ink/0 transition-colors group-hover:bg-ink/10">
-                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/90 text-on-primary opacity-90 shadow-lift transition-transform group-hover:scale-110">
-                  <Icon name="play_arrow" size={30} fill />
+                <video
+                  className="w-full"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  poster="/norn-demo-poster.png"
+                  aria-hidden
+                >
+                  <source src="/norn-demo.webm" type="video/webm" />
+                </video>
+                <span className="absolute inset-0 flex items-center justify-center bg-ink/0 transition-colors group-hover:bg-ink/10">
+                  <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/90 text-on-primary opacity-90 shadow-lift transition-transform group-hover:scale-110">
+                    <Icon name="play_arrow" size={30} fill />
+                  </span>
                 </span>
-              </span>
-            </button>
+              </button>
+              <p className="text-[13px] leading-relaxed text-on-surface-variant">
+                This shows the interpretation feature only. Norn also has a{" "}
+                <Link href="/batch" className="link">Batch</Link> worklist and an{" "}
+                <Link href="/eval" className="link">Evaluation</Link> benchmark.
+              </p>
+            </div>
             <div>
               <h2 className="display text-3xl font-semibold tracking-tight md:text-4xl">
                 Thirty seconds, one variant.
