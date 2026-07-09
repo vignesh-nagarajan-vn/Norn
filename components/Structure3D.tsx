@@ -11,8 +11,9 @@ import { Icon } from "./ui";
   in the map or the protein position is unknown, and shows a small message if
   the structure or the viewer cannot be reached (for example offline).
 
-  AlphaFold and the 3Dmol CDN are fetched from the browser, so this works on the
-  live deployment even though a sandboxed build server may not reach them.
+  The structure is fetched through the same-origin proxy `/api/structure`, which
+  resolves the current AlphaFold model version (v4 -> v6 over time) and avoids
+  cross-origin issues; 3Dmol.js is lazy-loaded from a CDN.
 */
 
 // Gene symbol -> UniProt (reviewed, human). Covers the demo/eval genes plus
@@ -81,7 +82,8 @@ export default function Structure3D({
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const $3Dmol = (await load3Dmol()) as any;
-        const res = await fetch(`https://alphafold.ebi.ac.uk/files/AF-${uniprot}-F1-model_v4.pdb`);
+        // Same-origin proxy resolves the current AlphaFold model version and avoids CORS.
+        const res = await fetch(`/api/structure?uniprot=${uniprot}`);
         if (!res.ok) throw new Error(`structure ${res.status}`);
         const pdb = await res.text();
         if (cancelled || !mountRef.current) return;
@@ -100,7 +102,9 @@ export default function Structure3D({
           { fontSize: 12, backgroundColor: hi, backgroundOpacity: 0.9, fontColor: cssHex("--on-secondary", "#ffffff"), inFront: true },
         );
         viewer.zoomTo();
-        viewer.zoomTo({ resi: proteinPosition }, 700);
+        // Frame the residue with a little local context rather than an extreme close-up.
+        const lo = Math.max(1, (proteinPosition as number) - 14);
+        viewer.zoomTo({ resi: `${lo}-${(proteinPosition as number) + 14}` }, 700);
         viewer.spin(spin);
         viewer.render();
         if (!cancelled) setState("ready");
@@ -156,8 +160,7 @@ export default function Structure3D({
               <span className="animate-norn-pulse">Loading AlphaFold structure...</span>
             ) : (
               <span className="max-w-xs px-4 text-[13px]">
-                The 3D structure could not be loaded here (AlphaFold or the viewer was unreachable). It renders on the
-                live deployment.
+                The 3D structure could not be loaded (the structure or the viewer was unreachable).
               </span>
             )}
           </div>

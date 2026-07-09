@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { STAGES, type StageState } from "./useInterpret";
 import { NornMark } from "./ui";
 import type { StageName } from "@/lib/types";
@@ -64,10 +65,30 @@ export default function PipelineView({
     if (st === "error") anyError = true;
   });
   const active = activeIdx >= 0 ? STAGES[activeIdx] : null;
-  // Give the in-flight stage half credit so the bar advances mid-stage.
-  const pct = Math.min(100, Math.round(((done + (active ? 0.5 : 0)) / total) * 100));
-  const running = pct < 100 && !anyError;
-  const label = active ? active.label : done >= total ? "Woven" : "Gathering the threads";
+  const allDone = done >= total;
+
+  // A continuously eased progress value so the bar never jumps: it catches up to
+  // the completed-stage floor smoothly, and trickles toward the next stage while
+  // one is in flight, decelerating as it approaches.
+  const [display, setDisplay] = useState(4);
+  useEffect(() => {
+    const id = setInterval(() => {
+      setDisplay((prev) => {
+        if (anyError) return prev;
+        if (allDone) return prev >= 99.4 ? 100 : prev + (100 - prev) * 0.28;
+        const floor = (done / total) * 100;
+        const nextMilestone = ((done + 1) / total) * 100;
+        let next = prev;
+        if (prev < floor) next = prev + (floor - prev) * 0.3;
+        else next = prev + Math.min((nextMilestone - prev) * 0.05, 0.55);
+        return Math.min(next, nextMilestone - 0.4, 99);
+      });
+    }, 90);
+    return () => clearInterval(id);
+  }, [done, total, allDone, anyError]);
+
+  const pct = Math.max(0, Math.min(100, Math.round(display)));
+  const label = active ? active.label : allDone ? "Woven" : "Gathering the threads";
   const detail = active ? stages[active.key].detail ?? active.sub : "";
   const barColor = anyError ? "var(--risk-high)" : "var(--secondary)";
 
@@ -91,10 +112,10 @@ export default function PipelineView({
         </div>
         <div className="relative h-2.5 overflow-hidden rounded-full bg-surface-high">
           <div
-            className="relative h-full rounded-full transition-[width] duration-700 ease-out"
-            style={{ width: `${Math.max(6, pct)}%`, background: barColor }}
+            className="relative h-full rounded-full transition-[width] duration-200 ease-linear"
+            style={{ width: `${Math.max(4, pct)}%`, background: barColor }}
           >
-            {running && <div className="absolute inset-0 loom-shimmer" />}
+            {!allDone && !anyError && <div className="absolute inset-0 loom-shimmer" />}
           </div>
         </div>
       </div>
