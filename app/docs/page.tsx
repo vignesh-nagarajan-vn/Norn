@@ -80,9 +80,13 @@ function DocsInner() {
             <li>Locus, for example <Code>17-43057062-A-AG</Code></li>
           </ul>
           <p>
-            The pipeline lights up each stage (recode, VEP, gnomAD, ClinVar, adjudicate, review). If a public API is
-            briefly unavailable, the bundled example fixtures keep the demo working. Unresolvable input returns a
-            clear error rather than a misleading result.
+            A progress bar and six stage beads (recode, VEP, gnomAD, ClinVar, adjudicate, review) fill as the pipeline
+            runs. If a public API is briefly unavailable, the bundled example fixtures keep the demo working.
+            Unresolvable input returns a clear error rather than a misleading result.
+          </p>
+          <p>
+            The report then shows the scorecard, points meter, and protein lollipop, and, where the gene maps to a
+            protein structure, a 3D view of the variant residue on its AlphaFold model (for orientation, not evidence).
           </p>
         </Section>
 

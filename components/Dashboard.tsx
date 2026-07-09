@@ -9,6 +9,7 @@ import AskPanel from "./AskPanel";
 import CuratorEvidence from "./CuratorEvidence";
 import LiteraturePanel from "./LiteraturePanel";
 import LollipopPlot from "./LollipopPlot";
+import Structure3D from "./Structure3D";
 import { usePrefs } from "./Prefs";
 import {
   acmgStrengthColor,
@@ -496,6 +497,11 @@ export default function Dashboard({ report }: { report: NornReport; onNew?: () =
               queryLabel={queryLabel}
             />
           </div>
+          <Structure3D
+            gene={report.evidence.consequence.geneSymbol ?? null}
+            proteinPosition={report.evidence.consequence.proteinPosition ?? null}
+            queryLabel={queryLabel}
+          />
         </div>
         <div className="flex flex-col gap-6 lg:col-span-4">
           <CopilotSummary report={report} />

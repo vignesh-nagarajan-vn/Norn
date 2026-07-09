@@ -348,11 +348,26 @@ body {
   }
 }
 
+/* Loading-bar sheen: a thread drawn through the loom while a variant runs. */
+@keyframes loom-shimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+.loom-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: loom-shimmer 1.5s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-norn-pulse,
   .thread-draw,
   .thread-drift,
-  .fate-rise {
+  .fate-rise,
+  .loom-shimmer {
     animation: none !important;
   }
   .thread-draw {

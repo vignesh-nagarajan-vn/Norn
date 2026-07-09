@@ -31,6 +31,7 @@ Vignesh Nagarajan was selected as 1 of 500 builders (about half of them PhDs, po
   <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white">
   <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white">
   <img src="https://img.shields.io/badge/jsPDF-EC1C24?style=for-the-badge">
+  <img src="https://img.shields.io/badge/3Dmol.js-2E7D32?style=for-the-badge">
   <img src="https://img.shields.io/badge/Fraunces-1F1F1F?style=for-the-badge">
 </p>
 
@@ -56,6 +57,7 @@ Vignesh Nagarajan was selected as 1 of 500 builders (about half of them PhDs, po
   <img src="https://img.shields.io/badge/gnomAD_v4-1f6feb?style=for-the-badge">
   <img src="https://img.shields.io/badge/GraphQL-E10098?style=for-the-badge&logo=graphql&logoColor=white">
   <img src="https://img.shields.io/badge/ClinVar-2a9d8f?style=for-the-badge">
+  <img src="https://img.shields.io/badge/AlphaFold-1a5276?style=for-the-badge">
   <img src="https://img.shields.io/badge/PubMed-326599?style=for-the-badge">
   <img src="https://img.shields.io/badge/NCBI_E--utilities-20558a?style=for-the-badge">
 </p>
@@ -162,10 +164,11 @@ Every interpretation is interactive, not a static report:
 
 - **Landing and Dashboard.** A dynamic landing page (`/`) explains what Norn does, frames the pipeline as the three Norse fates (gather, weigh, decree), and links straight into the Dashboard (`/interpret`), the working surface where every feature below lives.
 - **Watch the demo.** A screen recording of a real interpretation plays inline on the landing and expands to a full-screen player (also on `?demo=1`), so a new visitor understands the pipeline without typing a variant. The recording is kept in light mode.
-- **Live pipeline view.** Each stage (recode, VEP, gnomAD, ClinVar, adjudicate, review) lights up as it completes, streamed over newline-delimited JSON.
+- **Live pipeline view.** A progress bar and six stage beads (recode, VEP, gnomAD, ClinVar, adjudicate, review) fill as each stage completes, streamed over newline-delimited JSON.
 - **ACMG scorecard and points meter.** A row per criterion with its strength, verdict, evidence, and source, plus a meter showing where the total lands on the Pathogenic-to-Benign scale.
 - **Curator-supplied evidence.** Toggle the criteria that need functional, segregation, de novo, or phase evidence; the classification and points recompute live.
 - **Protein lollipop.** The query variant plotted against ClinVar variants at nearby residues, colored by classification.
+- **3D structure.** When the gene maps to a UniProt entry and a protein position is known, the variant residue is highlighted on the AlphaFold predicted structure, rendered in the browser with 3Dmol.js. It is shown for orientation, not as evidence.
 - **Ask the copilot.** A chat panel where the curator can question the interpretation. Claude answers using only that report as its knowledge base, so it explains the call without inventing new evidence or a different label.
 - **Literature.** Search PubMed for the gene and protein change to surface functional and case evidence Norn does not read itself.
 - **Batch mode.** Paste a list, upload a plain list, CSV, or VCF, or load a sample batch of well-established ClinVar and gnomAD variants, and interpret many at once into a sortable worklist (`/batch`).
