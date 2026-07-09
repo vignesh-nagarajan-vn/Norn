@@ -13,9 +13,9 @@ Vignesh Nagarajan was selected as 1 of 500 builders (about half of them PhDs, po
   <img src="docs/ui-dashboard.png" width="49%" alt="Norn interpretation dashboard with ACMG point aggregation and criteria" />
 </p>
 <p align="center">
-  <img src="docs/ui-3d.png" width="49%" alt="Norn 3D structure: the variant residue highlighted on the AlphaFold model" />
-  &nbsp;
   <img src="docs/ui-landing-drafted.png" width="49%" alt="Norn landing: a drafted interpretation, sourced and yours to confirm" />
+  &nbsp;
+  <img src="docs/ui-3d.png" width="49%" alt="Norn 3D structure: the variant residue highlighted on the AlphaFold model" />
 </p>
 <p align="center">
   <img src="docs/ui-batch.png" width="49%" alt="Norn batch worklist with classifications and points" />
