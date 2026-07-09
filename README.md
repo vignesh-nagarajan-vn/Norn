@@ -10,7 +10,7 @@ Vignesh Nagarajan was selected as 1 of 500 builders (about half of them PhDs, po
 <p align="center">
   <img src="docs/ui-landing.png" width="49%" alt="Norn landing page: read the evidence, draft the verdict" />
   &nbsp;
-  <img src="docs/ui-dashboard.png" width="49%" alt="Norn interpretation dashboard with ACMG point aggregation and criteria" />
+  <img src="docs/ui-dashboard.png" width="49%" alt="Norn criteria adjudication: PP3 met on AlphaMissense, with gnomAD faf95 filtering AF against the frequency criteria" />
 </p>
 <p align="center">
   <img src="docs/ui-landing-drafted.png" width="49%" alt="Norn landing: a drafted interpretation, sourced and yours to confirm" />
