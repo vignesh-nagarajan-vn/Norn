@@ -9,14 +9,14 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   metadataBase: new URL("https://norn-five.vercel.app"),
   title: {
-    default: "Norn: variant interpretation copilot",
+    default: "Norn: Variant Interpretation Copilot",
     template: "%s · Norn",
   },
   description: DESCRIPTION,
   applicationName: "Norn",
   manifest: "/manifest.webmanifest",
   openGraph: {
-    title: "Norn: variant interpretation copilot",
+    title: "Norn: Variant Interpretation Copilot",
     description: DESCRIPTION,
     url: "/",
     siteName: "Norn",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Norn: variant interpretation copilot",
+    title: "Norn: Variant Interpretation Copilot",
     description: DESCRIPTION,
   },
 };
@@ -42,7 +42,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    // The pre-paint themeInit script sets data-theme/data-scheme on <html> before
+    // hydration, so the server markup does not carry them; suppress the resulting
+    // attribute-mismatch warning (this element only).
+    <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />

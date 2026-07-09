@@ -49,6 +49,89 @@ function StageNode({ state }: { state: StageState & { label: string; sub: string
   );
 }
 
+/*
+  The loading bar. A requestAnimationFrame loop eases the displayed value toward a
+  moving target every frame (frame-rate independent, via an exponential approach),
+  and the bar width is driven by that float value, so it glides smoothly instead of
+  stepping between stage events. Isolated in its own component so the per-frame
+  updates never re-render the stage nodes.
+*/
+function ThreadBar({
+  done,
+  total,
+  allDone,
+  anyError,
+  label,
+  detail,
+  barColor,
+}: {
+  done: number;
+  total: number;
+  allDone: boolean;
+  anyError: boolean;
+  label: string;
+  detail: string;
+  barColor: string;
+}) {
+  const [display, setDisplay] = useState(4);
+
+  useEffect(() => {
+    const reduce =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      // Respect reduced motion: snap to the meaningful value, no animation.
+      setDisplay((prev) => Math.max(prev, allDone ? 100 : (done / total) * 100));
+      return;
+    }
+    let raf = 0;
+    let last = performance.now();
+    const step = (now: number) => {
+      const dt = Math.min(now - last, 120); // clamp so a backgrounded tab does not lurch
+      last = now;
+      setDisplay((prev) => {
+        if (anyError) return prev;
+        const floor = (done / total) * 100;
+        const nextMilestone = ((done + 1) / total) * 100;
+        // Aim just short of the next stage while one is in flight; 100 when finished.
+        const target = allDone ? 100 : Math.max(floor, nextMilestone - 1.5);
+        // Cover a fixed fraction of the remaining gap per millisecond, so the bar
+        // decelerates into the target rather than jumping to it.
+        const k = allDone ? 0.006 : 0.0022;
+        let next = prev + (target - prev) * (1 - Math.exp(-k * dt));
+        if (allDone) next = next > 99.7 ? 100 : next;
+        else next = Math.min(next, nextMilestone - 0.4);
+        return Math.max(prev, next); // never regress
+      });
+      raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [done, total, allDone, anyError]);
+
+  const pct = Math.round(display);
+
+  return (
+    <div className="mb-5">
+      <div className="mb-2 flex items-center justify-between text-xs">
+        <span className="text-on-surface-variant">
+          <span className="font-semibold text-on-surface">{label}</span>
+          {detail ? <span className="text-outline"> · {detail}</span> : null}
+        </span>
+        <span className="mono font-semibold" style={{ color: barColor }}>{pct}%</span>
+      </div>
+      <div className="relative h-2.5 overflow-hidden rounded-full bg-surface-high">
+        <div
+          className="relative h-full rounded-full"
+          style={{ width: `${Math.max(4, display)}%`, background: barColor }}
+        >
+          {!allDone && !anyError && <div className="absolute inset-0 loom-shimmer" />}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function PipelineView({
   stages,
 }: {
@@ -67,27 +150,6 @@ export default function PipelineView({
   const active = activeIdx >= 0 ? STAGES[activeIdx] : null;
   const allDone = done >= total;
 
-  // A continuously eased progress value so the bar never jumps: it catches up to
-  // the completed-stage floor smoothly, and trickles toward the next stage while
-  // one is in flight, decelerating as it approaches.
-  const [display, setDisplay] = useState(4);
-  useEffect(() => {
-    const id = setInterval(() => {
-      setDisplay((prev) => {
-        if (anyError) return prev;
-        if (allDone) return prev >= 99.4 ? 100 : prev + (100 - prev) * 0.28;
-        const floor = (done / total) * 100;
-        const nextMilestone = ((done + 1) / total) * 100;
-        let next = prev;
-        if (prev < floor) next = prev + (floor - prev) * 0.3;
-        else next = prev + Math.min((nextMilestone - prev) * 0.05, 0.55);
-        return Math.min(next, nextMilestone - 0.4, 99);
-      });
-    }, 90);
-    return () => clearInterval(id);
-  }, [done, total, allDone, anyError]);
-
-  const pct = Math.max(0, Math.min(100, Math.round(display)));
   const label = active ? active.label : allDone ? "Woven" : "Gathering the threads";
   const detail = active ? stages[active.key].detail ?? active.sub : "";
   const barColor = anyError ? "var(--risk-high)" : "var(--secondary)";
@@ -102,23 +164,15 @@ export default function PipelineView({
       </div>
 
       {/* Dynamic loading bar (bronze thread, matches the scheme). */}
-      <div className="mb-5">
-        <div className="mb-2 flex items-center justify-between text-xs">
-          <span className="text-on-surface-variant">
-            <span className="font-semibold text-on-surface">{label}</span>
-            {detail ? <span className="text-outline"> · {detail}</span> : null}
-          </span>
-          <span className="mono font-semibold" style={{ color: barColor }}>{pct}%</span>
-        </div>
-        <div className="relative h-2.5 overflow-hidden rounded-full bg-surface-high">
-          <div
-            className="relative h-full rounded-full transition-[width] duration-200 ease-linear"
-            style={{ width: `${Math.max(4, pct)}%`, background: barColor }}
-          >
-            {!allDone && !anyError && <div className="absolute inset-0 loom-shimmer" />}
-          </div>
-        </div>
-      </div>
+      <ThreadBar
+        done={done}
+        total={total}
+        allDone={allDone}
+        anyError={anyError}
+        label={label}
+        detail={detail}
+        barColor={barColor}
+      />
 
       <div className="flex items-start gap-2">
         {STAGES.map((s, i) => (

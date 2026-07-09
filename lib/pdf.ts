@@ -366,7 +366,7 @@ export async function exportReportPdf(report: NornReport): Promise<void> {
     doc.setFont("times", "normal");
     doc.setFontSize(8);
     doc.setTextColor(GREY[0], GREY[1], GREY[2]);
-    doc.text("Norn  ·  variant interpretation copilot", margin + 15, pageH - 19);
+    doc.text("Norn  ·  Variant Interpretation Copilot", margin + 15, pageH - 19);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(7.5);
     doc.setTextColor(ERROR[0], ERROR[1], ERROR[2]);

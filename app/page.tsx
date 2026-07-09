@@ -140,7 +140,43 @@ const FATES = [
   },
 ];
 
-const STAGES = ["recode", "VEP", "gnomAD", "ClinVar", "adjudicate", "review"];
+// The end-to-end pipeline drawn as beads on a thread. Grouped into three phases:
+// four evidence sources gathered in parallel, two Claude reasoning passes, and the
+// engine's decision (the classification is computed in code, never by the model).
+type ThreadKind = "gather" | "claude" | "decide";
+const THREAD: { key: string; icon: string; note: string; kind: ThreadKind }[] = [
+  { key: "recode", icon: "sync_alt", note: "normalize input", kind: "gather" },
+  { key: "VEP", icon: "biotech", note: "consequence", kind: "gather" },
+  { key: "gnomAD", icon: "groups", note: "frequency", kind: "gather" },
+  { key: "ClinVar", icon: "hub", note: "neighbors", kind: "gather" },
+  { key: "adjudicate", icon: "gavel", note: "Claude weighs", kind: "claude" },
+  { key: "review", icon: "fact_check", note: "Claude critiques", kind: "claude" },
+  { key: "classify", icon: "balance", note: "the label", kind: "decide" },
+];
+
+const THREAD_PHASES: { width: string; title: string; sub: string; claude?: boolean }[] = [
+  { width: "57.14%", title: "Gather evidence", sub: "public genomics, in parallel" },
+  { width: "28.57%", title: "Claude reasons", sub: "adjudicate, then critique", claude: true },
+  { width: "14.29%", title: "Engine decides", sub: "ClinGen points, in code" },
+];
+
+function beadStyle(kind: ThreadKind): React.CSSProperties {
+  if (kind === "decide") {
+    return { borderColor: "var(--secondary)", background: "var(--secondary)", color: "var(--on-secondary)" };
+  }
+  if (kind === "claude") {
+    return {
+      borderColor: "var(--secondary)",
+      background: "color-mix(in srgb, var(--secondary) 15%, var(--surface-bright))",
+      color: "var(--secondary)",
+    };
+  }
+  return {
+    borderColor: "color-mix(in srgb, var(--secondary) 45%, var(--outline-variant))",
+    background: "var(--surface)",
+    color: "var(--on-surface-variant)",
+  };
+}
 
 const FEATURES = [
   { icon: "stream", title: "Live pipeline", body: "Each stage streams over newline-delimited JSON and lights up as it completes." },
@@ -439,21 +475,62 @@ function Landing() {
             </p>
           </div>
 
-          {/* Pipeline as beads on a thread */}
-          <div className="mt-12 rounded-lg border border-outline-variant bg-surface-bright p-6">
-            <div className="mb-4 label-caps">The thread, end to end</div>
-            <div className="flex items-center">
-              {STAGES.map((s, i) => (
-                <div key={s} className="flex flex-1 items-center last:flex-none">
-                  <div className="flex flex-col items-center gap-2">
-                    <span className="flex h-4 w-4 items-center justify-center rounded-full border-2 border-secondary bg-surface">
-                      <span className="h-1.5 w-1.5 rounded-full bg-secondary" />
-                    </span>
-                    <span className="mono text-[11px] text-on-surface-variant">{s}</span>
-                  </div>
-                  {i < STAGES.length - 1 && <span className="mx-1 h-0.5 flex-1 bg-secondary/40" />}
+          {/* Pipeline as beads on a woven thread, grouped into three phases */}
+          <div className="mt-12 overflow-hidden rounded-xl border border-outline-variant bg-surface-bright">
+            <div className="flex items-center justify-between gap-3 border-b border-outline-variant px-5 py-3">
+              <span className="label-caps">The thread, end to end</span>
+              <span className="mono text-[11px] text-outline">one variant · about a minute</span>
+            </div>
+            <div className="overflow-x-auto">
+              <div className="min-w-[660px] px-5 pb-8 pt-5">
+                {/* the three phases, sized to sit above their beads */}
+                <div className="flex text-center">
+                  {THREAD_PHASES.map((p) => (
+                    <div key={p.title} style={{ width: p.width }} className="px-1.5">
+                      <div
+                        className="rounded-md border px-2 py-1.5"
+                        style={{
+                          borderColor: p.claude
+                            ? "color-mix(in srgb, var(--secondary) 40%, transparent)"
+                            : "var(--outline-variant)",
+                          background: p.claude ? "color-mix(in srgb, var(--secondary) 8%, transparent)" : "transparent",
+                        }}
+                      >
+                        <div className="flex items-center justify-center gap-1.5">
+                          {p.claude && <NornMark size={12} className="text-secondary" />}
+                          <span className="label-caps" style={p.claude ? { color: "var(--secondary)" } : undefined}>
+                            {p.title}
+                          </span>
+                        </div>
+                        <div className="mt-0.5 text-[10.5px] leading-tight text-outline">{p.sub}</div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+
+                {/* the thread of beads; the line runs behind, the beads sit on top */}
+                <div className="relative mt-5 flex">
+                  {THREAD.map((n, i) => (
+                    <div key={n.key} className="relative flex flex-1 flex-col items-center text-center">
+                      {i > 0 && (
+                        <span
+                          aria-hidden
+                          className="absolute right-1/2 top-6 z-0 h-[3px] w-full -translate-y-1/2"
+                          style={{ background: "color-mix(in srgb, var(--secondary) 38%, var(--outline-variant))" }}
+                        />
+                      )}
+                      <span
+                        className="relative z-10 flex h-12 w-12 items-center justify-center rounded-full border-2 shadow-sm"
+                        style={beadStyle(n.kind)}
+                      >
+                        <Icon name={n.icon} size={20} />
+                      </span>
+                      <span className="mt-2.5 mono text-[11px] font-semibold text-on-surface">{n.key}</span>
+                      <span className="mt-0.5 text-[11px] leading-tight text-outline">{n.note}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -527,7 +604,7 @@ function Landing() {
           <div className="flex items-center gap-2.5">
             <NornMark size={22} className="text-secondary" />
             <span className="display text-lg font-semibold">Norn</span>
-            <span className="ml-2 text-sm text-on-surface-variant">variant interpretation copilot</span>
+            <span className="ml-2 text-sm text-on-surface-variant">Variant Interpretation Copilot</span>
           </div>
           <div className="flex flex-wrap items-center gap-5 text-sm text-on-surface-variant">
             <Link href="/interpret" className="hover:text-on-surface">Dashboard</Link>

@@ -202,10 +202,6 @@ If no `ANTHROPIC_API_KEY` is set, or a model call fails, Norn falls back to a de
 
 Model selection: read from `ANTHROPIC_MODEL`, default `claude-opus-4-8`. This must be a model the API key can access, or every call returns 404 (interpretations fall back to the heuristic and the Ask panel reports a failed call). `claude-sonnet-4-6` is a faster, cheaper alternative for the same pipeline.
 
-## Known issues
-
-- **Ask the copilot does not work on the current deployment and needs to be fixed.** The chat panel returns a failed-call message instead of an answer because the deployment's API key cannot access the configured model (the default `claude-opus-4-8` returns 404), so the Claude calls fall back to the labeled offline heuristic. The fix is to set `ANTHROPIC_MODEL` on Vercel to a model the key can access (for example `claude-sonnet-4-6`) and redeploy, or to grant the key access to the configured model. Everything else in the report works regardless.
-
 ## Anti-circularity
 
 A variant's own ClinVar classification is never fed into adjudication. ClinVar is used only for two things: neighboring-residue evidence for PS1 and PM5, and the ground-truth labels in the eval set. This keeps the adjudication from simply echoing an existing ClinVar call.
@@ -335,6 +331,10 @@ Presentation and craft (how Norn is built and shown, not the product itself):
 - **A living style guide with visual-regression snapshots.** A `/style` page documenting the design tokens, the loom motif, and the criterion and verdict components, backed by the Playwright screenshot pass in CI so a future redesign cannot silently regress the views in this README.
 
 The branded PDF report and the deck template in [`design/`](design) (delivered) already carry the identity into what a lab hands around.
+
+## Known issues
+
+- **Ask the copilot does not work on the current deployment and needs to be fixed.** The chat panel returns a failed-call message instead of an answer because the deployment's API key cannot access the configured model (the default `claude-opus-4-8` returns 404), so the Claude calls fall back to the labeled offline heuristic. The fix is to set `ANTHROPIC_MODEL` on Vercel to a model the key can access (for example `claude-sonnet-4-6`) and redeploy, or to grant the key access to the configured model. Everything else in the report works regardless.
 
 ## References
 
