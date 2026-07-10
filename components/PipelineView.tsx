@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { STAGES, type StageState } from "./useInterpret";
 import { NornMark } from "./ui";
 import type { StageName } from "@/lib/types";
@@ -50,11 +50,15 @@ function StageNode({ state }: { state: StageState & { label: string; sub: string
 }
 
 /*
-  The loading bar. A requestAnimationFrame loop eases the displayed value toward a
-  moving target every frame (frame-rate independent, via an exponential approach),
-  and the bar width is driven by that float value, so it glides smoothly instead of
-  stepping between stage events. Isolated in its own component so the per-frame
-  updates never re-render the stage nodes.
+  The loading bar. The real stages are lopsided: recode and VEP run first, in
+  parallel, and take almost all the time, then gnomAD, ClinVar, and the two Claude
+  passes finish in a rush. Driving the bar off stage-done events alone leaves it
+  stuck near 0 then jumping to 100. So the bar instead creeps toward 100% on a time
+  constant (a smooth, even pace that never stalls), kept honest by a floor at the
+  real fraction of stages done, and snaps to 100% when the run actually finishes.
+  A rough "~Ns left" estimate counts down alongside. A requestAnimationFrame loop
+  eases the displayed value each frame; isolated in its own component so the
+  per-frame updates never re-render the stage nodes.
 */
 function ThreadBar({
   done,
@@ -73,7 +77,12 @@ function ThreadBar({
   detail: string;
   barColor: string;
 }) {
-  const [display, setDisplay] = useState(4);
+  const [display, setDisplay] = useState(2);
+  const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
+  const startRef = useRef<number | null>(null);
+  if (startRef.current === null) {
+    startRef.current = typeof performance !== "undefined" ? performance.now() : Date.now();
+  }
 
   useEffect(() => {
     const reduce =
@@ -82,27 +91,42 @@ function ThreadBar({
     if (reduce) {
       // Respect reduced motion: snap to the meaningful value, no animation.
       setDisplay((prev) => Math.max(prev, allDone ? 100 : (done / total) * 100));
+      setSecondsLeft(null);
       return;
     }
+
+    // TAU sets how fast the bar creeps toward 100% on elapsed time, so it advances
+    // evenly rather than stalling on the slow first stages then jumping. EST_TOTAL
+    // is a rough expected run time for the countdown (exact ETA is impossible with
+    // variable public-API latency, so it is shown as an estimate and floored).
+    const TAU = 8000;
+    const EST_TOTAL = 20000;
+
     let raf = 0;
     let last = performance.now();
     const step = (now: number) => {
       const dt = Math.min(now - last, 120); // clamp so a backgrounded tab does not lurch
       last = now;
+      const elapsed = now - (startRef.current ?? now);
+
       setDisplay((prev) => {
         if (anyError) return prev;
-        const floor = (done / total) * 100;
-        const nextMilestone = ((done + 1) / total) * 100;
-        // Aim just short of the next stage while one is in flight; 100 when finished.
-        const target = allDone ? 100 : Math.max(floor, nextMilestone - 1.5);
-        // Cover a fixed fraction of the remaining gap per millisecond, so the bar
-        // decelerates into the target rather than jumping to it.
-        const k = allDone ? 0.006 : 0.0022;
+        const stageFloor = (done / total) * 100; // never fall behind real progress
+        const timeTarget = 100 * (1 - Math.exp(-elapsed / TAU)); // smooth even creep
+        const target = allDone ? 100 : Math.max(stageFloor, Math.min(94, timeTarget));
+        const k = allDone ? 0.006 : 0.004;
         let next = prev + (target - prev) * (1 - Math.exp(-k * dt));
         if (allDone) next = next > 99.7 ? 100 : next;
-        else next = Math.min(next, nextMilestone - 0.4);
+        else next = Math.min(next, 99);
         return Math.max(prev, next); // never regress
       });
+
+      setSecondsLeft((prevSec) => {
+        if (allDone || anyError) return null;
+        const s = Math.max(2, Math.ceil((EST_TOTAL - elapsed) / 1000));
+        return s === prevSec ? prevSec : s; // only re-render when the whole second changes
+      });
+
       raf = requestAnimationFrame(step);
     };
     raf = requestAnimationFrame(step);
@@ -118,12 +142,17 @@ function ThreadBar({
           <span className="font-semibold text-on-surface">{label}</span>
           {detail ? <span className="text-outline"> · {detail}</span> : null}
         </span>
-        <span className="mono font-semibold" style={{ color: barColor }}>{pct}%</span>
+        <span className="mono font-semibold" style={{ color: barColor }}>
+          {!allDone && !anyError && secondsLeft != null && (
+            <span className="text-outline">~{secondsLeft}s · </span>
+          )}
+          {pct}%
+        </span>
       </div>
       <div className="relative h-2.5 overflow-hidden rounded-full bg-surface-high">
         <div
           className="relative h-full rounded-full"
-          style={{ width: `${Math.max(4, display)}%`, background: barColor }}
+          style={{ width: `${Math.max(2, display)}%`, background: barColor }}
         >
           {!allDone && !anyError && <div className="absolute inset-0 loom-shimmer" />}
         </div>

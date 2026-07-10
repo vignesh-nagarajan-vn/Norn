@@ -60,8 +60,12 @@ function asStringArray(v: unknown): string[] {
 export async function recode(raw: string): Promise<RecodeResult> {
   const id = encodeURIComponent(raw.trim());
   const url = `${BASE}/variant_recoder/human/${id}?content-type=application/json`;
+  // recode is non-critical: VEP supplies the gene, consequence, and coordinates,
+  // so a slow variant_recoder should not stall the whole run. Fail fast (one
+  // attempt, short timeout) instead of burning 8s + an 8s retry; the pipeline
+  // degrades to VEP coordinates and marks recode unavailable.
   const data = await cached(`recode:${raw}`, TTL, () =>
-    fetchJson<unknown[]>(url, { source: "Ensembl variant_recoder", timeoutMs: 8000, retries: 1 }),
+    fetchJson<unknown[]>(url, { source: "Ensembl variant_recoder", timeoutMs: 6000, retries: 0 }),
   );
 
   const empty: RecodeResult = {
