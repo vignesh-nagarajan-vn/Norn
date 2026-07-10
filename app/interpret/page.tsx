@@ -9,9 +9,11 @@ import { PrefsProvider } from "@/components/Prefs";
 import { Icon } from "@/components/ui";
 import { useInterpret } from "@/components/useInterpret";
 
-// The three chips are a scripted demo path: one clear pathogenic, one clear
-// benign, and one VUS that a curator flips with toggles. Each note points at the
-// differentiator it shows off.
+// The chips are a scripted demo path, each showing a different mechanism: a
+// clear pathogenic null allele, a clear benign polymorphism, a curator-flippable
+// VUS, and a classic cardiomyopathy missense that Norn conservatively drafts VUS
+// on automated evidence until the curator adds functional data. Each note points
+// at the differentiator it shows off.
 const EXAMPLES: Example[] = [
   {
     input: "BRCA1:c.5266dupC",
@@ -33,6 +35,13 @@ const EXAMPLES: Example[] = [
     color: "var(--vus)",
     consequence: "Reduced-penetrance missense",
     note: "AlphaMissense drives PP3; sits at +3 (VUS). Toggle curator evidence to flip it live.",
+  },
+  {
+    input: "MYH7:c.1208G>A",
+    tag: "VUS",
+    color: "var(--vus)",
+    consequence: "Cardiomyopathy missense (HCM)",
+    note: "R403Q, a classic HCM variant: PM5, PM2, and AlphaMissense PP3 draft it VUS. Add the functional (PS3) and case (PS4) evidence and it firms to Pathogenic. Norn will not overcall on automated evidence.",
   },
 ];
 

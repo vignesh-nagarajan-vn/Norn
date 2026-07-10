@@ -68,6 +68,21 @@ const CFTR_LANDSCAPE: ClinVarNeighbor[] = [
   neighbor("VCV000038784", "CFTR", 27, "R", "W", "Uncertain significance", 1),
 ];
 
+// MYH7 beta-myosin motor domain: pathogenic missense across the domain, with a
+// pathogenic R403W at the query residue that drives PM5. This mirrors what the
+// live ClinVar gene set returns, so the fixture and the live result agree
+// (Uncertain Significance on automated evidence: PM5, PM2, PP3, but the local
+// cluster is not dense enough to fire PM1). Illustrative accessions, real residues.
+const MYH7_LANDSCAPE: ClinVarNeighbor[] = [
+  neighbor("VCV000014093", "MYH7", 403, "R", "W", "Pathogenic", 2),
+  neighbor("VCV000014095", "MYH7", 453, "R", "C", "Pathogenic", 3),
+  neighbor("VCV000042846", "MYH7", 663, "R", "H", "Pathogenic", 2),
+  neighbor("VCV000181722", "MYH7", 716, "G", "R", "Pathogenic", 2),
+  neighbor("VCV000014106", "MYH7", 719, "R", "W", "Pathogenic", 3),
+  neighbor("VCV000164322", "MYH7", 1100, "E", "K", "Benign", 2),
+  neighbor("VCV000042900", "MYH7", 1382, "R", "Q", "Benign", 2),
+];
+
 export const FIXTURES: VariantFixture[] = [
   {
     keys: ["brca1:c.5266dupc", "rs80357906", "brca1 c.5266dupc", "brca1:c.5266dup"],
@@ -249,6 +264,68 @@ export const FIXTURES: VariantFixture[] = [
         neighbor("VCV000017661", "BRCA1", 1699, "R", "W", "Pathogenic", 2),
       ],
       geneVariants: BRCA1_LANDSCAPE,
+    },
+  },
+  {
+    keys: ["myh7:c.1208g>a", "rs121913625", "myh7 c.1208g>a", "myh7:p.arg403gln"],
+    label: "MYH7 c.1208G>A p.Arg403Gln (HCM motor-domain hotspot)",
+    normalized: {
+      raw: "MYH7:c.1208G>A",
+      kind: "hgvs",
+      rsid: "rs121913625",
+      hgvsg: "NC_000014.9:g.23424584C>T",
+      hgvscList: ["NM_000257.4:c.1208G>A"],
+      hgvsp: "NP_000248.2:p.Arg403Gln",
+      vepInput: "NM_000257.4:c.1208G>A",
+      vepMode: "hgvs",
+      chrom: "14",
+      pos: 23424584,
+      ref: "C",
+      alt: "T",
+      gnomadVariantId: "14-23424584-C-T",
+    },
+    consequence: {
+      geneSymbol: "MYH7",
+      transcriptId: "NM_000257.4",
+      mostSevereConsequence: "missense_variant",
+      consequenceTerms: ["missense_variant"],
+      isLof: false,
+      lofType: null,
+      hgvsc: "NM_000257.4:c.1208G>A",
+      hgvsp: "NP_000248.2:p.Arg403Gln",
+      proteinPosition: 403,
+      aminoAcids: "R/Q",
+      refAa: "R",
+      altAa: "Q",
+      siftPrediction: "deleterious",
+      siftScore: 0.0,
+      polyphenPrediction: "probably_damaging",
+      polyphenScore: 1.0,
+      alphaMissenseScore: 0.998,
+      alphaMissenseClass: "likely_pathogenic",
+      canonical: true,
+    },
+    frequency: {
+      found: false, // absent from gnomAD, consistent with a severe HCM allele (PM2)
+      gnomadVariantId: "14-23424584-C-T",
+      genomeAf: null,
+      exomeAf: null,
+      globalAf: 0,
+      popmaxAf: 0,
+      popmaxPopulation: null,
+      filteringAf: null,
+      representativeAf: 0,
+      ac: 0,
+      an: null,
+    },
+    clinvar: {
+      queried: true,
+      residuePosition: 403,
+      sameAaChange: [], // R403Q itself is the query; not matched against itself
+      sameResidueDifferentAa: [
+        neighbor("VCV000014093", "MYH7", 403, "R", "W", "Pathogenic", 2),
+      ],
+      geneVariants: MYH7_LANDSCAPE,
     },
   },
 ];

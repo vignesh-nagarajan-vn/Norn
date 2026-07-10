@@ -96,7 +96,7 @@ export default function Hero({
           <Icon name="bolt" size={16} />
           Example variants
         </h3>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {examples.map((ex) => (
             <button
               key={ex.input}

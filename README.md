@@ -107,6 +107,7 @@ The home page includes one-click chips, each backed by a bundled fixture so the 
 | `BRCA1:c.5266dupC` | frameshift (5382insC) | Likely Pathogenic (PVS1) |
 | `CFTR:c.1408A>G` | p.Met470Val, common | Benign (BA1 stand-alone override) |
 | `BRCA1:c.5096G>A` | p.Arg1699Gln, reduced penetrance | Uncertain Significance |
+| `MYH7:c.1208G>A` | p.Arg403Gln, hypertrophic cardiomyopathy | Uncertain Significance (curator adds PS3/PS4 to reach Pathogenic) |
 
 Norn is deliberately conservative: it applies PM2 at supporting strength and leaves evidence-dependent criteria to the curator, so a classic loss-of-function variant lands at Likely Pathogenic rather than Pathogenic on the automated evidence alone. That is correct under current ClinGen guidance.
 

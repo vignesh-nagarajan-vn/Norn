@@ -166,7 +166,7 @@ A variant's own ClinVar classification is NEVER fed into adjudication. ClinVar i
 ## Resilience
 
 - Every fetch has a timeout, one retry, and graceful degradation (a failed source marks its criteria unknown).
-- The three example chips are backed by fixtures (`lib/fixtures.ts`). Live data is tried first; on failure the pipeline uses the fixture and marks `fixtureUsed`.
+- The four example chips are backed by fixtures (`lib/fixtures.ts`). Live data is tried first; on failure the pipeline uses the fixture and marks `fixtureUsed`. The fixtures are kept consistent with the live result (for example MYH7 R403Q lands at Uncertain Significance both live and from the fixture, so a chip never contradicts itself).
 - Unresolvable-input guard (`pipeline.ts`): errors only when the input is unparseable (`kind === "unknown"`) or VEP explicitly returned empty (a real "not found"). A source timeout is treated as an outage, so a valid variant still returns a (degraded) report rather than an error.
 
 ## Claude usage

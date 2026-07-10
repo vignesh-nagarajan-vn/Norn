@@ -114,6 +114,7 @@ const EXAMPLES = [
   { input: "BRCA1:c.5266dupC", tag: "Pathogenic", color: "var(--pathogenic)" },
   { input: "CFTR:c.1408A>G", tag: "Benign", color: "var(--benign)" },
   { input: "BRCA1:c.5096G>A", tag: "VUS", color: "var(--vus)" },
+  { input: "MYH7:c.1208G>A", tag: "VUS", color: "var(--vus)" },
 ];
 
 const FATES = [
