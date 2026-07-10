@@ -124,12 +124,7 @@ Every interpretation is interactive, not a static report:
 - **Batch mode.** Paste a list, upload a plain list, CSV, or VCF, or load a sample batch, and interpret many variants at once into a sortable worklist (`/batch`).
 - **Export.** Download a branded one-to-two-page PDF report (vector meter and lollipop, legible in light or dark mode), the full JSON, or a draft ClinVar submission row.
 - **MCP server.** The same pipeline exposed over stdio (`interpret_variant`, `list_eval_variants`, `list_acmg_criteria`, `to_clinvar_submission`) so other tools can import Norn's output. See [docs/MCP.md](docs/MCP.md).
-- **Themes and demo.** Dark by default with a one-toggle light theme, colorblind-safe and high-contrast palettes, and an inline screen recording of a real interpretation. In-app documentation lives at `/docs`.
-
-<p align="center">
-  <img src="docs/ui-dashboard-light.png" width="70%" alt="Norn dashboard in light mode" />
-</p>
-<p align="center"><sub>Dark is the default; a light theme is one toggle away. Classification colors follow the chosen palette.</sub></p>
+- **Themes and demo.** Dark by default with a one-toggle light theme, colorblind-safe and high-contrast palettes, and an inline screen recording of a real interpretation. In-app documentation lives at `/docs`. A light-mode screenshot is in [docs/DESIGN.md](docs/DESIGN.md).
 
 ## Run it and deploy it
 

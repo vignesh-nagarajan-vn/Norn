@@ -18,6 +18,11 @@ The demo is a roughly 30-second screen recording of the real app (`public/norn-d
 
 The theme (`data-theme`, dark or light) is independent of the classification scheme, and dark is the default (a pre-paint script in `app/layout.tsx` applies the saved theme with no flash). Dark mode overrides only the chrome tokens: a warm near-black "night vellum" canvas, light paper text, a lighter bronze so the mark reads as the reverse lockup, an inverted primary button, and a light sepia ACMG strength ramp. The two deepest classification tiers (strong pathogenic, strong benign) are lifted per scheme so a Pathogenic or Benign label stays legible on the dark canvas. Everything else, including the whole engine and the PDF, is untouched.
 
+<p align="center">
+  <img src="ui-dashboard-light.png" width="70%" alt="Norn dashboard in light mode" />
+</p>
+<p align="center"><sub>Dark is the default; a light theme is one toggle away. Classification colors follow the chosen palette.</sub></p>
+
 ## The printout and the deck
 
 A lab hands around paper and slides, so the identity has to survive leaving the browser. The PDF export (`lib/pdf.ts`) is the one-page-or-two interpretation printout: the Norn mark drawn as vector rings, a header and a footer on every page, a solid classification chip, the points meter and lollipop as vectors, and a "Not for clinical use" line on every page. Its chrome is fixed to a light print palette (ink, bronze, greys) so it looks the same whether the app is in light or dark mode; only the classification colors follow the chosen scheme. `design/slides/deck.html` is a matching, self-contained slide template (Fraunces, vellum, the mark, the three fates, a sample result) that prints to a landscape PDF. It is also embedded as a PDF slideshow in the in-app Docs tab (`public/norn-deck.pdf`, printed from `public/deck.html`). Both reuse the tokens in `design/`. The architecture and scoring diagrams (`docs/architecture.svg`, `docs/scoring-model.svg`) were restyled to the same identity with updated numbers, and the previous blue versions are kept in `docs/archive/`.

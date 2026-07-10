@@ -90,7 +90,8 @@ docs/
   METHODOLOGY.md (ACMG engine, scoring, Claude passes, eval, data sources, limitations, references)
   DEPLOYMENT.md (local run, npm scripts, env vars, Vercel deploy), DESIGN.md, MCP.md
   architecture.svg, scoring-model.svg
-  ui-landing.png, ui-dashboard.png, ui-3d.png, ui-landing-drafted.png, ui-batch.png, ui-docs.png (dark, the default), ui-dashboard-light.png  README screenshots
+  ui-landing.png, ui-dashboard.png, ui-3d.png, ui-landing-drafted.png, ui-batch.png, ui-docs.png  README screenshots (dark, the default)
+  ui-dashboard-light.png  the light-mode figure, embedded in DESIGN.md (not the README)
   archive/              previous "Scientific Precision" UI screenshots and diagrams + note
 design/                 brand kit: logo/, illustrations/, slides/deck.html, tokens.css, README (guide)
 public/                 manifest.webmanifest, icons/ (PWA), norn-demo.webm + poster, deck.html + norn-deck.pdf
