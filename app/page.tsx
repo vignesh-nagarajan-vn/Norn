@@ -547,7 +547,8 @@ function Landing() {
               <p className="mt-4 text-[15px] leading-relaxed text-on-surface-variant">
                 Every interpretation is interactive, not a static PDF. See each criterion&apos;s evidence and source,
                 add the evidence Norn cannot fetch, question the call, and export a draft ClinVar submission when a
-                human has signed off.
+                human has signed off. Unlike a one-shot classifier, every criterion is sourced and a second Claude
+                pass flags overcalls, so you audit the reasoning rather than trust a label.
               </p>
               <div className="mt-6">
                 <SampleReport />
@@ -583,8 +584,8 @@ function Landing() {
             Spend your time confirming, not gathering.
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-on-surface-variant">
-            Norn produces a sourced first pass in about a minute. It drafts; you decide. It is never an autonomous
-            diagnostic.
+            Manual first-pass triage of one variant can take 20 to 40 minutes. Norn produces that sourced draft in
+            about a minute. It drafts; you decide. It is never an autonomous diagnostic.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link href="/interpret" className="btn-primary px-5 py-2.5 text-[15px]">

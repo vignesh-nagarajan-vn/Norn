@@ -81,7 +81,7 @@ Vignesh Nagarajan was selected as 1 of 500 builders (about half of them PhDs, po
 
 ## Who it is for
 
-The user is a molecular geneticist or genetic counselor doing variant curation. Concretely, picture a curator in a genomic-medicine group at Gladstone, for example the Conklin Lab at the Gladstone Institute of Data Science and Biotechnology, which builds iPSC disease models of inherited heart conditions. Before committing bench time to a candidate variant in a cardiomyopathy gene like MYH7 or TNNT2, they need a fast, sourced first pass on how the evidence lines up. Norn produces that draft in about a minute so the curator spends their time confirming and judging rather than gathering. Norn never replaces that person. It drafts; they decide.
+The user is a molecular geneticist or genetic counselor doing variant curation. Concretely, picture a curator in a genomic-medicine group at Gladstone, for example the Conklin Lab at the Gladstone Institute of Data Science and Biotechnology, which builds iPSC disease models of inherited heart conditions. Before committing bench time to a candidate variant in a cardiomyopathy gene like MYH7 or TNNT2, they need a fast, sourced first pass on how the evidence lines up. Where a manual first-pass triage of one variant can take 20 to 40 minutes, Norn produces that draft in about a minute, so the curator spends their time confirming and judging rather than gathering. Norn never replaces that person. It drafts; they decide.
 
 ## What it does, end to end
 
@@ -94,7 +94,7 @@ The user is a molecular geneticist or genetic counselor doing variant curation. 
 7. Combines the verdicts deterministically into a classification using the ClinGen points system.
 8. Asks Claude to review the draft, flag conflicts or overcalls, and write the curator checklist.
 
-The model justifies criteria. The engine combines them. The final label is always computed in code, never taken from the model. The full engine, thresholds, scoring, and the two Claude passes are documented in [docs/METHODOLOGY.md](docs/METHODOLOGY.md).
+The model justifies criteria. The engine combines them. The final label is always computed in code, never taken from the model. Unlike a one-shot classifier, every criterion is shown with its evidence and source and the second Claude pass flags overcalls, so the draft is auditable rather than a black-box label. The full engine, thresholds, scoring, and the two Claude passes are documented in [docs/METHODOLOGY.md](docs/METHODOLOGY.md).
 
 ![Norn architecture](docs/architecture.svg)
 
