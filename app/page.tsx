@@ -184,8 +184,6 @@ const FEATURES = [
   { icon: "edit_note", title: "Curator evidence", body: "Toggle the eight evidence-dependent criteria; the classification recomputes live." },
   { icon: "insights", title: "Protein lollipop", body: "The query plotted against ClinVar variants at nearby residues, colored by class." },
   { icon: "forum", title: "Ask the copilot", body: "Question the call. Claude answers using only that report as its knowledge base." },
-  { icon: "menu_book", title: "Literature", body: "A PubMed search surfaces functional and case evidence for the gene and change." },
-  { icon: "dataset", title: "Batch mode", body: "Paste a list or upload CSV or VCF and interpret many variants into a worklist." },
   { icon: "hub", title: "MCP server", body: "The same pipeline exposed over stdio so other tools can import Norn's output." },
 ];
 
