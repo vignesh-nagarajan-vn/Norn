@@ -95,7 +95,7 @@ The user is a molecular geneticist or genetic counselor doing variant curation. 
 7. Combines the verdicts deterministically into a classification using the ClinGen points system.
 8. Asks Claude to review the draft, flag conflicts or overcalls, and write the curator checklist.
 
-The model justifies criteria. The engine combines them. The final label is always computed in code, never taken from the model.
+The model justifies criteria. The engine combines them. The final label is always computed in code, never taken from the model. The full engine, thresholds, scoring, and the two Claude passes are documented in [docs/METHODOLOGY.md](docs/METHODOLOGY.md).
 
 ![Norn architecture](docs/architecture.svg)
 
@@ -111,125 +111,25 @@ The home page includes one-click chips, each backed by a bundled fixture so the 
 
 Norn is deliberately conservative: it applies PM2 at supporting strength and leaves evidence-dependent criteria to the curator, so a classic loss-of-function variant lands at Likely Pathogenic rather than Pathogenic on the automated evidence alone. That is correct under current ClinGen guidance.
 
-## The ACMG criteria Norn implements
-
-Norn adjudicates ten criteria automatically and lets the curator supply the eight that depend on evidence it cannot fetch. Points follow the ClinGen Bayesian model (Tavtigian et al. 2018): Very Strong 8, Strong 4, Moderate 2, Supporting 1, benign criteria negative.
-
-**Automated (adjudicated by Norn):**
-
-| Code | Meaning | Strength (points) | Evidence source |
-| --- | --- | --- | --- |
-| PVS1 | Predicted loss of function (nonsense, frameshift, canonical splice) | Very Strong (+8) | Ensembl VEP, gnomAD constraint |
-| PS1 | Same amino acid change as an established pathogenic variant | Strong (+4) | ClinVar |
-| PM1 | Mutational hotspot or functional domain (local pathogenic cluster) | Moderate (+2) | ClinVar |
-| PM2 | Absent or very rare in gnomAD | Moderate downgraded to Supporting (+1) | gnomAD v4 |
-| PM5 | Different pathogenic missense at the same residue | Moderate (+2) | ClinVar |
-| PP3 | Calibrated computational evidence for damage | Supporting (+1) | VEP (AlphaMissense) |
-| BA1 | Allele frequency above 5% | Stand-alone benign override | gnomAD v4 |
-| BS1 | Frequency greater than expected for the disorder | Strong (-4) | gnomAD v4 |
-| BP4 | Calibrated computational evidence for tolerance | Supporting (-1) | VEP (AlphaMissense) |
-| BP7 | Synonymous with no predicted splice impact | Supporting (-1) | Ensembl VEP |
-
-**Curator-supplied (toggled in the report, classification recomputes live):** PS2, PS3, PS4, PM3, PM6, PP1 (pathogenic) and BS3, BS4 (benign). These need functional, segregation, de novo, or allelic-phase evidence that Norn does not fetch, so a human applies them.
-
-Two caveats are surfaced in the report, not hidden:
-
-- **PVS1 disease mechanism.** PVS1 also requires that loss of function is a known disease mechanism for the gene. Norn firms this with gnomAD gene constraint (pLI, LOEUF): a LOF-intolerant gene clears the provisional flag, otherwise PVS1 stays flagged for a human to confirm.
-- **PM2 is applied at supporting strength (+1)**, following current ClinGen SVI guidance, even though its nominal ACMG strength is Moderate.
-
-### Documented thresholds
-
-Norn uses gene-specific allele-frequency thresholds where a rule is available (a small table inspired by ClinGen Variant Curation Expert Panels, in `data/gene-thresholds.json`), and generic defaults otherwise. The report shows which source was used.
-
-- Generic defaults: BA1 above 0.05 (Richards et al. 2015), BS1 above 0.01, PM2 below 0.0001 or absent.
-- Gene-specific example: BRCA1/BRCA2 use much stricter thresholds (illustrative ENIGMA-style values), so a low-frequency founder allele does not clear PM2.
-- Computational evidence: PP3 and BP4 are driven by AlphaMissense (Cheng et al. 2023), a calibrated missense predictor carried by the same VEP call. Its published class cutoffs map to a supporting call: `likely_pathogenic` fires PP3, `likely_benign` fires BP4, and `ambiguous` fires neither. SIFT and PolyPhen concordance is the fallback only when AlphaMissense does not cover the variant (for example indels), and both are shown for corroboration. Applied at Supporting strength.
-
-For the benign frequency criteria (BA1, BS1), the representative allele frequency is gnomAD's faf95 (the 95% CI filtering allele frequency of the grpmax population, the ClinGen SVI recommendation), falling back to the larger of the global and popmax point estimates when a variant is too rare for an faf95. Using the filtering AF, not the raw popmax, keeps a noisy small-population estimate from overcalling BS1. For example, BRCA1 p.Arg1699Gln has a popmax of 1.19e-4 but an faf95 of 3.98e-5, so it stays a VUS rather than being called Likely Benign.
-
-### Points to classification
-
-The point total maps to a five-tier classification (Tavtigian et al. 2020; ClinGen SVI):
-
-| Total points | Classification |
-| --- | --- |
-| 10 or more | Pathogenic |
-| 6 to 9 | Likely Pathogenic |
-| 0 to 5 | Uncertain Significance |
-| -6 to -1 | Likely Benign |
-| -7 or less | Benign |
-
-BA1 (allele frequency above 5%) is a stand-alone override to Benign regardless of the point total. Confidence (High, Moderate, Low) is derived from how far the total sits from the nearest category boundary and how many criteria were left unknown. The exact logic is in [`lib/acmg.ts`](lib/acmg.ts).
-
-## How the scoring works
-
-![Norn scoring model](docs/scoring-model.svg)
-
-## In the app
+## Features
 
 Every interpretation is interactive, not a static report:
 
-- **Landing and Dashboard.** A dynamic landing page (`/`) explains what Norn does, frames the pipeline as the three Norse fates (gather, weigh, decree), and links straight into the Dashboard (`/interpret`), the working surface where every feature below lives.
-- **Watch the demo.** A screen recording of a real interpretation plays inline on the landing and expands to a full-screen player (also on `?demo=1`), so a new visitor understands the pipeline without typing a variant. The recording is kept in light mode.
-- **Live pipeline view.** A progress bar and six stage beads (recode, VEP, gnomAD, ClinVar, adjudicate, review) fill as each stage completes, streamed over newline-delimited JSON.
+- **Live pipeline view.** A progress bar and six stage beads (recode, VEP, gnomAD, ClinVar, adjudicate, review) fill as each stage streams over newline-delimited JSON.
 - **ACMG scorecard and points meter.** A row per criterion with its strength, verdict, evidence, and source, plus a meter showing where the total lands on the Pathogenic-to-Benign scale.
 - **Curator-supplied evidence.** Toggle the criteria that need functional, segregation, de novo, or phase evidence; the classification and points recompute live.
-- **Protein lollipop.** The query variant plotted against ClinVar variants at nearby residues, colored by classification.
-- **3D structure.** When the gene maps to a UniProt entry and a protein position is known, the variant residue is highlighted on the AlphaFold predicted structure, rendered in the browser with 3Dmol.js. It is shown for orientation, not as evidence.
-- **Ask the copilot.** A chat panel where the curator can question the interpretation. Claude answers using only that report as its knowledge base, so it explains the call without inventing new evidence or a different label.
-- **Literature.** Search PubMed for the gene and protein change to surface functional and case evidence Norn does not read itself.
-- **Batch mode.** Paste a list, upload a plain list, CSV, or VCF, or load a sample batch of well-established ClinVar and gnomAD variants, and interpret many at once into a sortable worklist (`/batch`).
-- **Export.** Download a branded, one-to-two-page PDF report (the Norn mark, a header and footer on every page, the classification chip, and the points meter and lollipop drawn as vector graphics), the full JSON, or a draft ClinVar submission row. The PDF is formatted to a clinical standard and stays legible whether the app is in light or dark mode. A matching deck and print kit lives in [`design/`](design) and the deck is embedded (as a PDF slideshow) in the Docs tab.
-- **History.** Recent interpretations are kept in the browser and listed in the sidebar.
-- **Appearance.** Dark by default (the chrome and the mark reverse); a light theme is one toggle away, from the top bar or Settings.
-- **Settings.** Switch the classification palette (clinical convention by default, plus colorblind-safe and high-contrast options), switch the theme, and toggle the per-criterion model reasoning. Preferences persist in the browser.
-- **Sign-off.** A curator can mark a draft as reviewed. Norn records the intent; it never signs off on its own.
-- **Docs.** An in-app documentation page (`/docs`) covers the workflow, exports, and the MCP server.
+- **Protein lollipop and 3D structure.** The query plotted against ClinVar variants at nearby residues, and, where the gene maps to a UniProt entry, the residue highlighted on the AlphaFold model in the browser with 3Dmol.js (for orientation, not evidence).
+- **Ask the copilot.** A chat panel where Claude answers using only that report as its knowledge base, explaining the call without inventing new evidence or a different label.
+- **Literature.** A PubMed search for the gene and protein change surfaces functional and case evidence Norn does not read itself.
+- **Batch mode.** Paste a list, upload a plain list, CSV, or VCF, or load a sample batch, and interpret many variants at once into a sortable worklist (`/batch`).
+- **Export.** Download a branded one-to-two-page PDF report (vector meter and lollipop, legible in light or dark mode), the full JSON, or a draft ClinVar submission row.
+- **MCP server.** The same pipeline exposed over stdio (`interpret_variant`, `list_eval_variants`, `list_acmg_criteria`, `to_clinvar_submission`) so other tools can import Norn's output. See [docs/MCP.md](docs/MCP.md).
+- **Themes and demo.** Dark by default with a one-toggle light theme, colorblind-safe and high-contrast palettes, and an inline screen recording of a real interpretation. In-app documentation lives at `/docs`.
 
 <p align="center">
   <img src="docs/ui-dashboard-light.png" width="70%" alt="Norn dashboard in light mode" />
 </p>
 <p align="center"><sub>Dark is the default; a light theme is one toggle away. Classification colors follow the chosen palette.</sub></p>
-
-## The Claude reasoning layer
-
-Two server-side Anthropic calls run per variant. The API key never reaches the client.
-
-1. **Adjudicator.** Receives the gathered evidence plus the code-computed signals and returns strict JSON with a verdict, evidence, source, and one-sentence reasoning per criterion. The response is parsed defensively and validated against a Zod schema, with one reformat retry.
-2. **Reviewer.** Receives the draft classification and evidence, critiques it, catches overcalls and internal conflicts (for example a benign and a pathogenic computational criterion both marked met), and writes the "curator should double-check" checklist. This mirrors the reviewer-agent pattern in Claude Science.
-
-If no `ANTHROPIC_API_KEY` is set, or a model call fails, Norn falls back to a deterministic heuristic that derives verdicts directly from the computed signals. The fallback is labeled clearly in the UI as an offline heuristic and is never presented as model reasoning. Norn also flags any case where a model verdict disagrees with a hard code-computed signal.
-
-Model selection: read from `ANTHROPIC_MODEL`, default `claude-opus-4-8`. This must be a model the API key can access, or every call returns 404 (interpretations fall back to the heuristic and the Ask panel reports a failed call). `claude-sonnet-4-6` is a faster, cheaper alternative for the same pipeline.
-
-## Anti-circularity
-
-A variant's own ClinVar classification is never fed into adjudication. ClinVar is used only for two things: neighboring-residue evidence for PS1 and PM5, and the ground-truth labels in the eval set. This keeps the adjudication from simply echoing an existing ClinVar call.
-
-## Model Context Protocol server
-
-Norn ships an MCP server ([`mcp/server.ts`](mcp/server.ts)) so other tools can import its data directly. It exposes `interpret_variant`, `list_eval_variants`, `list_acmg_criteria`, and `to_clinvar_submission` over stdio, using the same pipeline as the web app. Run it with `npm run mcp` and connect any MCP client (for example Claude Desktop). See [docs/MCP.md](docs/MCP.md) for the config.
-
-## Evaluation
-
-`data/eval-variants.json` holds 20 well-established variants across BRCA1, BRCA2, CFTR, HBB, TP53, MLH1, HFE, MSH6, and APC, spanning pathogenic, benign, and uncertain, each with its generally accepted ClinVar germline classification and accession.
-
-The `/eval` page runs the full Norn pipeline on each variant and reports two numbers:
-
-- **Exact agreement**: the five-tier classification matches the expected label.
-- **Directional concordance**: the call lands in the same direction (pathogenic-leaning, uncertain, or benign-leaning).
-
-Because Norn applies PM2 at supporting strength, exact agreement is lower than directional concordance, which is the more meaningful measure for a triage copilot. Disagreements are shown, not hidden.
-
-## Data sources
-
-- **Ensembl VEP and variant_recoder** (REST): molecular consequence, transcript, protein change, in-silico scores (AlphaMissense, SIFT, PolyPhen), and input normalization. https://rest.ensembl.org
-- **gnomAD v4** (GraphQL): population allele frequency including the faf95 filtering AF, and gene constraint (pLI, LOEUF). https://gnomad.broadinstitute.org
-- **ClinVar** (NCBI E-utilities): neighboring-residue evidence and eval ground truth. https://www.ncbi.nlm.nih.gov/clinvar/
-- **PubMed** (NCBI E-utilities): literature search for the gene and protein change. https://pubmed.ncbi.nlm.nih.gov
-- **AlphaFold** (via UniProt): the predicted protein structure for the optional 3D view, fetched through a same-origin proxy. https://alphafold.ebi.ac.uk
-
-Every external call has a timeout, one retry, and graceful degradation. If a source is unavailable, the affected criteria are marked unknown rather than failing the whole request. In-memory caching keeps repeated lookups within a warm serverless instance cheap.
 
 ## Run it locally
 
@@ -245,17 +145,10 @@ npm run dev
 
 Open http://localhost:3000. The example chips work without any keys (they use bundled fixtures and the deterministic fallback). Setting `ANTHROPIC_API_KEY` switches the two reasoning passes to real Claude calls.
 
-Build and type-check:
-
 ```bash
-npm run build
-npm run typecheck
-```
-
-Run the MCP server (exposes Norn to other MCP clients):
-
-```bash
-npm run mcp
+npm run build       # production build (also type-checks)
+npm run typecheck   # tsc --noEmit
+npm run mcp         # start the stdio MCP server
 ```
 
 ## Deploy on Vercel
@@ -268,9 +161,7 @@ Norn deploys on Vercel with no extra infrastructure. There is no database.
 
 The heavy route (`/api/interpret`) sets `maxDuration = 60` and streams progress as newline-delimited JSON.
 
-### Environment variables
-
-| Name | Required | Purpose |
+| Env var | Required | Purpose |
 | --- | --- | --- |
 | `ANTHROPIC_API_KEY` | Yes, for real model passes | Enables the Claude adjudicator and reviewer. Without it, Norn uses the labeled deterministic fallback. |
 | `ANTHROPIC_MODEL` | No | Model id. Defaults to `claude-opus-4-8`. Must be a model your key can access, or every call 404s. `claude-sonnet-4-6` is a faster, cheaper option. |
@@ -279,72 +170,32 @@ The heavy route (`/api/interpret`) sets `maxDuration = 60` and streams progress 
 ## Project layout
 
 ```
-app/                 Next.js App Router pages and API routes
-  page.tsx           landing page (what Norn does, demo video, links into the Dashboard)
-  interpret/         the Dashboard: single-variant pipeline and report
-  batch/             batch worklist
-  eval/              eval runner page
-  docs/              in-app documentation
-  icon.svg           the Norn mark (favicon)
-  opengraph-image.png, twitter-image.png, apple-icon.png   social + app icons
-  api/interpret/     streaming pipeline route (NDJSON)
-  api/eval/          serves the static eval dataset
-  api/ask/           Ask-the-copilot chat (Claude)
-  api/literature/    PubMed search
-  api/structure/     AlphaFold structure proxy (for the 3D view)
-components/           UI: pipeline view, scorecard, points meter, lollipop, curator panel, 3D structure
-lib/                  engine and clients
-  acmg.ts            criteria specs, points, classification thresholds
-  anthropic.ts       the two Claude passes
-  ensembl.ts         variant_recoder and VEP
-  gnomad.ts          gnomAD GraphQL
-  clinvar.ts         ClinVar E-utilities
-  pipeline.ts        orchestrator with streamed stages
-  fallback.ts        deterministic heuristic when no key is set
-  fixtures.ts        offline demo data for the example chips
-data/eval-variants.json   the 20-variant evaluation set
-design/              brand kit: logo, illustrations, tokens, guide, deck template
-public/              manifest, PWA icons, the demo video and poster, the deck (HTML + PDF)
-docs/                architecture and scoring diagrams, design notes, archived UI
+app/          Next.js App Router pages (/, /interpret, /batch, /eval, /docs) and API routes
+components/   UI: pipeline view, scorecard, points meter, lollipop, curator panel, 3D structure
+lib/          engine and clients (acmg, anthropic, ensembl, gnomad, clinvar, pipeline, fallback, ...)
+data/         the 20-variant eval set and the gene-specific frequency thresholds
+mcp/          the stdio MCP server
+design/       brand kit: logo, illustrations, tokens, guide, deck template
+docs/         methodology, design notes, MCP config, diagrams, screenshots, archived UI
+public/       manifest, PWA icons, the demo video and poster, the deck (HTML + PDF)
 ```
 
-## Scope and limitations
+The full directory map, conventions, and gotchas are in [CLAUDE.md](CLAUDE.md).
 
-- Norn automates 10 of the 28 ACMG/AMP criteria and leaves 8 evidence-dependent ones (functional, segregation, de novo, allelic) to the curator; it does not curate literature itself.
-- PVS1 does not verify that loss of function is a disease mechanism for the gene. It is flagged provisional.
-- Frequency thresholds are generic defaults, not gene- and disease-specific.
-- Computational evidence (PP3/BP4) uses the calibrated AlphaMissense score at its published class cutoffs, with SIFT and PolyPhen concordance as the fallback for variants it does not cover. It is applied at a single Supporting strength rather than the full tiered (Supporting/Moderate/Strong) calibration.
-- The gnomAD variant lookup for complex indels can miss if coordinate normalization does not match gnomAD's minimal representation. The affected criteria degrade to unknown.
-- The protein lollipop shows a sample of ClinVar variants for the gene and is best-effort. It falls back cleanly when protein positions are unavailable.
-- Norn is not a diagnostic device and must not be used for clinical decisions.
+## Docs
 
-## Roadmap
+Norn documents itself beyond this README:
 
-Still ahead for the product:
+| Doc | What's in it |
+| --- | --- |
+| [docs/METHODOLOGY.md](docs/METHODOLOGY.md) | The ACMG engine in depth: criteria, thresholds, scoring, the two Claude passes, anti-circularity, evaluation, data sources, limitations, and references. |
+| [docs/DESIGN.md](docs/DESIGN.md) | Design notes: the "loom of fate" identity, themes and palettes, the PDF and deck, the demo video. |
+| [docs/MCP.md](docs/MCP.md) | The Model Context Protocol server: the tools it exposes and how to connect a client (for example Claude Desktop). |
+| [CLAUDE.md](CLAUDE.md) | Contributor and AI-agent guide: architecture map, conventions, and gotchas. Read this first if you are working in the repo. |
+| [design/README.md](design/README.md) | Brand kit guide: the logo, illustrations, tokens, and the deck template in `design/`. |
+| [docs/archive/README.md](docs/archive/) | The previous "Scientific Precision" UI and diagrams, kept for reference. |
 
-- **Calibrated predictors.** PP3 and BP4 now use AlphaMissense at its published class cutoffs (delivered). Still ahead: additional meta-predictors (REVEL, BayesDel) and the full tiered strength calibration (Pejaver et al. 2022), so a very high or very low score can reach Moderate or Strong rather than only Supporting.
-- **Audit trail.** A server-side store of interpretations and sign-off history so a lab can track who reviewed what and when.
-- **Confidence calibration.** Score Norn against a larger labeled set and report calibrated confidence per classification.
-
-Presentation and craft (how Norn is built and shown, not the product itself):
-
-- **A living style guide with visual-regression snapshots.** A `/style` page documenting the design tokens, the loom motif, and the criterion and verdict components, backed by the Playwright screenshot pass in CI so a future redesign cannot silently regress the views in this README.
-
-The branded PDF report and the deck template in [`design/`](design) (delivered) already carry the identity into what a lab hands around.
-
-## Known issues
-
-- **Fixed: the live Claude calls failed because Norn sent a `temperature` parameter.** The Ask panel returned a failed-call message and the interpretation passes fell back to the labeled offline heuristic because every request set `temperature`, which Claude Opus 4.8 and 4.7 (the default model) reject with a `400 invalid_request_error` ("temperature is deprecated for this model"). This was fixed in `lib/anthropic.ts` by dropping the parameter (the sampling parameters `temperature`/`top_p`/`top_k` are removed on those models); the deployment needs a redeploy to pick it up. The earlier hypothesis that the key could not access the model (a 404) was wrong: the request reached the model and was rejected on the parameter, which proves the key can access `claude-opus-4-8`. Everything else in the report works regardless.
-
-## References
-
-- Richards S, et al. Standards and guidelines for the interpretation of sequence variants: a joint consensus recommendation of the ACMG and AMP. Genet Med. 2015. (ACMG/AMP criteria)
-- Tavtigian SV, et al. Modeling the ACMG/AMP variant classification guidelines as a Bayesian classification framework. Genet Med. 2018. (points framework)
-- Tavtigian SV, et al. Fitting a naturally scaled point system to the ACMG/AMP variant classification guidelines. Hum Mutat. 2020. (point thresholds)
-- ClinGen Sequence Variant Interpretation working group recommendations (PM2 supporting, calibrated criteria).
-- Karczewski KJ, et al. gnomAD. (population frequency, v4)
-- Landrum MJ, et al. ClinVar. (variant classifications)
-- McLaren W, et al. The Ensembl Variant Effect Predictor. Genome Biol. 2016.
+Plus in-app documentation at `/docs` covering the workflow, exports, and the MCP server.
 
 ## License
 

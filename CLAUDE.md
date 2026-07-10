@@ -4,7 +4,7 @@ Guidance for AI agents (and humans) working in this repository. Read this first.
 
 ## Keeping the docs current (do this every session)
 
-Norn documents itself in several places: this file (`CLAUDE.md`), the main `README.md`, the docs under `docs/` (`DESIGN.md`, `MCP.md`, the diagrams, and `docs/archive/`), and the brand kit under `design/` (`tokens.css`, the logo, the guide). Any change to behavior, structure, routes, commands, environment, dependencies, or the UI must update every affected document in the same change, as applicable. That includes regenerating the README screenshots and the identity assets (OG/Twitter/apple/PWA icons in `app/` and `public/`, the guided-tour video) when the UI or identity changes, keeping `design/tokens.css` in sync with `app/globals.css`, and moving superseded assets into `docs/archive/`. Treat the docs as part of the build: a change that leaves them stale is not done. When in doubt, update this file so the next session starts from the truth.
+Norn documents itself in several places: this file (`CLAUDE.md`), the main `README.md` (a short overview: what it is, tech stack, who it is for, features, run/deploy, and a Docs index), the docs under `docs/` (`METHODOLOGY.md` for the ACMG engine/scoring/Claude passes/eval/limitations, `DESIGN.md`, `MCP.md`, the diagrams, and `docs/archive/`), and the brand kit under `design/` (`tokens.css`, the logo, the guide). The README is intentionally kept lean; deep methodology lives in `docs/METHODOLOGY.md`, so put engine/scoring/threshold detail there, not back in the README. Any change to behavior, structure, routes, commands, environment, dependencies, or the UI must update every affected document in the same change, as applicable. That includes regenerating the README screenshots and the identity assets (OG/Twitter/apple/PWA icons in `app/` and `public/`, the guided-tour video) when the UI or identity changes, keeping `design/tokens.css` in sync with `app/globals.css`, and moving superseded assets into `docs/archive/`. Treat the docs as part of the build: a change that leaves them stale is not done. When in doubt, update this file so the next session starts from the truth.
 
 ## What Norn is
 
@@ -87,7 +87,8 @@ data/
   eval-variants.json    20-variant benchmark with expected ClinVar labels
   gene-thresholds.json  illustrative gene-specific AF thresholds
 docs/
-  architecture.svg, scoring-model.svg, DESIGN.md, MCP.md
+  METHODOLOGY.md (ACMG engine, scoring, Claude passes, eval, data sources, limitations, references), DESIGN.md, MCP.md
+  architecture.svg, scoring-model.svg
   ui-landing.png, ui-dashboard.png, ui-3d.png, ui-landing-drafted.png, ui-batch.png, ui-docs.png (dark, the default), ui-dashboard-light.png  README screenshots
   archive/              previous "Scientific Precision" UI screenshots and diagrams + note
 design/                 brand kit: logo/, illustrations/, slides/deck.html, tokens.css, README (guide)
