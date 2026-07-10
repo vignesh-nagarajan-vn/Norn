@@ -12,9 +12,11 @@ export const dynamic = "force-dynamic";
 // {"type":"result"} object with the full report.
 export async function POST(req: NextRequest) {
   let variant = "";
+  let compare = false;
   try {
-    const body = (await req.json()) as { variant?: unknown };
+    const body = (await req.json()) as { variant?: unknown; compare?: unknown };
     variant = String(body?.variant ?? "").trim();
+    compare = Boolean(body?.compare);
   } catch {
     // fall through to the empty-input guard
   }
@@ -32,7 +34,7 @@ export async function POST(req: NextRequest) {
       const send = (event: PipelineEvent) =>
         controller.enqueue(encoder.encode(JSON.stringify(event) + "\n"));
       try {
-        const report = await runPipeline(variant, { emit: send });
+        const report = await runPipeline(variant, { emit: send, compareHeuristic: compare });
         send({ type: "result", report });
       } catch (err) {
         send({ type: "error", message: (err as Error).message ?? "Pipeline failed." });

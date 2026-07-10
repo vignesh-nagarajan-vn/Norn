@@ -80,6 +80,8 @@ The `/eval` page runs the full Norn pipeline on each variant and reports two num
 - **Exact agreement**: the five-tier classification matches the expected label.
 - **Directional concordance**: the call lands in the same direction (pathogenic-leaning, uncertain, or benign-leaning).
 
+**Claude vs the heuristic.** Each variant is also adjudicated by the deterministic heuristic on the same gathered evidence, and both agreement numbers are shown side by side. This isolates what Claude's reasoning adds over rules alone: the two agree on clear-cut variants (where the code-computed signals dominate) and diverge on the ambiguous ones, where reading the evidence matters. The comparison is free (the heuristic makes no external calls). With no `ANTHROPIC_API_KEY` set, the live column is itself the heuristic, so the two match and the page says so; set a key to measure the difference.
+
 Because Norn applies PM2 at supporting strength, exact agreement is lower than directional concordance, which is the more meaningful measure for a triage copilot. Disagreements are shown, not hidden.
 
 ## Data sources

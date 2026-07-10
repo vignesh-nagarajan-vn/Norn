@@ -27,6 +27,7 @@ import type {
   EvidenceBundle,
   FrequencyEvidence,
   GeneConstraint,
+  HeuristicComparison,
   NormalizedInput,
   NornReport,
   PipelineEvent,
@@ -40,6 +41,11 @@ type Emit = (event: PipelineEvent) => void;
 interface PipelineOptions {
   emit?: Emit;
   evalMode?: boolean;
+  // When true, also adjudicate the same evidence with the deterministic heuristic
+  // and attach it as report.comparison, so the eval can quantify what Claude's
+  // reasoning changed versus rules alone. Adds no external calls (the heuristic is
+  // free); only meaningful when a live Claude pass actually ran.
+  compareHeuristic?: boolean;
 }
 
 function emptyFrequency(variantId: string | null): FrequencyEvidence {
@@ -318,6 +324,21 @@ export async function runPipeline(
     }
   }
 
+  // Optional: adjudicate the same evidence with the deterministic heuristic and
+  // classify it, so the eval can show what Claude changed versus rules alone.
+  // No extra external calls; the heuristic is free. When no model ran, the live
+  // result already is the heuristic, so the comparison equals it.
+  let comparison: HeuristicComparison | undefined;
+  if (opts.compareHeuristic) {
+    const heuristicResult = usedClaude
+      ? classify(assembleCriteria(bundle, heuristicAdjudicate(bundle)))
+      : result;
+    comparison = {
+      classification: heuristicResult.classification,
+      points: heuristicResult.points,
+    };
+  }
+
   // Stage 6: reviewer critique (Claude or deterministic fallback).
   stage("review", "start");
   let review;
@@ -351,6 +372,7 @@ export async function runPipeline(
       mode: usedClaude ? "claude" : "heuristic",
     },
     warnings,
+    comparison,
     generatedAt: new Date().toISOString(),
     elapsedMs: Date.now() - started,
   };

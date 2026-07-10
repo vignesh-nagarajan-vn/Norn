@@ -101,7 +101,7 @@ mcp/server.ts           stdio MCP server: interpret_variant, list_eval_variants,
 
 ## The pipeline (lib/pipeline.ts), stage by stage
 
-`runPipeline(rawInput, { emit?, evalMode? })` is the single orchestrator. `app/api/interpret/route.ts` calls it with an `emit` that streams NDJSON; the MCP server and eval call it without one. The flow:
+`runPipeline(rawInput, { emit?, evalMode?, compareHeuristic? })` is the single orchestrator. `app/api/interpret/route.ts` calls it with an `emit` that streams NDJSON; the MCP server and eval call it without one. `compareHeuristic` also runs the deterministic heuristic on the same evidence and attaches `report.comparison` (free; no extra external calls). The flow:
 
 1. **classifyInput** (`lib/ensembl.ts`) tags the input `rsid | hgvs | locus | unknown`.
 2. **recode + VEP, in parallel** (emit `recode`, `vep`). `recode` (variant_recoder) normalizes to rsID/HGVS/VCF; VEP annotates consequence, transcript, protein position, and AlphaMissense/SIFT/PolyPhen. `parseVep` picks the MANE/canonical transcript. If VEP yields no gene and the input matches a fixture, the pipeline swaps in the fixture's annotation, frequency, and ClinVar data wholesale (so the report stays internally consistent) and sets `fixtureUsed`.
@@ -120,7 +120,7 @@ Stage events are `{type:"stage", stage, status: "start"|"done"|"skipped"|"error"
 
 All cross-module types live here; import from `@/lib/types`. The spine:
 
-- `NornReport` = `{ input, normalized, evidence: EvidenceBundle, result: ClassificationResult, review: ReviewResult, model: ModelInfo, warnings, generatedAt, elapsedMs }`. Every surface renders this; the MCP `interpret_variant` returns it.
+- `NornReport` = `{ input, normalized, evidence: EvidenceBundle, result: ClassificationResult, review: ReviewResult, model: ModelInfo, warnings, comparison?, generatedAt, elapsedMs }`. Every surface renders this; the MCP `interpret_variant` returns it. `comparison` (`HeuristicComparison` = `{ classification, points }`) is present only when the caller asked to compare (the eval), and is the heuristic-only result on the same evidence.
 - `EvidenceBundle` holds `consequence` (ConsequenceEvidence, incl. `alphaMissenseScore`/`alphaMissenseClass`), `frequency` (FrequencyEvidence, incl. `filteringAf`/`representativeAf`), `computational` (ComputationalEvidence, incl. `predictor`/`damaging`/`tolerant`), `clinvar` (ClinVarEvidence), `constraint` (GeneConstraint), `thresholds` (GeneThresholdInfo), `signals` (DeterministicSignals), `sourceStatus`, `fixtureUsed`.
 - `CriterionResult` extends `CriterionSpec` with `verdict` (met/not_met/unknown), `evidence`, `reasoning`, `source(Url)`, `appliedPoints`, `provisional?`, `signalDisagreement?`, `manual?`.
 - `ClassificationResult` = `{ points, pathogenicPoints, benignPoints, classification, confidence, confidenceRationale, ba1Override, criteria }`.
@@ -130,7 +130,7 @@ All cross-module types live here; import from `@/lib/types`. The spine:
 
 All are Node runtime and `dynamic = "force-dynamic"` (except eval); none persist anything.
 
-- **POST `/api/interpret`** `{ variant }` -> streams `application/x-ndjson`: one `{type:"stage"}` per stage, then `{type:"result", report}` (or `{type:"error", message}`). Empty input -> 400 JSON. `maxDuration = 60`.
+- **POST `/api/interpret`** `{ variant, compare? }` -> streams `application/x-ndjson`: one `{type:"stage"}` per stage, then `{type:"result", report}` (or `{type:"error", message}`). `compare: true` also adjudicates the same evidence with the deterministic heuristic and attaches `report.comparison` (the `/eval` page uses this to show Claude vs heuristic); it adds no external calls. Empty input -> 400 JSON. `maxDuration = 60`.
 - **POST `/api/ask`** `{ report, question, history? }` -> `{ live, needsKey, answer }` (or `{error}`). `needsKey:true` only when the key is missing; a failure with a key set returns `needsKey:false` plus the error (so a 404/param error no longer masquerades as a missing key). `maxDuration = 30`.
 - **POST `/api/literature`** `{ gene, proteinChange? }` -> `{ hits: LiteratureHit[] }` (PubMed). Errors return `{error, hits: []}`.
 - **GET `/api/structure?uniprot=`** -> the AlphaFold PDB as `text/plain` (resolves the current model version via the AlphaFold API, in-memory cached; `maxDuration = 20`); 400 on a bad accession, 502 when no structure.
@@ -192,7 +192,7 @@ It needs the same env as the app (`ANTHROPIC_API_KEY` for live passes). Claude D
 
 ## Evaluation (app/eval, /api/eval)
 
-`data/eval-variants.json` is 20 well-established variants (BRCA1/2, CFTR, HBB, TP53, MLH1, HFE, MSH6, APC) with their expected ClinVar germline label and accession. The `/eval` page fetches the set and runs each through `/api/interpret`, then reports **exact agreement** (five-tier match) and **directional concordance** (same direction). `lib/eval.ts` holds the pure comparison helpers. The eval enforces the same anti-circularity exclusion as adjudication (a variant is never scored against its own ClinVar record).
+`data/eval-variants.json` is 20 well-established variants (BRCA1/2, CFTR, HBB, TP53, MLH1, HFE, MSH6, APC) with their expected ClinVar germline label and accession. The `/eval` page fetches the set and runs each through `/api/interpret` with `compare: true`, then reports **exact agreement** (five-tier match) and **directional concordance** (same direction) for the live (Claude) result and, alongside, for the deterministic heuristic adjudicated on the same evidence (`report.comparison`), so the lift Claude's reasoning adds over rules is measured, not asserted. With no `ANTHROPIC_API_KEY` the live column is itself the heuristic, so the two match and the page says so. `lib/eval.ts` holds the pure comparison helpers. The eval enforces the same anti-circularity exclusion as adjudication (a variant is never scored against its own ClinVar record).
 
 ## Batch mode (app/batch)
 

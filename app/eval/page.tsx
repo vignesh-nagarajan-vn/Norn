@@ -18,13 +18,15 @@ interface Row {
   status: RowStatus;
   computed?: Classification;
   points?: number;
+  heuristic?: Classification; // same evidence adjudicated by the deterministic heuristic
+  mode?: "claude" | "heuristic"; // whether the live column is a real Claude pass
 }
 
 async function interpretOnce(variant: string): Promise<NornReport> {
   const res = await fetch("/api/interpret", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ variant }),
+    body: JSON.stringify({ variant, compare: true }),
   });
   if (!res.ok || !res.body) throw new Error(`Request failed (${res.status})`);
   const reader = res.body.getReader();
@@ -94,7 +96,13 @@ export default function EvalPage() {
         const report = await interpretOnce(v.input);
         setRows((prev) => ({
           ...prev,
-          [v.input]: { status: "done", computed: report.result.classification, points: report.result.points },
+          [v.input]: {
+            status: "done",
+            computed: report.result.classification,
+            points: report.result.points,
+            heuristic: report.comparison?.classification,
+            mode: report.model.mode,
+          },
         }));
       } catch {
         setRows((prev) => ({ ...prev, [v.input]: { status: "error" } }));
@@ -104,23 +112,35 @@ export default function EvalPage() {
   }, [dataset, running]);
 
   const stats = useMemo(() => {
-    if (!dataset) return { done: 0, exact: 0, concordant: 0, total: 0 };
+    if (!dataset)
+      return { done: 0, exact: 0, concordant: 0, hExact: 0, hConcordant: 0, total: 0, claudeMode: false };
     let done = 0;
     let exact = 0;
     let concordant = 0;
+    let hExact = 0;
+    let hConcordant = 0;
+    let claudeMode = false;
     for (const v of dataset.variants) {
       const r = rows[v.input];
       if (r?.status === "done" && r.computed) {
         done++;
         if (isExactMatch(v.expected, r.computed)) exact++;
         if (isConcordant(v.expected, r.computed)) concordant++;
+        if (r.mode === "claude") claudeMode = true;
+        if (r.heuristic) {
+          if (isExactMatch(v.expected, r.heuristic)) hExact++;
+          if (isConcordant(v.expected, r.heuristic)) hConcordant++;
+        }
       }
     }
-    return { done, exact, concordant, total: dataset.variants.length };
+    return { done, exact, concordant, hExact, hConcordant, total: dataset.variants.length, claudeMode };
   }, [dataset, rows]);
 
-  const pctExact = stats.done ? Math.round((stats.exact / stats.done) * 100) : 0;
-  const pctConcordant = stats.done ? Math.round((stats.concordant / stats.done) * 100) : 0;
+  const pct = (n: number) => (stats.done ? Math.round((n / stats.done) * 100) : 0);
+  const pctExact = pct(stats.exact);
+  const pctConcordant = pct(stats.concordant);
+  const pctHExact = pct(stats.hExact);
+  const pctHConcordant = pct(stats.hConcordant);
 
   return (
     <PrefsProvider>
@@ -130,7 +150,8 @@ export default function EvalPage() {
         <p className="mt-2 max-w-3xl text-[15px] leading-relaxed text-on-surface-variant">
           Norn runs its full pipeline on {dataset?.variants.length ?? "a set of"} well-established variants and
           compares its computed classification to the expected ClinVar label. Two measures are reported: exact
-          five-tier agreement and directional concordance.
+          five-tier agreement and directional concordance. Each variant is also adjudicated by the deterministic
+          heuristic on the same evidence, so you can see what Claude&apos;s reasoning changes versus rules alone.
         </p>
         <div className="mt-3 flex items-start gap-2 rounded-lg border border-outline-variant bg-surface-low px-4 py-3 text-[13px] text-on-surface-variant">
           <Icon name="shield" size={18} className="mt-0.5 text-secondary" />
@@ -149,9 +170,36 @@ export default function EvalPage() {
         <section className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
           <StatCard label="Variants" value={`${stats.total}`} />
           <StatCard label="Evaluated" value={`${stats.done}`} />
-          <StatCard label="Exact agreement" value={stats.done ? `${pctExact}%` : "n/a"} sub={`${stats.exact}/${stats.done}`} />
-          <StatCard label="Directional concordance" value={stats.done ? `${pctConcordant}%` : "n/a"} sub={`${stats.concordant}/${stats.done}`} />
+          <StatCard
+            label={stats.claudeMode ? "Claude directional" : "Live directional"}
+            value={stats.done ? `${pctConcordant}%` : "n/a"}
+            sub={stats.done ? `${stats.concordant}/${stats.done} · exact ${pctExact}%` : undefined}
+          />
+          <StatCard
+            label="Heuristic directional"
+            value={stats.done ? `${pctHConcordant}%` : "n/a"}
+            sub={stats.done ? `${stats.hConcordant}/${stats.done} · exact ${pctHExact}%` : undefined}
+          />
         </section>
+
+        {stats.done > 0 && (
+          <div className="mt-3 flex items-start gap-2 rounded-lg border border-outline-variant bg-surface-low px-4 py-3 text-[13px] text-on-surface-variant">
+            <Icon name="balance" size={18} className="mt-0.5 text-secondary" />
+            {stats.claudeMode ? (
+              <span>
+                <span className="font-semibold text-on-surface">Claude vs the heuristic on the same evidence:</span>{" "}
+                Claude matches direction on {stats.concordant}/{stats.done} (exact {pctExact}%); the deterministic
+                heuristic on {stats.hConcordant}/{stats.done} (exact {pctHExact}%). The gap is what the model&apos;s
+                reasoning adds over the rules.
+              </span>
+            ) : (
+              <span>
+                No <code className="mono">ANTHROPIC_API_KEY</code> is set, so the live column is the offline heuristic
+                and the two match. Set a key and rerun to measure Claude against the heuristic.
+              </span>
+            )}
+          </div>
+        )}
 
         <section className="card mt-6 overflow-hidden">
           <table className="w-full text-sm">
@@ -160,7 +208,8 @@ export default function EvalPage() {
                 <th className="px-4 py-2 font-bold">Variant</th>
                 <th className="px-4 py-2 font-bold">Gene</th>
                 <th className="px-4 py-2 font-bold">Expected</th>
-                <th className="px-4 py-2 font-bold">Norn</th>
+                <th className="px-4 py-2 font-bold">{/* live: Claude or offline heuristic */}Norn</th>
+                <th className="px-4 py-2 font-bold">Heuristic</th>
                 <th className="px-4 py-2 font-bold">Points</th>
                 <th className="px-4 py-2 font-bold">Match</th>
               </tr>
@@ -192,6 +241,13 @@ export default function EvalPage() {
                         <span className="text-outline">n/a</span>
                       )}
                     </td>
+                    <td className="px-4 py-2">
+                      {r?.heuristic ? (
+                        <span style={{ color: classColorVar(r.heuristic) }}>{r.heuristic}</span>
+                      ) : (
+                        <span className="text-outline">n/a</span>
+                      )}
+                    </td>
                     <td className="mono px-4 py-2 text-on-surface-variant">{r?.points != null ? (r.points > 0 ? `+${r.points}` : r.points) : "n/a"}</td>
                     <td className="px-4 py-2">
                       {computed ? (
@@ -214,7 +270,7 @@ export default function EvalPage() {
         </section>
 
         <p className="mt-4 text-[12px] leading-relaxed text-outline">
-          Norn implements eight criteria and applies PM2 at supporting strength, so it is deliberately
+          Norn implements ten automated criteria and applies PM2 at supporting strength, so it is deliberately
           conservative: many true-pathogenic variants land at Likely Pathogenic rather than Pathogenic. Exact
           five-tier agreement is therefore lower than directional concordance, which is the more meaningful
           measure for a triage copilot. Disagreements are shown, not hidden.

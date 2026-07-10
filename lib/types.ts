@@ -219,6 +219,14 @@ export interface ModelInfo {
   mode: "claude" | "heuristic";
 }
 
+// The same evidence bundle adjudicated by the deterministic heuristic alone,
+// classified in code. Populated only when the pipeline is asked to compare, so
+// the eval can show what Claude's reasoning changed versus rules on their own.
+export interface HeuristicComparison {
+  classification: Classification;
+  points: number;
+}
+
 export interface NornReport {
   input: string;
   normalized: NormalizedInput;
@@ -227,6 +235,7 @@ export interface NornReport {
   review: ReviewResult;
   model: ModelInfo;
   warnings: string[];
+  comparison?: HeuristicComparison; // heuristic-only result on the same evidence (eval Claude-vs-heuristic view)
   generatedAt: string;
   elapsedMs: number;
 }

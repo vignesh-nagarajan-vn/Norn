@@ -121,6 +121,7 @@ Every interpretation is interactive, not a static report:
 - **Ask the copilot.** A chat panel where Claude answers using only that report as its knowledge base, explaining the call without inventing new evidence or a different label.
 - **Literature.** A PubMed search for the gene and protein change surfaces functional and case evidence Norn does not read itself.
 - **Batch mode.** Paste a list, upload a plain list, CSV, or VCF, or load a sample batch, and interpret many variants at once into a sortable worklist (`/batch`).
+- **Evaluation with a Claude-vs-heuristic baseline.** The `/eval` page scores the pipeline against 20 well-established ClinVar variants and, on the same evidence, adjudicates with the deterministic heuristic alongside, so the lift from Claude's reasoning is measured rather than asserted.
 - **Export.** Download a branded one-to-two-page PDF report (vector meter and lollipop, legible in light or dark mode), the full JSON, or a draft ClinVar submission row.
 - **MCP server.** The same pipeline exposed over stdio (`interpret_variant`, `list_eval_variants`, `list_acmg_criteria`, `to_clinvar_submission`) so other tools can import Norn's output. See [docs/MCP.md](docs/MCP.md).
 - **Themes and demo.** Dark by default with a one-toggle light theme, colorblind-safe and high-contrast palettes, and an inline screen recording of a real interpretation. In-app documentation lives at `/docs`. A light-mode screenshot is in [docs/DESIGN.md](docs/DESIGN.md).
