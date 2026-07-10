@@ -54,8 +54,7 @@ export default function Hero({
           Read a variant
         </h1>
         <p className="mx-auto mb-8 max-w-2xl text-[15px] leading-relaxed text-on-surface-variant">
-          Enter one variant to gather evidence across public genomics databases and draft a preliminary ACMG
-          classification for a curator to confirm.
+          Enter one variant. Norn gathers the evidence and drafts a preliminary ACMG classification to confirm.
         </p>
 
         <form

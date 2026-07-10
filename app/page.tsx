@@ -123,14 +123,14 @@ const FATES = [
     gloss: "what was",
     title: "Gather",
     icon: "travel_explore",
-    body: "Norn normalizes the input and pulls molecular consequence, population frequency, and neighboring-residue evidence from Ensembl VEP, gnomAD v4, and ClinVar.",
+    body: "Pulls molecular consequence, population frequency, and neighboring-residue evidence from Ensembl VEP, gnomAD v4, and ClinVar.",
   },
   {
     norse: "Verðandi",
     gloss: "what is",
     title: "Weigh",
     icon: "balance",
-    body: "Claude adjudicates each ACMG/AMP criterion (met, not met, or unknown) against code-computed signals, returning one line of reasoning per criterion.",
+    body: "Claude adjudicates each ACMG/AMP criterion against code-computed signals, one line of reasoning each.",
   },
   {
     norse: "Skuld",
@@ -302,13 +302,12 @@ function Landing() {
               Draft the verdict.
             </h1>
             <p className="fate-rise mt-6 max-w-2xl text-lg leading-relaxed text-on-surface-variant" style={{ animationDelay: "0.12s" }}>
-              Norn is a variant-interpretation copilot. Paste one genetic variant and it gathers evidence from public
-              genomics databases, adjudicates each ACMG/AMP criterion with Claude, and computes a transparent
-              classification for a curator to confirm.
+              A variant-interpretation copilot. Paste one variant; Norn gathers the public-database evidence,
+              adjudicates each ACMG/AMP criterion with Claude, and drafts a transparent classification to confirm.
             </p>
             <p className="fate-rise mt-3 text-[15px] text-on-surface-variant" style={{ animationDelay: "0.16s" }}>
-              The Norse fates read evidence and decree destiny. A variant classifier does the same: Norn{" "}
-              <RotatingVerb /> the evidence, then a human decides.
+              The Norse fates read evidence and decree fate. Norn{" "}
+              <RotatingVerb /> the evidence; a human decides.
             </p>
 
             <div className="fate-rise mt-8 flex flex-wrap items-center gap-3" style={{ animationDelay: "0.2s" }}>
@@ -376,8 +375,7 @@ function Landing() {
             Gather, weigh, decree.
           </h2>
           <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-on-surface-variant">
-            Norn is named for the Norse fates who sit at the well beneath the world tree and weave the threads of
-            destiny. Its pipeline follows the same three movements.
+            Named for the Norse fates who weave the threads of destiny, Norn follows the same three movements.
           </p>
           <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
             {FATES.map((f) => (
@@ -437,8 +435,8 @@ function Landing() {
                 Thirty seconds, one variant.
               </h2>
               <p className="mt-4 text-[15px] leading-relaxed text-on-surface-variant">
-                Norn gathers the evidence, weighs each ACMG criterion with Claude, and lets the engine decree the
-                classification. Play the recording full screen, or open the Dashboard and run your own.
+                Norn gathers the evidence, weighs each criterion with Claude, and the engine decrees the
+                classification. Play it full screen, or run your own.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <button type="button" onClick={() => setVideoOpen(true)} className="btn-primary px-5 py-2.5 text-[15px]">
@@ -466,11 +464,9 @@ function Landing() {
               </h2>
             </div>
             <p className="text-[15px] leading-relaxed text-on-surface-variant">
-              Claude returns a per-criterion verdict with one sentence of reasoning. It never returns the final label.
-              The classification is always computed in code from the adjudicated verdicts, so the same evidence always
-              yields the same call. A second Claude pass then critiques the draft and writes the curator checklist. If
-              no API key is set, Norn falls back to a labeled deterministic heuristic, never presented as model
-              reasoning.
+              Claude returns a per-criterion verdict and one line of reasoning, never the final label. The engine
+              computes the classification in code from those verdicts, so the same evidence always yields the same
+              call. A second Claude pass critiques the draft and writes the curator checklist.
             </p>
           </div>
 
@@ -545,10 +541,9 @@ function Landing() {
                 Transparent, sourced, and yours to confirm.
               </h2>
               <p className="mt-4 text-[15px] leading-relaxed text-on-surface-variant">
-                Every interpretation is interactive, not a static PDF. See each criterion&apos;s evidence and source,
-                add the evidence Norn cannot fetch, question the call, and export a draft ClinVar submission when a
-                human has signed off. Unlike a one-shot classifier, every criterion is sourced and a second Claude
-                pass flags overcalls, so you audit the reasoning rather than trust a label.
+                Every interpretation is interactive. See each criterion&apos;s evidence and source, add what Norn
+                cannot fetch, question the call, and export a draft ClinVar submission. Unlike a one-shot classifier,
+                every criterion is sourced and a second Claude pass flags overcalls, so you audit the call.
               </p>
               <div className="mt-6">
                 <SampleReport />

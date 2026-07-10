@@ -149,9 +149,9 @@ export default function EvalPage() {
         <h1 className="display text-3xl font-semibold tracking-tight text-on-surface">Evaluation</h1>
         <p className="mt-2 max-w-3xl text-[15px] leading-relaxed text-on-surface-variant">
           Norn runs its full pipeline on {dataset?.variants.length ?? "a set of"} well-established variants and
-          compares its computed classification to the expected ClinVar label. Two measures are reported: exact
-          five-tier agreement and directional concordance. Each variant is also adjudicated by the deterministic
-          heuristic on the same evidence, so you can see what Claude&apos;s reasoning changes versus rules alone.
+          compares its call to the expected ClinVar label, by exact five-tier agreement and by directional
+          concordance. Each is also adjudicated by the deterministic heuristic on the same evidence, so you can see
+          what Claude&apos;s reasoning adds over rules alone.
         </p>
         <div className="mt-3 flex items-start gap-2 rounded-lg border border-outline-variant bg-surface-low px-4 py-3 text-[13px] text-on-surface-variant">
           <Icon name="shield" size={18} className="mt-0.5 text-secondary" />
@@ -271,9 +271,9 @@ export default function EvalPage() {
 
         <p className="mt-4 text-[12px] leading-relaxed text-outline">
           Norn implements ten automated criteria and applies PM2 at supporting strength, so it is deliberately
-          conservative: many true-pathogenic variants land at Likely Pathogenic rather than Pathogenic. Exact
-          five-tier agreement is therefore lower than directional concordance, which is the more meaningful
-          measure for a triage copilot. Disagreements are shown, not hidden.
+          conservative: many true-pathogenic variants land at Likely Pathogenic, not Pathogenic. Exact agreement
+          runs lower than directional concordance, the more meaningful measure for triage. Disagreements are shown,
+          not hidden.
         </p>
       </div>
     </AppShell>

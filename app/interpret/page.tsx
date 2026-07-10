@@ -41,7 +41,7 @@ const EXAMPLES: Example[] = [
     tag: "VUS",
     color: "var(--vus)",
     consequence: "Cardiomyopathy missense (HCM)",
-    note: "R403Q, a classic HCM variant: PM5, PM2, and AlphaMissense PP3 draft it VUS. Add the functional (PS3) and case (PS4) evidence and it firms to Pathogenic. Norn will not overcall on automated evidence.",
+    note: "R403Q, a classic HCM variant, drafts VUS (PM5, PM2, PP3). Add functional (PS3) and case (PS4) evidence and it firms to Pathogenic; Norn will not overcall.",
   },
 ];
 
