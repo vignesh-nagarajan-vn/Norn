@@ -54,10 +54,12 @@ async function callModel(
   maxTokens: number,
 ): Promise<string> {
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  // No `temperature`: Claude Opus 4.8 / 4.7 (the default model) reject sampling
+  // parameters with a 400 ("temperature is deprecated for this model"). The final
+  // label is computed in code regardless, so the model's own sampling is fine.
   const msg = await client.messages.create({
     model: modelName(),
     max_tokens: maxTokens,
-    temperature: 0,
     system,
     messages: [{ role: "user", content: user }],
   });
@@ -270,10 +272,10 @@ export async function askAboutReport(
 ): Promise<string> {
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const trimmed = history.slice(-8);
+  // No `temperature` here either: Opus 4.8 / 4.7 reject it with a 400.
   const msg = await client.messages.create({
     model: modelName(),
     max_tokens: 700,
-    temperature: 0.2,
     system: `${ASK_SYSTEM}\n\nINTERPRETATION (your only knowledge base):\n${reportContext}`,
     messages: [...trimmed, { role: "user" as const, content: question }],
   });

@@ -334,7 +334,7 @@ The branded PDF report and the deck template in [`design/`](design) (delivered) 
 
 ## Known issues
 
-- **Ask the copilot does not work on the current deployment and needs to be fixed.** The chat panel returns a failed-call message instead of an answer because the deployment's API key cannot access the configured model (the default `claude-opus-4-8` returns 404), so the Claude calls fall back to the labeled offline heuristic. The fix is to set `ANTHROPIC_MODEL` on Vercel to a model the key can access (for example `claude-sonnet-4-6`) and redeploy, or to grant the key access to the configured model. Everything else in the report works regardless.
+- **Fixed: the live Claude calls failed because Norn sent a `temperature` parameter.** The Ask panel returned a failed-call message and the interpretation passes fell back to the labeled offline heuristic because every request set `temperature`, which Claude Opus 4.8 and 4.7 (the default model) reject with a `400 invalid_request_error` ("temperature is deprecated for this model"). This was fixed in `lib/anthropic.ts` by dropping the parameter (the sampling parameters `temperature`/`top_p`/`top_k` are removed on those models); the deployment needs a redeploy to pick it up. The earlier hypothesis that the key could not access the model (a 404) was wrong: the request reached the model and was rejected on the parameter, which proves the key can access `claude-opus-4-8`. Everything else in the report works regardless.
 
 ## References
 
