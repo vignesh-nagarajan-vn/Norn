@@ -4,7 +4,7 @@ Guidance for AI agents (and humans) working in this repository. Read this first.
 
 ## Keeping the docs current (do this every session)
 
-Norn documents itself in several places: this file (`CLAUDE.md`), the main `README.md` (a short overview: what it is, tech stack, who it is for, features, run/deploy, and a Docs index), the docs under `docs/` (`METHODOLOGY.md` for the ACMG engine/scoring/Claude passes/eval/limitations, `DESIGN.md`, `MCP.md`, the diagrams, and `docs/archive/`), and the brand kit under `design/` (`tokens.css`, the logo, the guide). The README is intentionally kept lean; deep methodology lives in `docs/METHODOLOGY.md`, so put engine/scoring/threshold detail there, not back in the README. Any change to behavior, structure, routes, commands, environment, dependencies, or the UI must update every affected document in the same change, as applicable. That includes regenerating the README screenshots and the identity assets (OG/Twitter/apple/PWA icons in `app/` and `public/`, the guided-tour video) when the UI or identity changes, keeping `design/tokens.css` in sync with `app/globals.css`, and moving superseded assets into `docs/archive/`. Treat the docs as part of the build: a change that leaves them stale is not done. When in doubt, update this file so the next session starts from the truth.
+Norn documents itself in several places: this file (`CLAUDE.md`), the main `README.md` (a short overview: what it is, tech stack, who it is for, features, a link to run/deploy, and a Docs index), the docs under `docs/` (`METHODOLOGY.md` for the ACMG engine/scoring/Claude passes/eval/limitations, `DEPLOYMENT.md` for local run + Vercel deploy + env vars, `DESIGN.md`, `MCP.md`, the diagrams, and `docs/archive/`), and the brand kit under `design/` (`tokens.css`, the logo, the guide). The README is intentionally kept lean: deep methodology lives in `docs/METHODOLOGY.md` and the run/deploy steps in `docs/DEPLOYMENT.md`, so put engine/scoring/threshold detail in METHODOLOGY and setup/env detail in DEPLOYMENT, not back in the README. Any change to behavior, structure, routes, commands, environment, dependencies, or the UI must update every affected document in the same change, as applicable. That includes regenerating the README screenshots and the identity assets (OG/Twitter/apple/PWA icons in `app/` and `public/`, the guided-tour video) when the UI or identity changes, keeping `design/tokens.css` in sync with `app/globals.css`, and moving superseded assets into `docs/archive/`. Treat the docs as part of the build: a change that leaves them stale is not done. When in doubt, update this file so the next session starts from the truth.
 
 ## What Norn is
 
@@ -87,7 +87,8 @@ data/
   eval-variants.json    20-variant benchmark with expected ClinVar labels
   gene-thresholds.json  illustrative gene-specific AF thresholds
 docs/
-  METHODOLOGY.md (ACMG engine, scoring, Claude passes, eval, data sources, limitations, references), DESIGN.md, MCP.md
+  METHODOLOGY.md (ACMG engine, scoring, Claude passes, eval, data sources, limitations, references)
+  DEPLOYMENT.md (local run, npm scripts, env vars, Vercel deploy), DESIGN.md, MCP.md
   architecture.svg, scoring-model.svg
   ui-landing.png, ui-dashboard.png, ui-3d.png, ui-landing-drafted.png, ui-batch.png, ui-docs.png (dark, the default), ui-dashboard-light.png  README screenshots
   archive/              previous "Scientific Precision" UI screenshots and diagrams + note
@@ -96,6 +97,43 @@ public/                 manifest.webmanifest, icons/ (PWA), norn-demo.webm + pos
 mcp/server.ts           stdio MCP server: interpret_variant, list_eval_variants,
                         list_acmg_criteria, to_clinvar_submission
 ```
+
+## The pipeline (lib/pipeline.ts), stage by stage
+
+`runPipeline(rawInput, { emit?, evalMode? })` is the single orchestrator. `app/api/interpret/route.ts` calls it with an `emit` that streams NDJSON; the MCP server and eval call it without one. The flow:
+
+1. **classifyInput** (`lib/ensembl.ts`) tags the input `rsid | hgvs | locus | unknown`.
+2. **recode + VEP, in parallel** (emit `recode`, `vep`). `recode` (variant_recoder) normalizes to rsID/HGVS/VCF; VEP annotates consequence, transcript, protein position, and AlphaMissense/SIFT/PolyPhen. `parseVep` picks the MANE/canonical transcript. If VEP yields no gene and the input matches a fixture, the pipeline swaps in the fixture's annotation, frequency, and ClinVar data wholesale (so the report stays internally consistent) and sets `fixtureUsed`.
+3. Build the gnomAD `variantId` from the recoder `vcf_string`, then VEP coords, then the fixture.
+4. **gnomAD + ClinVar + gene constraint, in parallel** (emit `gnomad`, `clinvar`). gnomAD frequency (rsID first, then variantId); ClinVar neighbors (PS1/PM5, excluding the query's own cDNA) plus the gene-wide set for the lollipop and PM1; `gnomadGeneConstraint` for PVS1. Each source degrades to a fixture or to "unavailable" on its own.
+5. **computationalEvidence + computeSignals** (`lib/signals.ts`) turn the raw evidence into per-criterion booleans plus the AlphaMissense/faf95 derivations.
+6. Assemble the `EvidenceBundle` and run the **unresolvable guard**: throw only if the input is unparseable or VEP returned a real empty (not a timeout).
+7. **adjudicate** (emit `adjudicate`): `adjudicateWithClaude` when `ANTHROPIC_API_KEY` is set, else `heuristicAdjudicate`; a Claude failure falls back to the heuristic and records a warning.
+8. **assembleCriteria** (`lib/assemble.ts`) builds `CriterionResult[]` from the verdicts + code-built evidence strings + source URLs, and flags `provisional` (PVS1) and `signalDisagreement` (model vs. hard signal). **classify** (`lib/acmg.ts`) computes the points, label, and confidence.
+9. **review** (emit `review`): `reviewWithClaude` or `heuristicReview` writes the critique, conflicts, and curator checklist.
+10. Return a `NornReport` with `model` (`live`, `mode: claude | heuristic`), `warnings`, `evidence`, `result`, `review`, and timing.
+
+Stage events are `{type:"stage", stage, status: "start"|"done"|"skipped"|"error", detail?}`; `StageName` is `recode | vep | gnomad | clinvar | adjudicate | review`.
+
+## Shared types (lib/types.ts)
+
+All cross-module types live here; import from `@/lib/types`. The spine:
+
+- `NornReport` = `{ input, normalized, evidence: EvidenceBundle, result: ClassificationResult, review: ReviewResult, model: ModelInfo, warnings, generatedAt, elapsedMs }`. Every surface renders this; the MCP `interpret_variant` returns it.
+- `EvidenceBundle` holds `consequence` (ConsequenceEvidence, incl. `alphaMissenseScore`/`alphaMissenseClass`), `frequency` (FrequencyEvidence, incl. `filteringAf`/`representativeAf`), `computational` (ComputationalEvidence, incl. `predictor`/`damaging`/`tolerant`), `clinvar` (ClinVarEvidence), `constraint` (GeneConstraint), `thresholds` (GeneThresholdInfo), `signals` (DeterministicSignals), `sourceStatus`, `fixtureUsed`.
+- `CriterionResult` extends `CriterionSpec` with `verdict` (met/not_met/unknown), `evidence`, `reasoning`, `source(Url)`, `appliedPoints`, `provisional?`, `signalDisagreement?`, `manual?`.
+- `ClassificationResult` = `{ points, pathogenicPoints, benignPoints, classification, confidence, confidenceRationale, ba1Override, criteria }`.
+- `PipelineEvent` = `StageEvent | ResultEvent | ErrorEvent`; the NDJSON stream is a sequence of these.
+
+## API routes (app/api)
+
+All are Node runtime and `dynamic = "force-dynamic"` (except eval); none persist anything.
+
+- **POST `/api/interpret`** `{ variant }` -> streams `application/x-ndjson`: one `{type:"stage"}` per stage, then `{type:"result", report}` (or `{type:"error", message}`). Empty input -> 400 JSON. `maxDuration = 60`.
+- **POST `/api/ask`** `{ report, question, history? }` -> `{ live, needsKey, answer }` (or `{error}`). `needsKey:true` only when the key is missing; a failure with a key set returns `needsKey:false` plus the error (so a 404/param error no longer masquerades as a missing key). `maxDuration = 30`.
+- **POST `/api/literature`** `{ gene, proteinChange? }` -> `{ hits: LiteratureHit[] }` (PubMed). Errors return `{error, hits: []}`.
+- **GET `/api/structure?uniprot=`** -> the AlphaFold PDB as `text/plain` (resolves the current model version via the AlphaFold API, in-memory cached; `maxDuration = 20`); 400 on a bad accession, 502 when no structure.
+- **GET `/api/eval`** -> the static `data/eval-variants.json` (`force-static`).
 
 ## The ACMG engine (lib/acmg.ts, lib/signals.ts)
 
@@ -134,10 +172,37 @@ A variant's own ClinVar classification is NEVER fed into adjudication. ClinVar i
 
 - Two server-side calls per variant: adjudicator and reviewer (`lib/anthropic.ts`). Plus `askAboutReport` for the Ask panel.
 - Responses must be strict JSON; parsed defensively and validated with Zod, with one reformat retry.
+- The **adjudicator** is given the `CRITERIA` definitions plus a compact `summarize(bundle)` (variant, frequency, computational incl. AlphaMissense, ClinVar neighbors, gene constraint, `computedSignals`, thresholds) and must return `{criteria:[{code, verdict, evidence, source, reasoning}]}` validated by `AdjudicationSchema`. The **reviewer** is given the draft classification + evidence and returns `{critique, conflicts, checklist, overcallRisk}` validated by `ReviewSchema`. The system prompts (`ADJUDICATOR_SYSTEM`, `REVIEWER_SYSTEM`, `ASK_SYSTEM`) tell the model it adjudicates criteria only and never assigns the final label, to treat `computedSignals` as strong priors, and to never use a variant's own ClinVar classification as evidence.
 - Do NOT send `temperature` (or `top_p`/`top_k`): Claude Opus 4.8 / 4.7 remove the sampling parameters and reject them with a `400` ("temperature is deprecated for this model"), which silently drops every interpretation to the heuristic and errors the Ask panel. `messages.create` in `anthropic.ts` omits them on purpose; the engine computes the label in code, so the model's own sampling is fine. If you need extended thinking on Opus 4.8, use `thinking: {type: "adaptive"}`, not a temperature.
 - Model id from `ANTHROPIC_MODEL`, default `claude-opus-4-8`. NOTE: on a real Anthropic account the id must be one the account can access, or every Claude call 404s (interpretations then silently fall back to the heuristic and the Ask panel errors). If "chat doesn't work" on a live deploy: first confirm the request is not being rejected on a parameter (a 400 like the `temperature` one above), then check the key is set AND the deployment was redeployed, and that the model id is valid.
 - With no key (local dev), Norn uses the labeled deterministic fallback (`lib/fallback.ts`). This is expected; the UI marks it "offline heuristic".
 - The Ask route (`/api/ask`) returns `needsKey: true` only when the key is missing; a failure with a key set returns `needsKey: false` plus the error, and `AskPanel` shows the "set the key" banner only for `needsKey`. So a 404 from an inaccessible `ANTHROPIC_MODEL` no longer masquerades as a missing key; the reply names the model and suggests setting an accessible one.
+
+## The MCP server (mcp/server.ts)
+
+`npm run mcp` starts a stdio MCP server (`@modelcontextprotocol/sdk`) that reuses the same `runPipeline` and pure helpers as the web app, so any MCP client (Claude Desktop, an agent framework) can pull Norn data directly. Four tools:
+
+- `interpret_variant({ variant, format?: "json"|"text" })` -> `runPipeline` -> the full `NornReport` JSON (or `reportToContext` compact text).
+- `list_eval_variants()` -> the benchmark dataset.
+- `list_acmg_criteria()` -> `{ automated: CRITERIA, curatorSupplied: MANUAL_CRITERIA, thresholds: THRESHOLDS }`.
+- `to_clinvar_submission({ variant })` -> `toClinvarSubmission(report)`, a draft submission row (needs human sign-off).
+
+It needs the same env as the app (`ANTHROPIC_API_KEY` for live passes). Claude Desktop config is in `docs/MCP.md`.
+
+## Evaluation (app/eval, /api/eval)
+
+`data/eval-variants.json` is 20 well-established variants (BRCA1/2, CFTR, HBB, TP53, MLH1, HFE, MSH6, APC) with their expected ClinVar germline label and accession. The `/eval` page fetches the set and runs each through `/api/interpret`, then reports **exact agreement** (five-tier match) and **directional concordance** (same direction). `lib/eval.ts` holds the pure comparison helpers. The eval enforces the same anti-circularity exclusion as adjudication (a variant is never scored against its own ClinVar record).
+
+## Batch mode (app/batch)
+
+Paste a newline list, upload a plain list, CSV, or VCF, or load a sample batch; the page parses each entry into a variant string and runs them through `/api/interpret` into a sortable worklist (classification, points). Each row links to `/interpret?v=<variant>` for the full report.
+
+## Client state: prefs, history, localStorage
+
+No database; the only persistence is two `localStorage` keys, both client-only:
+
+- **`norn-prefs`** (`components/Prefs.tsx`): `{ theme: light|dark, colorScheme: clinical|cvd|contrast, showReasoning }`. Read pre-paint by the inline script in `app/layout.tsx` (default dark, no flash) and by `PrefsProvider`; `usePrefs()` exposes it, `ThemeToggle` and the Settings modal write it.
+- **`norn-history`** (`lib/history.ts`): the last 15 interpretations (`{variant, classification, points, at}`), newest first, deduped by variant. `addHistory` fires a `norn-history-changed` event so the sidebar Recent list refreshes. A real server-side audit trail is still on the roadmap.
 
 ## Conventions
 
@@ -155,7 +220,7 @@ npm run typecheck   # tsc --noEmit
 npm run mcp         # start the stdio MCP server (needs the same env as the app)
 ```
 
-Environment variables: `ANTHROPIC_API_KEY` (required for real Claude passes and the Ask panel), `ANTHROPIC_MODEL` (optional, default `claude-opus-4-8`), `NCBI_API_KEY` (optional, raises ClinVar/PubMed rate limits). See `.env.example`.
+Environment variables: `ANTHROPIC_API_KEY` (required for real Claude passes and the Ask panel), `ANTHROPIC_MODEL` (optional, default `claude-opus-4-8`), `NCBI_API_KEY` (optional, raises ClinVar/PubMed rate limits). See `.env.example`. The user-facing setup and deploy steps live in `docs/DEPLOYMENT.md`; this section is the contributor quick reference.
 
 Deploy: import into Vercel (Next.js preset), set the env vars, deploy. Vercel does not apply new env vars to an existing deployment until you redeploy.
 
@@ -183,4 +248,4 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
 
 ## Roadmap (not yet done)
 
-PP3/BP4 now use the calibrated AlphaMissense score carried by the VEP call, and BS1/BA1 use gnomAD's faf95 filtering AF. Still ahead: additional calibrated meta-predictors (REVEL, BayesDel) and per-strength thresholds, a server-side audit trail (needs a datastore), and confidence calibration against a larger labeled set. See the Roadmap section in `README.md`.
+PP3/BP4 now use the calibrated AlphaMissense score carried by the VEP call, and BS1/BA1 use gnomAD's faf95 filtering AF. Still ahead: additional calibrated meta-predictors (REVEL, BayesDel) and per-strength thresholds, a server-side audit trail (needs a datastore; the only persistence today is the client `norn-history`), and confidence calibration against a larger labeled set. See the Roadmap section in `docs/METHODOLOGY.md`.
