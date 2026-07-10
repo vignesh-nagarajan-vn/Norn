@@ -131,41 +131,9 @@ Every interpretation is interactive, not a static report:
 </p>
 <p align="center"><sub>Dark is the default; a light theme is one toggle away. Classification colors follow the chosen palette.</sub></p>
 
-## Run it locally
+## Run it and deploy it
 
-Requirements: Node 18.18 or newer.
-
-```bash
-git clone https://github.com/vignesh-nagarajan-vn/Norn.git
-cd Norn
-npm install
-cp .env.example .env.local   # add your ANTHROPIC_API_KEY
-npm run dev
-```
-
-Open http://localhost:3000. The example chips work without any keys (they use bundled fixtures and the deterministic fallback). Setting `ANTHROPIC_API_KEY` switches the two reasoning passes to real Claude calls.
-
-```bash
-npm run build       # production build (also type-checks)
-npm run typecheck   # tsc --noEmit
-npm run mcp         # start the stdio MCP server
-```
-
-## Deploy on Vercel
-
-Norn deploys on Vercel with no extra infrastructure. There is no database.
-
-1. Import the repository into Vercel (framework preset: Next.js).
-2. Set `ANTHROPIC_API_KEY`. Optionally set `ANTHROPIC_MODEL` and `NCBI_API_KEY`.
-3. Deploy.
-
-The heavy route (`/api/interpret`) sets `maxDuration = 60` and streams progress as newline-delimited JSON.
-
-| Env var | Required | Purpose |
-| --- | --- | --- |
-| `ANTHROPIC_API_KEY` | Yes, for real model passes | Enables the Claude adjudicator and reviewer. Without it, Norn uses the labeled deterministic fallback. |
-| `ANTHROPIC_MODEL` | No | Model id. Defaults to `claude-opus-4-8`. Must be a model your key can access, or every call 404s. `claude-sonnet-4-6` is a faster, cheaper option. |
-| `NCBI_API_KEY` | No | Raises NCBI E-utilities rate limits from 3 to 10 requests per second. |
+Node 18.18 or newer, then `npm install` and `npm run dev` (the example chips work with no API key). Full local-setup steps, the scripts, the environment variables, and Vercel deployment are in **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**.
 
 ## Project layout
 
@@ -176,7 +144,7 @@ lib/          engine and clients (acmg, anthropic, ensembl, gnomad, clinvar, pip
 data/         the 20-variant eval set and the gene-specific frequency thresholds
 mcp/          the stdio MCP server
 design/       brand kit: logo, illustrations, tokens, guide, deck template
-docs/         methodology, design notes, MCP config, diagrams, screenshots, archived UI
+docs/         methodology, deployment, design notes, MCP config, diagrams, screenshots, archived UI
 public/       manifest, PWA icons, the demo video and poster, the deck (HTML + PDF)
 ```
 
@@ -188,6 +156,7 @@ Norn documents itself beyond this README:
 
 | Doc | What's in it |
 | --- | --- |
+| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Run it locally and deploy to Vercel: requirements, the scripts, the environment variables, and the deploy steps. |
 | [docs/METHODOLOGY.md](docs/METHODOLOGY.md) | The ACMG engine in depth: criteria, thresholds, scoring, the two Claude passes, anti-circularity, evaluation, data sources, limitations, and references. |
 | [docs/DESIGN.md](docs/DESIGN.md) | Design notes: the "loom of fate" identity, themes and palettes, the PDF and deck, the demo video. |
 | [docs/MCP.md](docs/MCP.md) | The Model Context Protocol server: the tools it exposes and how to connect a client (for example Claude Desktop). |
