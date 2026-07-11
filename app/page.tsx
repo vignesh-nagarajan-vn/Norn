@@ -45,7 +45,7 @@ function VideoLightbox({ onClose }: { onClose: () => void }) {
           playsInline
         />
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-          <span className="text-sm text-white/70">A screen recording of one real interpretation, end to end.</span>
+          <span className="text-sm text-white/70">One real interpretation, end to end.</span>
           <Link href="/interpret" onClick={onClose} className="btn-primary bg-white text-[#17130e] hover:bg-white/90">
             Open the Dashboard <Icon name="arrow_forward" size={18} />
           </Link>
@@ -123,7 +123,7 @@ const FATES = [
     gloss: "what was",
     title: "Gather",
     icon: "travel_explore",
-    body: "Pulls molecular consequence, population frequency, and neighboring-residue evidence from Ensembl VEP, gnomAD v4, and ClinVar.",
+    body: "Consequence, frequency, and neighboring-residue evidence from Ensembl VEP, gnomAD v4, and ClinVar.",
   },
   {
     norse: "Verðandi",
@@ -137,7 +137,7 @@ const FATES = [
     gloss: "what shall be",
     title: "Decree",
     icon: "gavel",
-    body: "The ClinGen points framework combines the verdicts in code. The engine owns the classification; the model only justifies it.",
+    body: "ClinGen points combine the verdicts in code. The engine owns the label; the model only justifies it.",
   },
 ];
 
@@ -180,12 +180,14 @@ function beadStyle(kind: ThreadKind): React.CSSProperties {
 }
 
 const FEATURES = [
-  { icon: "stream", title: "Live pipeline", body: "Each stage streams over newline-delimited JSON and lights up as it completes." },
+  { icon: "stream", title: "Live pipeline", body: "Each stage streams live and lights up as it completes." },
   { icon: "fact_check", title: "ACMG scorecard", body: "A row per criterion with strength, verdict, evidence, and source, plus a points meter." },
   { icon: "edit_note", title: "Curator evidence", body: "Toggle the eight evidence-dependent criteria; the classification recomputes live." },
-  { icon: "insights", title: "Protein lollipop", body: "The query plotted against ClinVar variants at nearby residues, colored by class." },
-  { icon: "forum", title: "Ask the copilot", body: "Question the call. Claude answers using only that report as its knowledge base." },
-  { icon: "hub", title: "MCP server", body: "The same pipeline exposed over stdio so other tools can import Norn's output." },
+  { icon: "insights", title: "Protein lollipop", body: "The query plotted against nearby ClinVar variants, colored by class." },
+  { icon: "forum", title: "Ask the copilot", body: "Question the call; Claude answers from that report alone." },
+  { icon: "menu_book", title: "Literature", body: "A PubMed search surfaces functional and case evidence for the gene and change." },
+  { icon: "dataset", title: "Batch mode", body: "Paste a list or upload CSV or VCF to interpret many variants into a worklist." },
+  { icon: "hub", title: "MCP server", body: "The same pipeline over stdio, so other tools can import Norn's output." },
 ];
 
 const SOURCES = ["Ensembl VEP", "variant_recoder", "gnomAD v4", "ClinVar", "PubMed", "NCBI E-utilities"];
@@ -230,8 +232,8 @@ function SampleReport() {
           ))}
         </div>
         <p className="text-[11px] text-outline">
-          A preview. PM2 is applied at supporting strength, so a classic loss-of-function variant lands at Likely
-          Pathogenic on automated evidence alone. Open the Dashboard to run a real variant.
+          A preview. PM2 at supporting strength keeps a loss-of-function variant at Likely Pathogenic on automated
+          evidence alone. Open the Dashboard to run a real one.
         </p>
       </div>
     </div>
@@ -302,8 +304,8 @@ function Landing() {
               Draft the verdict.
             </h1>
             <p className="fate-rise mt-6 max-w-2xl text-lg leading-relaxed text-on-surface-variant" style={{ animationDelay: "0.12s" }}>
-              A variant-interpretation copilot. Paste one variant; Norn gathers the public-database evidence,
-              adjudicates each ACMG/AMP criterion with Claude, and drafts a transparent classification to confirm.
+              A variant-interpretation copilot. Paste one variant; Norn gathers the evidence, adjudicates each
+              ACMG/AMP criterion with Claude, and drafts a classification to confirm.
             </p>
             <p className="fate-rise mt-3 text-[15px] text-on-surface-variant" style={{ animationDelay: "0.16s" }}>
               The Norse fates read evidence and decree fate. Norn{" "}
@@ -375,7 +377,7 @@ function Landing() {
             Gather, weigh, decree.
           </h2>
           <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-on-surface-variant">
-            Named for the Norse fates who weave the threads of destiny, Norn follows the same three movements.
+            Named for the Norse fates who weave destiny, Norn follows the same three movements.
           </p>
           <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
             {FATES.map((f) => (
@@ -425,7 +427,7 @@ function Landing() {
                 </span>
               </button>
               <p className="text-[13px] leading-relaxed text-on-surface-variant">
-                This shows the interpretation feature only. Norn also has a{" "}
+                Interpretation only. Norn also has a{" "}
                 <Link href="/batch" className="link">Batch</Link> worklist and an{" "}
                 <Link href="/eval" className="link">Evaluation</Link> benchmark.
               </p>
@@ -436,7 +438,7 @@ function Landing() {
               </h2>
               <p className="mt-4 text-[15px] leading-relaxed text-on-surface-variant">
                 Norn gathers the evidence, weighs each criterion with Claude, and the engine decrees the
-                classification. Play it full screen, or run your own.
+                classification.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <button type="button" onClick={() => setVideoOpen(true)} className="btn-primary px-5 py-2.5 text-[15px]">
@@ -463,11 +465,13 @@ function Landing() {
                 The engine decides.
               </h2>
             </div>
-            <p className="text-[15px] leading-relaxed text-on-surface-variant">
-              Claude returns a per-criterion verdict and one line of reasoning, never the final label. The engine
-              computes the classification in code from those verdicts, so the same evidence always yields the same
-              call. A second Claude pass critiques the draft and writes the curator checklist.
-            </p>
+            <div className="space-y-3 text-[15px] leading-relaxed text-on-surface-variant">
+              <p>Claude returns a per-criterion verdict and one line of reasoning, never the final label.</p>
+              <p>
+                The engine computes the classification in code, so the same evidence always yields the same call.
+                A second Claude pass then critiques the draft and writes the curator checklist.
+              </p>
+            </div>
           </div>
 
           {/* Pipeline as beads on a woven thread, grouped into three phases */}
@@ -541,9 +545,22 @@ function Landing() {
                 Transparent, sourced, and yours to confirm.
               </h2>
               <p className="mt-4 text-[15px] leading-relaxed text-on-surface-variant">
-                Every interpretation is interactive. See each criterion&apos;s evidence and source, add what Norn
-                cannot fetch, question the call, and export a draft ClinVar submission. Unlike a one-shot classifier,
-                every criterion is sourced and a second Claude pass flags overcalls, so you audit the call.
+                Every interpretation is interactive, not a black-box label.
+              </p>
+              <ul className="mt-4 space-y-2 text-[14px] leading-relaxed text-on-surface-variant">
+                {[
+                  "See each criterion's evidence and source",
+                  "Add the evidence Norn cannot fetch",
+                  "Question the call, then export a draft ClinVar submission",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2">
+                    <Icon name="check" size={16} className="mt-0.5 shrink-0 text-secondary" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-4 text-[14px] leading-relaxed text-on-surface-variant">
+                Every point is sourced, and a second Claude pass flags overcalls.
               </p>
               <div className="mt-6">
                 <SampleReport />
@@ -579,8 +596,8 @@ function Landing() {
             Spend your time confirming, not gathering.
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-on-surface-variant">
-            Manual first-pass triage of one variant can take 20 to 40 minutes. Norn produces that sourced draft in
-            about a minute. It drafts; you decide. It is never an autonomous diagnostic.
+            Manual first-pass triage of one variant can take 20 to 40 minutes; Norn produces that sourced draft in
+            about a minute. It drafts; you decide, never an autonomous diagnostic.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link href="/interpret" className="btn-primary px-5 py-2.5 text-[15px]">
