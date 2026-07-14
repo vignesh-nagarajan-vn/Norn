@@ -5,7 +5,7 @@ Norn is a variant-interpretation copilot that drafts ACMG/AMP evidence for a hum
 Vignesh Nagarajan was selected as 1 of 500 builders (about half of them PhDs, postdocs, or physicians) from more than 6,000 applicants across 47 countries for **Built with Claude: Life Sciences**, a global hackathon hosted by Anthropic and Cerebral Valley in partnership with Gladstone Institutes, and built Norn after being selected. Selectees received Claude Max and $200 in API credits to build with Claude Science and Claude Code.
 
 - **Live Deployment:** [https://norn-five.vercel.app/](https://norn-five.vercel.app/)
-- YouTube Demo: [https://www.youtube.com/watch?v=Dugw_8zb_HU ](https://www.youtube.com/watch?v=Dugw_8zb_HU)
+- **YouTube Demo:** [https://www.youtube.com/watch?v=Dugw_8zb_HU ](https://www.youtube.com/watch?v=Dugw_8zb_HU)
 - **Hackathon:** [https://cerebralvalley.ai/e/built-with-claude-life-sciences](https://cerebralvalley.ai/e/built-with-claude-life-sciences)
 
 <br>
